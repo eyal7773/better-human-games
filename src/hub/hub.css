@@ -1,0 +1,129 @@
+body {
+  background:
+    radial-gradient(90% 50% at 80% 0%, #fff6e3 0%, transparent 60%),
+    linear-gradient(180deg, #e4f6f2 0%, #cdeee6 100%);
+  min-height: 100vh;
+}
+
+.hub {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: calc(28px + var(--safe-top)) 20px calc(28px + var(--safe-bottom));
+}
+
+.wordmark {
+  margin: 0 0 18px;
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--lagoon-deep);
+}
+.wordmark::before {
+  content: '';
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-inline-end: 8px;
+  border-radius: 50%;
+  background: var(--lagoon-bright);
+  box-shadow: 0 0 0 3px var(--ink);
+  vertical-align: -1px;
+}
+
+.hub-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(58px, 17vw, 96px);
+  line-height: 0.86;
+  letter-spacing: -0.005em;
+}
+.hub-lede {
+  margin: 16px 0 28px;
+  max-width: 36ch;
+  font-size: 1.1rem;
+  color: var(--ink-soft);
+}
+
+.game-card {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+  border-radius: 32px;
+  border: 3px solid var(--ink);
+  background: var(--paper);
+  overflow: hidden;
+  box-shadow: 0 8px 0 var(--ink);
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+.game-card:active {
+  transform: translateY(6px);
+  box-shadow: 0 2px 0 var(--ink);
+}
+.gc-art {
+  position: relative;
+  height: 230px;
+  display: grid;
+  place-items: end center;
+  background: linear-gradient(180deg, #fff1d6 0%, #ffc29a 55%, #ff8a5c 100%);
+  border-bottom: 3px solid var(--ink);
+  overflow: hidden;
+}
+.gc-temp {
+  position: absolute;
+  top: -10px;
+  inset-inline: 0;
+  text-align: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 220px;
+  line-height: 0.8;
+  color: rgba(255, 255, 255, 0.55);
+  direction: ltr;
+  user-select: none;
+}
+.gc-kettle {
+  position: relative;
+  width: 170px;
+  margin-bottom: -4px;
+}
+.gc-kettle svg {
+  width: 100%;
+  display: block;
+}
+.gc-body {
+  padding: 18px 20px 22px;
+}
+.gc-body h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 54px;
+  line-height: 1;
+}
+.gc-body p {
+  margin: 8px 0 0;
+  font-size: 1.02rem;
+}
+.gc-body .gc-meta {
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+}
+.gc-cta {
+  margin-top: 18px;
+  width: 100%;
+}
+
+.hub-next {
+  margin: 30px 0 0;
+  text-align: center;
+  color: var(--ink-soft);
+}
+.hub-foot {
+  margin-top: 32px;
+  text-align: center;
+  font-size: 0.9rem;
+}
+.hub-foot a {
+  color: var(--ink-soft);
+  text-underline-offset: 4px;
+}

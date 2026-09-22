@@ -1,0 +1,188 @@
+:root {
+  --ink: #2a1838;
+  --ink-soft: #5b4a69;
+  --paper: #fffdf8;
+  --mist: #e8f5f1;
+  --lagoon: #13877d;
+  --lagoon-bright: #2ec4b6;
+  --lagoon-deep: #0c5f58;
+  --ember: #ff9f1c;
+  --boil: #e5383b;
+  --butter: #ffd447;
+  --plum: #3b2352;
+
+  --font-display: 'Karantina', 'Fredoka', system-ui, sans-serif;
+  --font-body: 'Fredoka', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --r-lg: 28px;
+  --r-md: 18px;
+  --r-sm: 12px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+
+  color-scheme: light;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--ink);
+  background: var(--mist);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  line-height: 1.5;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid var(--plum);
+  outline-offset: 3px;
+}
+
+/* Chunky game button: a raised pill that physically presses down. */
+.btn {
+  --btn-bg: var(--lagoon);
+  --btn-edge: var(--lagoon-deep);
+  --btn-fg: #fff;
+  appearance: none;
+  border: 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+  min-height: 56px;
+  padding: 0.55em 1.6em 0.65em;
+  border-radius: 999px;
+  background: var(--btn-bg);
+  color: var(--btn-fg);
+  font-weight: 600;
+  font-size: 1.2rem;
+  letter-spacing: 0.01em;
+  box-shadow: 0 6px 0 var(--btn-edge), 0 12px 24px -8px rgba(42, 24, 56, 0.45);
+  transform: translateY(0);
+  transition: transform 90ms ease, box-shadow 90ms ease, filter 150ms;
+  user-select: none;
+  -webkit-user-select: none;
+  text-decoration: none;
+}
+.btn:active {
+  transform: translateY(5px);
+  box-shadow: 0 1px 0 var(--btn-edge), 0 4px 10px -6px rgba(42, 24, 56, 0.5);
+}
+.btn[disabled] {
+  filter: grayscale(0.8) opacity(0.55);
+  cursor: default;
+}
+.btn.ghost {
+  --btn-bg: var(--paper);
+  --btn-edge: #d9cfe3;
+  --btn-fg: var(--ink);
+}
+.btn.warm {
+  --btn-bg: var(--ember);
+  --btn-edge: #c96f00;
+  --btn-fg: var(--ink);
+}
+
+/* ---------- kettle character ---------- */
+.kettle {
+  --kettle: var(--lagoon-bright);
+  --kettle-dark: var(--lagoon);
+  overflow: visible;
+}
+.kettle .k-shadow {
+  fill: rgba(42, 24, 56, 0.14);
+}
+.kettle .k-handle {
+  stroke: var(--ink);
+}
+.kettle .k-body,
+.kettle .k-spout,
+.kettle .k-lid {
+  fill: var(--kettle);
+  stroke: var(--ink);
+  stroke-width: 3.5;
+  stroke-linejoin: round;
+  transition: fill 400ms;
+}
+.kettle .k-band {
+  fill: var(--kettle-dark);
+  transition: fill 400ms;
+}
+.kettle .k-knob {
+  fill: var(--ink);
+}
+.kettle .k-shine {
+  fill: #fff;
+  opacity: 0.45;
+}
+.kettle .face {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  display: none;
+}
+.kettle .face .eye {
+  fill: var(--ink);
+  stroke: none;
+}
+.kettle .face .blush {
+  fill: #ff7aa2;
+  stroke: none;
+  opacity: 0.8;
+}
+.kettle .face .mouth {
+  fill: #fff;
+}
+.kettle .face .teeth {
+  stroke-width: 2;
+}
+.kettle[data-mood='calm'] .face-calm,
+.kettle[data-mood='warm'] .face-warm,
+.kettle[data-mood='hot'] .face-hot {
+  display: inline;
+}
+.kettle[data-mood='warm'] {
+  --kettle: #ffc15e;
+  --kettle-dark: #e79a1f;
+}
+.kettle[data-mood='hot'] {
+  --kettle: #ff6b4a;
+  --kettle-dark: #c7362a;
+  animation: kettle-rattle 0.12s infinite alternate;
+}
+@keyframes kettle-rattle {
+  from {
+    transform: rotate(-2.5deg) translateY(0);
+  }
+  to {
+    transform: rotate(2.5deg) translateY(-1px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
