@@ -2,7 +2,7 @@ import { h, clamp, ltr, pick, rand, Scope } from '../shared/dom';
 import type { AudioEngine } from '../shared/audio';
 import { vibrate } from '../shared/haptics';
 import { setKettleMood } from '../shared/kettle';
-import type { FX } from './fx';
+import type { FX } from '../shared/fx';
 import { type HUD, heatGradient, toCelsius } from './hud';
 import type { Dilemma } from './content';
 import type { Task, TaskCtx } from './tasks/types';

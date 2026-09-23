@@ -1,4 +1,5 @@
-import { h, rand, reducedMotion } from '../shared/dom';
+import { h, rand, reducedMotion } from './dom';
+import './fx.css';
 
 type Kind = 'steam' | 'spark' | 'ring' | 'confetti' | 'pebble' | 'ember';
 

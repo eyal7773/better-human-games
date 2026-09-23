@@ -1,7 +1,7 @@
 import { h, Scope } from '../shared/dom';
 import type { AudioEngine } from '../shared/audio';
 import { vibrate } from '../shared/haptics';
-import type { FX } from './fx';
+import type { FX } from '../shared/fx';
 import { pebbleSVG } from './art';
 import { save, persist, todayKey, type Placed } from './save';
 import { tr, isRTL } from '../shared/i18n';

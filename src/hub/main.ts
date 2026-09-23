@@ -2,6 +2,7 @@ import '../shared/base.css';
 import './hub.css';
 import { kettleSVG, setKettleMood } from '../shared/kettle';
 import { lang, langSwitcher, tr } from '../shared/i18n';
+import { buddySVG } from '../catch-me/buddy';
 
 // The page ships in English; other languages swap text in by data-i18n key.
 const TEXT: Record<string, { he: string; ar: string }> = {
@@ -17,6 +18,13 @@ const TEXT: Record<string, { he: string; ar: string }> = {
     ar: 'هذه اللعبة تستفزّكم عن قصد. تتدرّبون على ملاحظة الحرارة وهي تبدأ، على التوقّف، على التنفّس — وعلى اختيار ردّ لن تندموا عليه.',
   },
   bpMeta: { he: 'על כעס בבית ובמשפחה. בערך 5 דקות לערב.', ar: 'عن الغضب في البيت والعائلة. حوالي 5 دقائق في المساء.' },
+  cmTitle: { he: 'תפוס אותי', ar: 'امسكني' },
+  cmBubble: { he: 'תפוס אותי!', ar: 'امسكني!' },
+  cmBody: {
+    he: 'כפתור קטן שממש לא רוצה שילחצו עליו. אתם רודפים אחריו, התסכול עולה — וכשזה רותח, מחזיקים ונושמים ארבע שניות.',
+    ar: 'زرّ صغير لا يريد أبدًا أن يُضغط عليه. تطاردونه، والإحباط يرتفع — وعندما يغلي، تضغطون مطوّلًا وتتنفّسون أربع ثوانٍ.',
+  },
+  cmMeta: { he: 'על תסכולים קטנים. דקה־שתיים, מתי שבא.', ar: 'عن الإحباطات الصغيرة. دقيقة أو اثنتان، متى شئتم.' },
   play: { he: 'לשחק', ar: 'العبوا' },
   next: { he: 'עוד משחקים בדרך.', ar: 'المزيد من الألعاب في الطريق.' },
   source: { he: 'קוד פתוח ב־GitHub', ar: 'مفتوح المصدر على GitHub' },
@@ -53,4 +61,13 @@ if (holder) {
   card?.addEventListener('pointerleave', () => heat(false));
   card?.addEventListener('focus', () => heat(true));
   card?.addEventListener('blur', () => heat(false));
+}
+
+// The runaway button sidesteps your pointer on its card, like in the game.
+const buddy = document.getElementById('hub-buddy');
+if (buddy) {
+  buddy.insertAdjacentHTML('afterbegin', buddySVG());
+  const card = buddy.closest('.game-card');
+  card?.addEventListener('pointerenter', () => buddy.classList.add('dodge'));
+  card?.addEventListener('pointerleave', () => buddy.classList.remove('dodge'));
 }

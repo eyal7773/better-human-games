@@ -1,6 +1,6 @@
 import type { Scope } from '../../shared/dom';
 import type { AudioEngine } from '../../shared/audio';
-import type { FX } from '../fx';
+import type { FX } from '../../shared/fx';
 
 export interface TaskCtx {
   board: HTMLElement;

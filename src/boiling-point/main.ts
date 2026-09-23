@@ -4,7 +4,7 @@ import { h, ltr, shuffle } from '../shared/dom';
 import { tr, langSwitcher } from '../shared/i18n';
 import { AudioEngine } from '../shared/audio';
 import { kettleSVG } from '../shared/kettle';
-import { FX } from './fx';
+import { FX } from '../shared/fx';
 import { HUD } from './hud';
 import { save, persist } from './save';
 import { DILEMMAS } from './content';
