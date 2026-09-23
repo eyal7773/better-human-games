@@ -1,22 +1,35 @@
 <!doctype html>
-<html lang="he" dir="rtl">
+<html lang="en" dir="ltr">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#e4f6f2" />
-    <title>בן אדם טוב יותר</title>
-    <meta name="description" content="משחקים קצרים לנייד שמאמנים את הרגעים הקשים של החיים: לשים לב, לעצור, ולבחור תגובה." />
+    <script>
+      // Set language + direction before first paint (see src/shared/i18n.ts).
+      try {
+        var l = new URLSearchParams(location.search).get('lang') || localStorage.getItem('bhg.lang');
+        if (l === 'he' || l === 'ar') {
+          document.documentElement.lang = l;
+          document.documentElement.dir = 'rtl';
+          document.documentElement.setAttribute('data-i18n-pending', '');
+        }
+      } catch (e) {}
+    </script>
+    <title>Better Human</title>
+    <meta name="description" content="Short mobile games that train life’s hard moments: notice, pause, and choose a response." />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Karantina:wght@400;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400;500;600;700;800&family=Fredoka:wght@400;500;600;700&family=Karantina:wght@400;700&display=swap" rel="stylesheet" />
   </head>
   <body>
     <main class="hub">
       <header class="hub-head">
-        <p class="wordmark">בן אדם טוב יותר</p>
-        <h1 class="hub-title">משחקים לרגעים שבהם הכי קל לאבד את זה</h1>
-        <p class="hub-lede">כל משחק מאמן תגובה אחת מהחיים האמיתיים. כמה דקות בטלפון, ובפעם הבאה שזה קורה באמת — הגוף כבר מכיר את הדרך.</p>
+        <div class="hub-bar">
+          <p class="wordmark" data-i18n="wordmark">Better Human</p>
+        </div>
+        <h1 class="hub-title" data-i18n="title">Games for the moments it’s easiest to lose it</h1>
+        <p class="hub-lede" data-i18n="lede">Each game trains one real-life response. A few minutes on your phone, and the next time it really happens — your body already knows the way.</p>
       </header>
 
       <a class="game-card" href="./boiling-point/">
@@ -25,17 +38,17 @@
           <div class="gc-kettle" id="hub-kettle"></div>
         </div>
         <div class="gc-body">
-          <h2>נקודת רתיחה</h2>
-          <p>המשחק מעצבן אתכם בכוונה. אתם מתרגלים לשים לב לחום כשהוא רק מתחיל, לעצור, לנשום — ולבחור תגובה שלא תצטערו עליה.</p>
-          <p class="gc-meta">על כעס בבית ובמשפחה. בערך 5 דקות לערב.</p>
-          <span class="btn gc-cta">לשחק</span>
+          <h2 data-i18n="bpTitle">Boiling Point</h2>
+          <p data-i18n="bpBody">This game annoys you on purpose. You practise noticing the heat as it starts, pausing, breathing — and choosing a response you won’t regret.</p>
+          <p class="gc-meta" data-i18n="bpMeta">About anger at home and in the family. Around 5 minutes an evening.</p>
+          <span class="btn gc-cta" data-i18n="play">Play</span>
         </div>
       </a>
 
-      <p class="hub-next">עוד משחקים בדרך.</p>
+      <p class="hub-next" data-i18n="next">More games on the way.</p>
 
       <footer class="hub-foot">
-        <a href="https://github.com/eyal7773/better-human-games">קוד פתוח ב־GitHub</a>
+        <a href="https://github.com/eyal7773/better-human-games" data-i18n="source">Open source on GitHub</a>
       </footer>
     </main>
     <script type="module" src="/src/hub/main.ts"></script>

@@ -1,6 +1,7 @@
 import '../shared/base.css';
 import './styles.css';
 import { h, ltr, shuffle } from '../shared/dom';
+import { tr, langSwitcher } from '../shared/i18n';
 import { AudioEngine } from '../shared/audio';
 import { kettleSVG } from '../shared/kettle';
 import { FX } from './fx';
@@ -11,6 +12,20 @@ import { playRound, type CalmKind, type PlayView, type RoundResult, type TaskKin
 import { showSummary } from './summary';
 import { mountIsland } from './island';
 import { pebbleSVG } from './art';
+
+/** Strings used in more than one place. */
+const T = {
+  title: tr({ en: 'Boiling Point', he: 'נקודת רתיחה', ar: 'نقطة الغليان' }),
+  island: tr({ en: 'Island of Calm', he: 'אי השקט', ar: 'جزيرة السكينة' }),
+  howTo: tr({ en: 'How to play', he: 'איך משחקים', ar: 'كيف نلعب' }),
+  settings: tr({ en: 'Settings', he: 'הגדרות', ar: 'الإعدادات' }),
+  choiceTime: tr({ en: 'Time to choose a response', he: 'זמן לבחירת תגובה', ar: 'وقت اختيار الرد' }),
+  pausesInTime: tr({ en: 'Paused in time', he: 'עצירות בזמן', ar: 'توقّفات في الوقت' }),
+  calmResponses: tr({ en: 'Calm responses', he: 'תגובות רגועות', ar: 'ردود هادئة' }),
+  zenPoints: tr({ en: 'Zen points', he: 'נקודות זן', ar: 'نقاط الهدوء' }),
+};
+
+document.title = T.title;
 
 const app = document.getElementById('app')!;
 const audio = new AudioEngine(save.muted);
@@ -37,7 +52,7 @@ function home() {
     soundBtn.innerHTML = save.muted
       ? '<svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M17 9l5 6M22 9l-5 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>'
       : '<svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>';
-    soundBtn.setAttribute('aria-label', save.muted ? 'הפעלת צליל' : 'השתקה');
+    soundBtn.setAttribute('aria-label', save.muted ? tr({ en: 'Sound on', he: 'הפעלת צליל', ar: 'تشغيل الصوت' }) : tr({ en: 'Mute', he: 'השתקה', ar: 'كتم الصوت' }));
   };
   paintSound();
   soundBtn.addEventListener('click', () => {
@@ -62,33 +77,37 @@ function home() {
       h('a', {
         class: 'icon-btn',
         href: import.meta.env.BASE_URL,
-        'aria-label': 'לכל המשחקים',
+        'aria-label': tr({ en: 'All games', he: 'לכל המשחקים', ar: 'كل الألعاب' }),
         html: '<svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z" fill="currentColor"/></svg>',
       }),
       h('div', { class: 'hud-zen', html: pebbleSVG('pebble hud-pebble') }, h('span', {}, String(save.zen))),
       soundBtn,
     ),
     h('div', { class: 'home-hero' }, h('div', { class: 'home-temp', 'aria-hidden': 'true' }, '100°'), kettleWrap),
-    h('h1', { class: 'home-title' }, 'נקודת רתיחה'),
+    h('h1', { class: 'home-title' }, T.title),
     h(
       'p',
       { class: 'home-lede' },
-      'המשחק מעצבן אתכם בכוונה. המטרה: לשים לב לחום כשהוא רק מתחיל, לעצור, להירגע — ולבחור תגובה שלא תצטערו עליה.',
+      tr({
+        en: 'This game annoys you on purpose. The goal: notice the heat as it starts, pause, calm down — and choose a response you won’t regret.',
+        he: 'המשחק מעצבן אתכם בכוונה. המטרה: לשים לב לחום כשהוא רק מתחיל, לעצור, להירגע — ולבחור תגובה שלא תצטערו עליה.',
+        ar: 'هذه اللعبة تستفزّكم عن قصد. الهدف: أن تلاحظوا الحرارة وهي تبدأ، أن تتوقفوا، أن تهدأوا — وأن تختاروا ردًّا لن تندموا عليه.',
+      }),
     ),
     h(
       'div',
       { class: 'home-actions' },
-      h('button', { class: 'btn', type: 'button', onclick: () => void evening() }, save.evenings ? 'להתחיל ערב חדש' : 'להתחיל את הערב'),
-      h('button', { class: 'btn ghost', type: 'button', onclick: island }, 'אי השקט'),
+      h('button', { class: 'btn', type: 'button', onclick: () => void evening() }, save.evenings ? tr({ en: 'Start a new evening', he: 'להתחיל ערב חדש', ar: 'ابدأوا مساءً جديدًا' }) : tr({ en: 'Start the evening', he: 'להתחיל את הערב', ar: 'ابدأوا المساء' })),
+      h('button', { class: 'btn ghost', type: 'button', onclick: island }, T.island),
     ),
     save.rounds
-      ? h('div', { class: 'home-stats' }, stat(save.evenings, 'ערבים'), stat(save.noticed, 'עצירות בזמן'), stat(save.bestChoices, 'תגובות רגועות'))
+      ? h('div', { class: 'home-stats' }, stat(save.evenings, tr({ en: 'Evenings', he: 'ערבים', ar: 'أمسيات' })), stat(save.noticed, T.pausesInTime), stat(save.bestChoices, T.calmResponses))
       : null,
     h(
       'nav',
       { class: 'home-links' },
-      h('button', { class: 'link', type: 'button', onclick: () => howTo() }, 'איך משחקים'),
-      h('button', { class: 'link', type: 'button', onclick: settings }, 'הגדרות'),
+      h('button', { class: 'link', type: 'button', onclick: () => howTo() }, T.howTo),
+      h('button', { class: 'link', type: 'button', onclick: settings }, T.settings),
     ),
   );
   app.append(screen);
@@ -111,12 +130,26 @@ function home() {
 
 // ---------------------------------------------------------------- how to
 
-const STEPS: [string, string, string][] = [
-  ['🧺', 'משימה קטנה מהבית', 'מסדרים, מכינים, מחפשים זוגות. באמצע מגיעים הנודניקים ומתחילים להפריע — בכוונה.'],
-  ['🌡️', 'שמים לב לחום', 'המדחום עולה. כשמרגישים שזה מתחיל — לוחצים ✋ עצירה. ככל שמוקדם יותר, יותר נקודות.'],
-  ['🫁', 'נרגעים לאט', 'נשימה ארוכה, גריפת חול איטית או הקשה בקצב הלב. לחיצות מהירות ועצבניות מחממות.'],
-  ['💬', 'בוחרים תגובה', 'מצב אמיתי מהבית וכמה שניות להחליט. התגובה הרגועה שווה הכי הרבה נקודות זן.'],
-];
+const STEPS: [string, string, string][] = tr({
+  en: [
+    ['🧺', 'A small chore at home', 'Tidy up, make something, match pairs. Halfway through, the nudniks show up and start interfering — on purpose.'],
+    ['🌡️', 'Notice the heat', 'The thermometer rises. When you feel it starting — tap ✋ Pause. The earlier you pause, the more points.'],
+    ['🫁', 'Calm down slowly', 'A long breath, slow sand raking or tapping to a heartbeat. Fast, agitated tapping heats you up.'],
+    ['💬', 'Choose a response', 'A real situation from home and a few seconds to decide. The calm response is worth the most zen points.'],
+  ],
+  he: [
+    ['🧺', 'משימה קטנה מהבית', 'מסדרים, מכינים, מחפשים זוגות. באמצע מגיעים הנודניקים ומתחילים להפריע — בכוונה.'],
+    ['🌡️', 'שמים לב לחום', 'המדחום עולה. כשמרגישים שזה מתחיל — לוחצים ✋ עצירה. ככל שמוקדם יותר, יותר נקודות.'],
+    ['🫁', 'נרגעים לאט', 'נשימה ארוכה, גריפת חול איטית או הקשה בקצב הלב. לחיצות מהירות ועצבניות מחממות.'],
+    ['💬', 'בוחרים תגובה', 'מצב אמיתי מהבית וכמה שניות להחליט. התגובה הרגועה שווה הכי הרבה נקודות זן.'],
+  ],
+  ar: [
+    ['🧺', 'مهمة صغيرة في البيت', 'ترتيب، تحضير، البحث عن أزواج. في المنتصف يصل المزعجون ويبدأون بالتشويش — عن قصد.'],
+    ['🌡️', 'لاحظوا الحرارة', 'ميزان الحرارة يرتفع. عندما تشعرون أن الأمر بدأ — اضغطوا ✋ توقّف. كلما توقفتم أبكر، زادت النقاط.'],
+    ['🫁', 'اهدأوا ببطء', 'نفَس طويل، تمشيط الرمل ببطء أو النقر على إيقاع القلب. النقرات السريعة والعصبية ترفع الحرارة.'],
+    ['💬', 'اختاروا ردًّا', 'موقف حقيقي من البيت وبضع ثوانٍ للقرار. الرد الهادئ يساوي أكبر عدد من نقاط الهدوء.'],
+  ],
+});
 
 function howTo() {
   const close = () => {
@@ -130,7 +163,7 @@ function howTo() {
     h(
       'div',
       { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'howto-title' },
-      h('h2', { id: 'howto-title' }, 'איך משחקים'),
+      h('h2', { id: 'howto-title' }, T.howTo),
       h(
         'ol',
         { class: 'steps' },
@@ -138,8 +171,16 @@ function howTo() {
           h('li', {}, h('span', { class: 'step-icon', 'aria-hidden': 'true' }, icon), h('div', {}, h('b', {}, title), h('p', {}, body))),
         ),
       ),
-      h('p', { class: 'sheet-note' }, 'נקודות הזן בונות את אי השקט שלכם. ובבית, כשתרגישו את החום עולה — כבר תדעו מה לעשות.'),
-      h('button', { class: 'btn', type: 'button', onclick: close }, 'הבנתי'),
+      h(
+        'p',
+        { class: 'sheet-note' },
+        tr({
+          en: 'Zen points build your Island of Calm. And at home, when you feel the heat rising — you’ll already know what to do.',
+          he: 'נקודות הזן בונות את אי השקט שלכם. ובבית, כשתרגישו את החום עולה — כבר תדעו מה לעשות.',
+          ar: 'نقاط الهدوء تبني جزيرة السكينة الخاصة بكم. وفي البيت، عندما تشعرون بالحرارة ترتفع — ستعرفون ما يجب فعله.',
+        }),
+      ),
+      h('button', { class: 'btn', type: 'button', onclick: close }, tr({ en: 'Got it', he: 'הבנתי', ar: 'فهمت' })),
     ),
   );
   app.append(overlay);
@@ -153,9 +194,9 @@ function settings() {
   const times = [5, 8, 12];
   const seg = h(
     'div',
-    { class: 'segmented', role: 'radiogroup', 'aria-label': 'זמן לבחירת תגובה' },
+    { class: 'segmented', role: 'radiogroup', 'aria-label': T.choiceTime },
     ...times.map((t) => {
-      const b = h('button', { type: 'button', role: 'radio', 'aria-checked': String(save.choiceSeconds === t) }, `${t} שניות`);
+      const b = h('button', { type: 'button', role: 'radio', 'aria-checked': String(save.choiceSeconds === t) }, tr({ en: `${t} sec`, he: `${t} שניות`, ar: `${t} ثوانٍ` }));
       b.addEventListener('click', () => {
         save.choiceSeconds = t;
         persist();
@@ -165,11 +206,11 @@ function settings() {
     }),
   );
   let armed = false;
-  const reset = h('button', { class: 'btn ghost danger', type: 'button' }, 'איפוס ההתקדמות');
+  const reset = h('button', { class: 'btn ghost danger', type: 'button' }, tr({ en: 'Reset progress', he: 'איפוס ההתקדמות', ar: 'إعادة ضبط التقدّم' }));
   reset.addEventListener('click', () => {
     if (!armed) {
       armed = true;
-      reset.textContent = 'בטוח? לחצו שוב כדי למחוק הכל';
+      reset.textContent = tr({ en: 'Sure? Tap again to erase everything', he: 'בטוח? לחצו שוב כדי למחוק הכל', ar: 'متأكدون؟ اضغطوا مرة أخرى لحذف كل شيء' });
       return;
     }
     try {
@@ -185,12 +226,22 @@ function settings() {
     h(
       'div',
       { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'settings-title' },
-      h('h2', { id: 'settings-title' }, 'הגדרות'),
-      h('h3', {}, 'זמן לבחירת תגובה'),
+      h('h2', { id: 'settings-title' }, T.settings),
+      h('h3', {}, tr({ en: 'Language', he: 'שפה', ar: 'اللغة' })),
+      langSwitcher('segmented lang-switch'),
+      h('h3', {}, T.choiceTime),
       seg,
-      h('p', { class: 'sheet-note' }, 'במקור: 5 שניות, כמו ברגע אמיתי. אפשר להאריך כדי להספיק לקרוא.'),
+      h(
+        'p',
+        { class: 'sheet-note' },
+        tr({
+          en: 'Default: 5 seconds, like a real moment. You can make it longer to have time to read.',
+          he: 'במקור: 5 שניות, כמו ברגע אמיתי. אפשר להאריך כדי להספיק לקרוא.',
+          ar: 'الافتراضي: 5 ثوانٍ، كما في لحظة حقيقية. يمكن إطالتها ليتسنّى لكم القراءة.',
+        }),
+      ),
       reset,
-      h('button', { class: 'btn', type: 'button', onclick: close }, 'סגירה'),
+      h('button', { class: 'btn', type: 'button', onclick: close }, tr({ en: 'Close', he: 'סגירה', ar: 'إغلاق' })),
     ),
   );
   app.append(overlay);
@@ -228,7 +279,7 @@ function buildPlayView(onMenu: () => void): PlayView {
     'button',
     { class: 'pause-btn', type: 'button', hidden: true },
     h('span', { class: 'pause-hand', 'aria-hidden': 'true' }, '✋'),
-    h('span', {}, 'עצירה'),
+    h('span', {}, tr({ en: 'Pause', he: 'עצירה', ar: 'توقّف' })),
   );
   const layer = h('div', { class: 'mischief-layer' });
   const modal = h('div', { class: 'modal-layer' });
@@ -260,11 +311,11 @@ async function evening() {
       h(
         'div',
         { class: 'sheet', role: 'dialog', 'aria-modal': 'true' },
-        h('h2', {}, 'לצאת מהערב?'),
-        h('p', { class: 'sheet-note' }, 'הנקודות מסיבובים שהסתיימו כבר שמורות.'),
+        h('h2', {}, tr({ en: 'Leave the evening?', he: 'לצאת מהערב?', ar: 'الخروج من المساء؟' })),
+        h('p', { class: 'sheet-note' }, tr({ en: 'Points from finished rounds are already saved.', he: 'הנקודות מסיבובים שהסתיימו כבר שמורות.', ar: 'نقاط الجولات المنتهية محفوظة بالفعل.' })),
         h('div', { class: 'sheet-actions' },
-          h('button', { class: 'btn', type: 'button', onclick: () => box.remove() }, 'להמשיך לשחק'),
-          h('button', { class: 'btn ghost', type: 'button', onclick: () => { quit = true; abortRound?.(); home(); } }, 'יציאה לתפריט'),
+          h('button', { class: 'btn', type: 'button', onclick: () => box.remove() }, tr({ en: 'Keep playing', he: 'להמשיך לשחק', ar: 'متابعة اللعب' })),
+          h('button', { class: 'btn ghost', type: 'button', onclick: () => { quit = true; abortRound?.(); home(); } }, tr({ en: 'Exit to menu', he: 'יציאה לתפריט', ar: 'الخروج إلى القائمة' })),
         ),
       ),
     );
@@ -332,16 +383,27 @@ function eveningEnd(results: RoundResult[]) {
   const boiled = results.filter((r) => r.outcome === 'boiled').length;
   const best = results.filter((r) => r.choice === 'best').length;
   const headline =
-    boiled === 0 && noticed === 3 ? 'ערב של שקט' : boiled === 0 ? 'עברתם את הערב בלי לרתוח' : boiled === 3 ? 'ערב סוער' : 'ערב עם עליות ומורדות';
+    boiled === 0 && noticed === 3
+      ? tr({ en: 'A peaceful evening', he: 'ערב של שקט', ar: 'مساء هادئ' })
+      : boiled === 0
+        ? tr({ en: 'You got through the evening without boiling', he: 'עברתם את הערב בלי לרתוח', ar: 'مرّ المساء دون أن تغلوا' })
+        : boiled === 3
+          ? tr({ en: 'A stormy evening', he: 'ערב סוער', ar: 'مساء عاصف' })
+          : tr({ en: 'An evening of ups and downs', he: 'ערב עם עליות ומורדות', ar: 'مساء من الصعود والهبوط' });
   const icon = (r: RoundResult) => ({ noticed: '✋', forced: '♨', finished: '✓', boiled: '💥' })[r.outcome];
   const outcomeText = (r: RoundResult) =>
-    ({ noticed: `עצירה ב־${ltr(`${r.pauseC}°`)}`, forced: 'הקומקום שרק', finished: 'משימה הושלמה', boiled: 'רתיחה' })[r.outcome];
+    ({
+      noticed: tr({ en: `Paused at ${ltr(`${r.pauseC}°`)}`, he: `עצירה ב־${ltr(`${r.pauseC}°`)}`, ar: `توقّف عند ${ltr(`${r.pauseC}°`)}` }),
+      forced: tr({ en: 'The kettle whistled', he: 'הקומקום שרק', ar: 'صفّر الإبريق' }),
+      finished: tr({ en: 'Chore done', he: 'משימה הושלמה', ar: 'اكتملت المهمة' }),
+      boiled: tr({ en: 'Boiled over', he: 'רתיחה', ar: 'غليان' }),
+    })[r.outcome];
   const screen = h(
     'section',
     { class: 'screen night' },
     h('div', { class: 'night-sky', 'aria-hidden': 'true' }, ...Array.from({ length: 28 }, (_, i) => h('i', { style: { left: `${(i * 37) % 100}%`, top: `${(i * 53) % 60}%`, animationDelay: `${(i % 7) * 0.4}s` } }))),
     h('div', { class: 'night-clock' }, '20:30'),
-    h('p', { class: 'night-kicker' }, 'הילדים ישנים'),
+    h('p', { class: 'night-kicker' }, tr({ en: 'The kids are asleep', he: 'הילדים ישנים', ar: 'الأولاد نائمون' })),
     h('h1', { class: 'night-title' }, headline),
     h(
       'ol',
@@ -353,17 +415,17 @@ function eveningEnd(results: RoundResult[]) {
     h(
       'div',
       { class: 'night-facts' },
-      h('div', {}, h('b', {}, `${noticed}/3`), h('span', {}, 'עצירות בזמן')),
-      h('div', {}, h('b', {}, `${best}/3`), h('span', {}, 'תגובות רגועות')),
-      h('div', {}, h('b', {}, ltr(`+${total}`)), h('span', {}, 'נקודות זן')),
+      h('div', {}, h('b', {}, `${noticed}/3`), h('span', {}, T.pausesInTime)),
+      h('div', {}, h('b', {}, `${best}/3`), h('span', {}, T.calmResponses)),
+      h('div', {}, h('b', {}, ltr(`+${total}`)), h('span', {}, T.zenPoints)),
     ),
     h(
       'div',
       { class: 'home-actions' },
-      h('button', { class: 'btn', type: 'button', onclick: island }, 'לבנות באי השקט'),
-      h('button', { class: 'btn ghost', type: 'button', onclick: () => void evening() }, 'ערב נוסף'),
+      h('button', { class: 'btn', type: 'button', onclick: island }, tr({ en: 'Build on the island', he: 'לבנות באי השקט', ar: 'ابنوا في الجزيرة' })),
+      h('button', { class: 'btn ghost', type: 'button', onclick: () => void evening() }, tr({ en: 'Another evening', he: 'ערב נוסף', ar: 'مساء آخر' })),
     ),
-    h('button', { class: 'link', type: 'button', onclick: home }, 'לתפריט'),
+    h('button', { class: 'link', type: 'button', onclick: home }, tr({ en: 'Menu', he: 'לתפריט', ar: 'القائمة' })),
   );
   app.append(screen);
   audio.bell(0, 0.8);

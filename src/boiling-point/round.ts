@@ -15,6 +15,7 @@ import { SlideCalm } from './calm/slide';
 import { HeartCalm } from './calm/heartbeat';
 import { type Mischief, unleash } from './gremlins';
 import { runChoice, type ChoiceOutcome } from './choice';
+import { tr } from '../shared/i18n';
 
 export type TaskKind = 'order' | 'sort' | 'pairs';
 export type CalmKind = 'breath' | 'slide' | 'heart';
@@ -213,10 +214,10 @@ class Round {
           this.taps = this.taps.slice(-2);
           this.audio.sizzle();
           vibrate(50);
-          this.addHeat(4, e.clientX, e.clientY, 'לחיצות עצבניות');
+          this.addHeat(4, e.clientX, e.clientY, tr({ en: 'agitated taps', he: 'לחיצות עצבניות', ar: 'نقرات عصبية' }));
           if (!this.coachedTaps) {
             this.coachedTaps = true;
-            this.toast('לחיצות מהירות ועצבניות מחממות. לאט.');
+            this.toast(tr({ en: 'Fast, agitated tapping heats you up. Slowly.', he: 'לחיצות מהירות ועצבניות מחממות. לאט.', ar: 'النقرات السريعة والعصبية ترفع الحرارة. ببطء.' }));
           }
         }
       },
@@ -245,7 +246,7 @@ class Round {
   }
 
   private taskTitle() {
-    return { order: 'משימה לפי הסדר', sort: 'לסדר את הסלון', pairs: 'זוגות גרביים' }[this.spec.task];
+    return { order: tr({ en: 'A chore, in order', he: 'משימה לפי הסדר', ar: 'مهمة بالترتيب' }), sort: tr({ en: 'Tidy the living room', he: 'לסדר את הסלון', ar: 'ترتيب غرفة الجلوس' }), pairs: tr({ en: 'Sock pairs', he: 'זוגות גרביים', ar: 'أزواج الجوارب' }) }[this.spec.task];
   }
 
   private async taskPhase(): Promise<'noticed' | 'forced' | 'finished' | 'boiled'> {
@@ -289,7 +290,7 @@ class Round {
 
     s.timeout(() => {
       this.disrupting = true;
-      this.v.hint.textContent = 'הנודניקים הגיעו…';
+      this.v.hint.textContent = tr({ en: 'The nudniks are here…', he: 'הנודניקים הגיעו…', ar: 'وصل المزعجون…' });
       this.showPause(s, () => resolve('noticed'));
       unleash('thief', g);
       const spawn = () => {
@@ -312,11 +313,15 @@ class Round {
     if (outcome === 'noticed') {
       this.pauseHeat = this.heat;
       this.pauseSample = this.samples.length;
-      await this.stopMoment(`עצרתם ב־${ltr(`${toCelsius(this.heat)}°`)}`, 'noticed');
+      await this.stopMoment(tr({
+          en: `You paused at ${ltr(`${toCelsius(this.heat)}°`)}`,
+          he: `עצרתם ב־${ltr(`${toCelsius(this.heat)}°`)}`,
+          ar: `توقفتم عند ${ltr(`${toCelsius(this.heat)}°`)}`,
+        }), 'noticed');
     } else if (outcome === 'forced') {
-      await this.stopMoment('הקומקום שורק!', 'forced');
+      await this.stopMoment(tr({ en: 'The kettle is whistling!', he: 'הקומקום שורק!', ar: 'الإبريق يصفّر!' }), 'forced');
     } else {
-      await this.stopMoment('סיימתם. ועכשיו — להוריד את החום', 'finished');
+      await this.stopMoment(tr({ en: 'Done. And now — bring the heat down', he: 'סיימתם. ועכשיו — להוריד את החום', ar: 'انتهيتم. والآن — خفّضوا الحرارة' }), 'finished');
     }
     return outcome;
   }
@@ -348,7 +353,7 @@ class Round {
     b.addEventListener('click', handler);
     s.add(() => b.removeEventListener('click', handler));
     if (this.spec.coach) {
-      const tip = h('div', { class: 'coach' }, 'מרגישים שזה עולה? לחצו כאן. ככל שעוצרים מוקדם יותר — יותר נקודות.');
+      const tip = h('div', { class: 'coach' }, tr({ en: 'Feel it rising? Tap here. The earlier you pause — the more points.', he: 'מרגישים שזה עולה? לחצו כאן. ככל שעוצרים מוקדם יותר — יותר נקודות.', ar: 'تشعرون أنها ترتفع؟ اضغطوا هنا. كلما توقفتم أبكر — زادت النقاط.' }));
       this.v.root.append(tip);
       s.add(() => tip.remove());
       s.timeout(() => tip.remove(), 4500);
@@ -379,7 +384,7 @@ class Round {
     const calm: Calm =
       this.spec.calm === 'breath' ? new BreathCalm(ctx) : this.spec.calm === 'slide' ? new SlideCalm(ctx) : new HeartCalm(ctx);
     this.v.title.textContent = calm.title;
-    this.v.hint.textContent = from === 'forced' ? 'הרתיחה קרובה. ' + calm.hint : calm.hint;
+    this.v.hint.textContent = from === 'forced' ? tr({ en: 'Boiling point is close. ', he: 'הרתיחה קרובה. ', ar: 'الغليان قريب. ' }) + calm.hint : calm.hint;
     calm.mount();
 
     const g = { scope: s, board: this.v.board, layer: this.v.layer, audio: this.audio, fx: this.fx, task: null, heat: this.addHeat };
@@ -398,7 +403,7 @@ class Round {
     this.audio.success();
     const start = this.heat;
     await this.master.tween(900, (k) => (this.heat = start + (Math.min(start, 14) - start) * k));
-    this.v.hint.textContent = 'נרגעתם. עכשיו אפשר לבחור איך להגיב';
+    this.v.hint.textContent = tr({ en: 'You’ve calmed down. Now you can choose how to respond', he: 'נרגעתם. עכשיו אפשר לבחור איך להגיב', ar: 'هدأتم. الآن يمكنكم اختيار كيف تردّون' });
     await this.master.sleep(500);
     return 'calm';
   }
@@ -419,7 +424,7 @@ class Round {
       const r = this.v.kettle.getBoundingClientRect();
       for (let i = 0; i < 40; i++) this.fx.steam(r.left + rand(0, r.width), r.top + r.height / 2, 1, 2.2);
       this.fx.shake(this.v.root, 14, 700);
-      const cloud = h('div', { class: 'boil-cloud' }, h('p', {}, 'רתחתם.'), h('span', {}, 'זה קורה. מה שחשוב הוא לשים לב מוקדם יותר בפעם הבאה.'));
+      const cloud = h('div', { class: 'boil-cloud' }, h('p', {}, tr({ en: 'You boiled over.', he: 'רתחתם.', ar: 'غليتم.' })), h('span', {}, tr({ en: 'It happens. What matters is noticing earlier next time.', he: 'זה קורה. מה שחשוב הוא לשים לב מוקדם יותר בפעם הבאה.', ar: 'هذا يحدث. المهم أن تلاحظوا أبكر في المرة القادمة.' })));
       this.v.modal.append(cloud);
       await this.master.sleep(2600);
       cloud.remove();

@@ -1,6 +1,7 @@
 import { h, clamp, pick, shuffle, rand } from '../../shared/dom';
 import { vibrate } from '../../shared/haptics';
 import { type Task, type TaskCtx, toClient } from './types';
+import { tr } from '../../shared/i18n';
 
 const TOYS = ['🧸', '🚗', '🧩', '🪀', '⚽', '🦖', '🪁', '🎲'];
 const CLOTHES = ['🧦', '👕', '👖', '🩳', '🧢', '👗', '🧤', '🧣'];
@@ -21,8 +22,8 @@ interface Item {
 
 /** Drag toys into the toy box and clothes into the laundry basket. */
 export class SortTask implements Task {
-  title = 'לאסוף את הבלגן מהסלון';
-  hint = 'גררו צעצועים לארגז, ובגדים לסל הכביסה';
+  title = tr({ en: 'Clear the mess from the living room', he: 'לאסוף את הבלגן מהסלון', ar: 'اجمعوا الفوضى من غرفة الجلوس' });
+  hint = tr({ en: 'Drag toys to the toy box, and clothes to the laundry basket', he: 'גררו צעצועים לארגז, ובגדים לסל הכביסה', ar: 'اسحبوا الألعاب إلى الصندوق، والملابس إلى سلة الغسيل' });
   private items: Item[] = [];
   private bins!: Record<Kind, { el: HTMLElement; stack: HTMLElement }>;
   private size = 64;
@@ -51,7 +52,7 @@ export class SortTask implements Task {
       board.append(el);
       return { el, stack };
     };
-    this.bins = { toy: mkBin('toy', 'צעצועים', '🧸'), clothes: mkBin('clothes', 'כביסה', '🧺') };
+    this.bins = { toy: mkBin('toy', tr({ en: 'Toys', he: 'צעצועים', ar: 'ألعاب' }), '🧸'), clothes: mkBin('clothes', tr({ en: 'Laundry', he: 'כביסה', ar: 'غسيل' }), '🧺') };
 
     const n = 4 + (this.c.level >= 2 ? 1 : 0);
     const pool: { kind: Kind; emoji: string }[] = [

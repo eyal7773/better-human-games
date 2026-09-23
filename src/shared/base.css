@@ -23,6 +23,22 @@
   color-scheme: light;
 }
 
+/* Each language gets fonts that cover its script. Hebrew and English share
+   Karantina/Fredoka; Arabic needs its own rounded family. */
+:root:lang(ar) {
+  --font-display: 'Baloo Bhaijaan 2', 'Fredoka', system-ui, sans-serif;
+  --font-body: 'Baloo Bhaijaan 2', 'Fredoka', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+/* Letter-spacing breaks the joins of cursive Arabic script. */
+:root:lang(ar) * {
+  letter-spacing: 0 !important;
+}
+
+/* While a non-default language swaps in its text, keep the English copy hidden. */
+html[data-i18n-pending] body {
+  visibility: hidden;
+}
+
 *,
 *::before,
 *::after {
@@ -185,4 +201,13 @@ button {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* Arabic display type: numbers and clocks keep the condensed Karantina digits,
+   and headings get room for dots and marks above and below the line. */
+:root:lang(ar) :is(.gc-temp, .home-temp, .hud-temp, .scene-clock, .ri-clock, .night-clock, .nr-clock, .stat b, .night-facts b, .sum-total b, .heart-bpm) {
+  font-family: 'Karantina', 'Fredoka', system-ui, sans-serif;
+}
+:root:lang(ar) :is(.hub-title, .home-title, .gc-body h2, .summary-card h2, .night-title, .boil-cloud p, .stop-moment p, .sheet h2, .sheet-head h2, .ri-title) {
+  line-height: 1.25;
 }

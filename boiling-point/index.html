@@ -1,25 +1,35 @@
 <!doctype html>
-<html lang="he" dir="rtl">
+<html lang="en" dir="ltr">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
     <meta name="theme-color" content="#e4f6f2" />
+    <script>
+      // Set language + direction before first paint (see src/shared/i18n.ts).
+      try {
+        var l = new URLSearchParams(location.search).get('lang') || localStorage.getItem('bhg.lang');
+        if (l === 'he' || l === 'ar') {
+          document.documentElement.lang = l;
+          document.documentElement.dir = 'rtl';
+        }
+      } catch (e) {}
+    </script>
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-title" content="נקודת רתיחה" />
-    <title>נקודת רתיחה</title>
-    <meta name="description" content="משחק לנייד שמעצבן אתכם בכוונה — ומלמד לשים לב לכעס, לעצור, להירגע ולבחור תגובה רגועה." />
-    <meta property="og:title" content="נקודת רתיחה" />
-    <meta property="og:description" content="לתרגל את הרגע שבין הכעס לתגובה." />
+    <meta name="apple-mobile-web-app-title" content="Boiling Point" />
+    <title>Boiling Point</title>
+    <meta name="description" content="A mobile game that annoys you on purpose — and teaches you to notice anger, pause, calm down and choose a calm response." />
+    <meta property="og:title" content="Boiling Point" />
+    <meta property="og:description" content="Practise the moment between anger and reaction." />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Karantina:wght@400;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400;500;600;700;800&family=Fredoka:wght@400;500;600;700&family=Karantina:wght@400;700&display=swap" rel="stylesheet" />
   </head>
   <body>
     <div id="app"></div>
-    <noscript>המשחק דורש JavaScript.</noscript>
+    <noscript>This game needs JavaScript. · המשחק דורש JavaScript. · تحتاج اللعبة إلى JavaScript.</noscript>
     <script type="module" src="/src/boiling-point/main.ts"></script>
   </body>
 </html>

@@ -1,6 +1,7 @@
 import { h } from '../../shared/dom';
 import { vibrate } from '../../shared/haptics';
 import type { Calm, CalmCtx } from './types';
+import { tr } from '../../shared/i18n';
 
 const NEED = 10;
 const WINDOW = 230; // ms either side of the beat
@@ -9,8 +10,8 @@ const BPM_TO = 54;
 
 /** Tap on the beat while the heart slows down. Rushing ahead of it heats you up. */
 export class HeartCalm implements Calm {
-  title = 'להאט את הדופק';
-  hint = 'הקישו על הלב בדיוק כשהטבעת נסגרת עליו';
+  title = tr({ en: 'Slow the heartbeat', he: 'להאט את הדופק', ar: 'أبطئوا نبض القلب' });
+  hint = tr({ en: 'Tap the heart just as the ring closes on it', he: 'הקישו על הלב בדיוק כשהטבעת נסגרת עליו', ar: 'انقروا على القلب تمامًا عندما تنغلق الحلقة عليه' });
 
   constructor(private c: CalmCtx) {}
 
@@ -20,7 +21,7 @@ export class HeartCalm implements Calm {
     const heart = h('button', {
       class: 'heart',
       type: 'button',
-      'aria-label': 'הקישו בקצב הלב',
+      'aria-label': tr({ en: 'Tap to the heartbeat', he: 'הקישו בקצב הלב', ar: 'انقروا على إيقاع القلب' }),
       html: `<svg viewBox="0 0 100 92" aria-hidden="true"><path d="M50 88 C20 66 4 50 4 28 C4 12 16 3 29 3 C39 3 46 9 50 17 C54 9 61 3 71 3 C84 3 96 12 96 28 C96 50 80 66 50 88Z"/></svg>`,
     });
     const bpmEl = h('div', { class: 'heart-bpm' }, String(BPM_FROM));
@@ -54,7 +55,7 @@ export class HeartCalm implements Calm {
         audio.pluck(hits);
         this.c.heat(-7);
         vibrate(15);
-        this.c.say(hits < NEED ? 'בדיוק. עוד אחת, לאט' : 'הלב נרגע');
+        this.c.say(hits < NEED ? tr({ en: 'Exactly. One more, slowly', he: 'בדיוק. עוד אחת, לאט', ar: 'بالضبط. واحدة أخرى، ببطء' }) : tr({ en: 'The heart is calming', he: 'הלב נרגע', ar: 'القلب يهدأ' }));
         if (hits >= NEED) {
           finished = true;
           heart.classList.add('complete');
@@ -62,11 +63,11 @@ export class HeartCalm implements Calm {
           this.c.done();
         }
       } else if (sinceTap < interval() * 0.55 || target === hitBeat) {
-        this.c.heat(3, e.clientX, e.clientY, 'מהר מדי');
+        this.c.heat(3, e.clientX, e.clientY, tr({ en: 'too fast', he: 'מהר מדי', ar: 'بسرعة زائدة' }));
         audio.sizzle();
-        this.c.say('מהר מדי. חכו שהטבעת תיסגר');
+        this.c.say(tr({ en: 'Too fast. Wait for the ring to close', he: 'מהר מדי. חכו שהטבעת תיסגר', ar: 'بسرعة زائدة. انتظروا حتى تنغلق الحلقة' }));
       } else {
-        this.c.say('כמעט. הקשה אחת בדיוק כשהטבעת פוגשת את הלב');
+        this.c.say(tr({ en: 'Almost. One tap just as the ring meets the heart', he: 'כמעט. הקשה אחת בדיוק כשהטבעת פוגשת את הלב', ar: 'تقريبًا. نقرة واحدة تمامًا عندما تلتقي الحلقة بالقلب' }));
       }
     });
     heart.addEventListener('contextmenu', (e) => e.preventDefault());

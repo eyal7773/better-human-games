@@ -1,24 +1,25 @@
 import { h, clamp } from '../../shared/dom';
 import { vibrate } from '../../shared/haptics';
 import type { Calm, CalmCtx } from './types';
+import { tr } from '../../shared/i18n';
 
 const COLS = 56;
 const PASS = 0.36; // how much one slow sweep rakes a column (≈3 sweeps to finish)
 
 /** A tiny zen garden. Only slow strokes rake the sand; rushing makes the stone skid. */
 export class SlideCalm implements Calm {
-  title = 'לגרוף את החול';
-  hint = 'גררו את האבן מצד לצד, לאט. מהר מדי — והיא מחליקה';
+  title = tr({ en: 'Rake the sand', he: 'לגרוף את החול', ar: 'مشّطوا الرمل' });
+  hint = tr({ en: 'Drag the stone from side to side, slowly. Too fast — and it slips', he: 'גררו את האבן מצד לצד, לאט. מהר מדי — והיא מחליקה', ar: 'اسحبوا الحجر من جانب إلى جانب، ببطء. بسرعة زائدة — وسينزلق' });
 
   constructor(private c: CalmCtx) {}
 
   mount() {
     const { board, scope, audio } = this.c;
     const canvas = h('canvas', { class: 'garden-canvas' });
-    const stone = h('div', { class: 'garden-stone', role: 'slider', 'aria-label': 'אבן לגריפת החול', tabindex: '0' });
+    const stone = h('div', { class: 'garden-stone', role: 'slider', 'aria-label': tr({ en: 'Stone for raking the sand', he: 'אבן לגריפת החול', ar: 'حجر لتمشيط الرمل' }), tabindex: '0' });
     const speedo = h('div', { class: 'garden-speed' }, h('i'));
     const garden = h('div', { class: 'garden' }, canvas, stone);
-    board.append(h('div', { class: 'garden-wrap' }, garden, speedo, h('p', { class: 'garden-legend' }, 'מהירות')));
+    board.append(h('div', { class: 'garden-wrap' }, garden, speedo, h('p', { class: 'garden-legend' }, tr({ en: 'Speed', he: 'מהירות', ar: 'السرعة' }))));
 
     const W = garden.clientWidth;
     const H = garden.clientHeight;
@@ -129,8 +130,8 @@ export class SlideCalm implements Calm {
           audio.slip();
           vibrate(30);
           const r = stone.getBoundingClientRect();
-          this.c.heat(4, r.left + r.width / 2, r.top, 'לאט יותר');
-          this.c.say('מהר מדי. נסו לגרור כאילו אתם בתוך דבש');
+          this.c.heat(4, r.left + r.width / 2, r.top, tr({ en: 'slower', he: 'לאט יותר', ar: 'أبطأ' }));
+          this.c.say(tr({ en: 'Too fast. Try dragging as if you were moving through honey', he: 'מהר מדי. נסו לגרור כאילו אתם בתוך דבש', ar: 'بسرعة زائدة. جرّبوا السحب كأنكم تتحركون داخل العسل' }));
         }
       } else {
         stone.classList.remove('fast');
