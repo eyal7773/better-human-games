@@ -1,11 +1,12 @@
 import { h, clamp, pick, shuffle, rand, ease } from '../../shared/dom';
 import { vibrate } from '../../shared/haptics';
 import { type Task, type TaskCtx, toClient } from './types';
+import { tr } from '../../shared/i18n';
 
 const RECIPES = [
-  { title: 'להכין כריך לגן', items: ['🍞', '🧈', '🧀', '🥬', '🍅', '🥒'] },
-  { title: 'לערוך שולחן לארוחת ערב', items: ['🍽️', '🍴', '🥄', '🥛', '🍝', '🧂'] },
-  { title: 'לארוז תיק לגן', items: ['🎒', '🥪', '💧', '🍎', '🧢', '🧥'] },
+  { title: tr({ en: 'Make a sandwich for daycare', he: 'להכין כריך לגן', ar: 'تحضير سندويشة للروضة' }), items: ['🍞', '🧈', '🧀', '🥬', '🍅', '🥒'] },
+  { title: tr({ en: 'Set the table for dinner', he: 'לערוך שולחן לארוחת ערב', ar: 'تجهيز الطاولة للعشاء' }), items: ['🍽️', '🍴', '🥄', '🥛', '🍝', '🧂'] },
+  { title: tr({ en: 'Pack the daycare bag', he: 'לארוז תיק לגן', ar: 'تجهيز حقيبة الروضة' }), items: ['🎒', '🥪', '💧', '🍎', '🧢', '🧥'] },
 ];
 const DISTRACTORS = ['🍩', '🧃', '🍫', '🍭'];
 
@@ -21,7 +22,7 @@ interface Tile {
 /** Tap the items in the order shown on the strip. */
 export class OrderTask implements Task {
   title: string;
-  hint = 'הקישו על הפריטים לפי הסדר שבפס העליון';
+  hint = tr({ en: 'Tap the items in the order shown on the top strip', he: 'הקישו על הפריטים לפי הסדר שבפס העליון', ar: 'انقروا على الأغراض بالترتيب الظاهر في الشريط العلوي' });
   private recipe = pick(RECIPES);
   private tiles: Tile[] = [];
   private slots: HTMLElement[] = [];

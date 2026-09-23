@@ -248,6 +248,10 @@ body {
   border: 3px solid var(--ink);
   overflow: hidden;
 }
+/* The meter fills from the inline start, so its gradient follows the text direction. */
+[dir='ltr'] .hud-track {
+  background: linear-gradient(to right, #2ec4b6 0%, #ffd447 45%, #ff9f1c 70%, #e5383b 100%);
+}
 .hud-cover {
   position: absolute;
   inset-block: 0;
@@ -1334,6 +1338,9 @@ body {
   width: 100%;
   border-radius: inherit;
   background: linear-gradient(to left, #ffd447, #ff9f1c);
+}
+[dir='ltr'] .fuse-line {
+  background: linear-gradient(to right, #ffd447, #ff9f1c);
 }
 .fuse-spark {
   display: none;

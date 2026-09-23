@@ -4,6 +4,7 @@ import { vibrate } from '../shared/haptics';
 import type { FX } from './fx';
 import { pebbleSVG } from './art';
 import { save, persist, todayKey, type Placed } from './save';
+import { tr, isRTL } from '../shared/i18n';
 
 type Draw = (c: CanvasRenderingContext2D, x: number, y: number, s: number, t: number, stage: number, seed: number) => void;
 
@@ -269,16 +270,16 @@ const drawWaterfall: Draw = (c, x, y, s, t) => {
 };
 
 export const ITEMS: ItemDef[] = [
-  { id: 'flowers', name: 'ערוגת פרחים', desc: 'קצת צבע', cost: 20, slots: [11, 12, 13], draw: drawFlowers },
-  { id: 'stones', name: 'מגדל אבנים', desc: 'איזון, אבן על אבן', cost: 25, slots: [6, 7], draw: drawStones },
-  { id: 'tree', name: 'עץ', desc: 'גדל עם כל סיבוב רגוע', cost: 30, slots: [0, 1, 2], draw: drawTree },
-  { id: 'lantern', name: 'פנס אבן', desc: 'אור חמים לערב', cost: 45, slots: [4, 5], draw: drawLantern },
-  { id: 'bench', name: 'ספסל', desc: 'מקום לשבת רגע', cost: 50, slots: [9], draw: drawBench },
-  { id: 'fireflies', name: 'גחליליות', desc: 'נקודות אור מרחפות', cost: 60, slots: [], draw: () => {} },
-  { id: 'chimes', name: 'פעמוני רוח', desc: 'מוסיף צלצולים לאי', cost: 70, slots: [10], draw: drawChimes },
-  { id: 'pond', name: 'בריכת דגים', desc: 'שני דגי קוי', cost: 90, slots: [3], draw: drawPond },
-  { id: 'sakura', name: 'עץ דובדבן', desc: 'עלי כותרת נושרים', cost: 110, slots: [8], draw: drawSakura },
-  { id: 'waterfall', name: 'מפל', desc: 'מים שזורמים לים', cost: 140, slots: [14], draw: drawWaterfall },
+  { id: 'flowers', name: tr({ en: 'Flower bed', he: 'ערוגת פרחים', ar: 'حوض زهور' }), desc: tr({ en: 'A splash of colour', he: 'קצת צבע', ar: 'قليل من الألوان' }), cost: 20, slots: [11, 12, 13], draw: drawFlowers },
+  { id: 'stones', name: tr({ en: 'Stone stack', he: 'מגדל אבנים', ar: 'برج حجارة' }), desc: tr({ en: 'Balance, stone on stone', he: 'איזון, אבן על אבן', ar: 'توازن، حجر فوق حجر' }), cost: 25, slots: [6, 7], draw: drawStones },
+  { id: 'tree', name: tr({ en: 'Tree', he: 'עץ', ar: 'شجرة' }), desc: tr({ en: 'Grows with every calm round', he: 'גדל עם כל סיבוב רגוע', ar: 'تكبر مع كل جولة هادئة' }), cost: 30, slots: [0, 1, 2], draw: drawTree },
+  { id: 'lantern', name: tr({ en: 'Stone lantern', he: 'פנס אבן', ar: 'فانوس حجري' }), desc: tr({ en: 'Warm light for the evening', he: 'אור חמים לערב', ar: 'ضوء دافئ للمساء' }), cost: 45, slots: [4, 5], draw: drawLantern },
+  { id: 'bench', name: tr({ en: 'Bench', he: 'ספסל', ar: 'مقعد' }), desc: tr({ en: 'A place to sit a moment', he: 'מקום לשבת רגע', ar: 'مكان للجلوس لحظة' }), cost: 50, slots: [9], draw: drawBench },
+  { id: 'fireflies', name: tr({ en: 'Fireflies', he: 'גחליליות', ar: 'يراعات' }), desc: tr({ en: 'Floating specks of light', he: 'נקודות אור מרחפות', ar: 'نقاط ضوء عائمة' }), cost: 60, slots: [], draw: () => {} },
+  { id: 'chimes', name: tr({ en: 'Wind chimes', he: 'פעמוני רוח', ar: 'أجراس الريح' }), desc: tr({ en: 'Adds chimes to the island', he: 'מוסיף צלצולים לאי', ar: 'تضيف رنينًا للجزيرة' }), cost: 70, slots: [10], draw: drawChimes },
+  { id: 'pond', name: tr({ en: 'Fish pond', he: 'בריכת דגים', ar: 'بركة أسماك' }), desc: tr({ en: 'Two koi fish', he: 'שני דגי קוי', ar: 'سمكتا كوي' }), cost: 90, slots: [3], draw: drawPond },
+  { id: 'sakura', name: tr({ en: 'Cherry tree', he: 'עץ דובדבן', ar: 'شجرة كرز' }), desc: tr({ en: 'Falling petals', he: 'עלי כותרת נושרים', ar: 'بتلات تتساقط' }), cost: 110, slots: [8], draw: drawSakura },
+  { id: 'waterfall', name: tr({ en: 'Waterfall', he: 'מפל', ar: 'شلال' }), desc: tr({ en: 'Water flowing to the sea', he: 'מים שזורמים לים', ar: 'ماء يجري إلى البحر' }), cost: 140, slots: [14], draw: drawWaterfall },
 ];
 
 const byId = (id: string) => ITEMS.find((i) => i.id === id)!;
@@ -488,15 +489,15 @@ export function mountIsland(root: HTMLElement, audio: AudioEngine, fx: FX, onBac
   const realBtn = h('button', { class: 'real-pause', type: 'button' });
   const sheet = h(
     'section',
-    { class: 'island-sheet', 'aria-label': 'חנות האי' },
-    h('div', { class: 'sheet-head' }, h('h2', {}, 'אי השקט'), realBtn),
+    { class: 'island-sheet', 'aria-label': tr({ en: 'Island shop', he: 'חנות האי', ar: 'متجر الجزيرة' }) },
+    h('div', { class: 'sheet-head' }, h('h2', {}, tr({ en: 'Island of Calm', he: 'אי השקט', ar: 'جزيرة السكينة' })), realBtn),
     note,
     shop,
   );
   const top = h(
     'header',
     { class: 'island-top' },
-    h('button', { class: 'icon-btn', type: 'button', 'aria-label': 'חזרה', onclick: onBack, html: '<svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>' }),
+    h('button', { class: 'icon-btn', type: 'button', 'aria-label': tr({ en: 'Back', he: 'חזרה', ar: 'رجوع' }), onclick: onBack, html: `<svg viewBox="0 0 24 24"><path d="${isRTL ? 'M9 5l7 7-7 7' : 'M15 5l-7 7 7 7'}" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>` }),
     zen,
   );
   const screen = h('section', { class: 'screen island' }, canvas, top, sheet);
@@ -521,15 +522,15 @@ export function mountIsland(root: HTMLElement, audio: AudioEngine, fx: FX, onBac
   };
 
   const setNote = () => {
-    if (!save.placed.length) note.textContent = 'האי עוד ריק. כל רגע של שקט במשחק שווה נקודות זן — ובהן בונים כאן.';
-    else if (save.placed.some((p) => p.id === 'tree')) note.textContent = 'העצים גדלים עם כל סיבוב שבו לא רתחתם.';
-    else note.textContent = 'בחרו מה להוסיף לאי.';
+    if (!save.placed.length) note.textContent = tr({ en: 'The island is still empty. Every calm moment in the game earns zen points — and you build with them here.', he: 'האי עוד ריק. כל רגע של שקט במשחק שווה נקודות זן — ובהן בונים כאן.', ar: 'الجزيرة ما زالت فارغة. كل لحظة هدوء في اللعبة تساوي نقاط هدوء — وبها تبنون هنا.' });
+    else if (save.placed.some((p) => p.id === 'tree')) note.textContent = tr({ en: 'The trees grow with every round you didn’t boil over.', he: 'העצים גדלים עם כל סיבוב שבו לא רתחתם.', ar: 'الأشجار تكبر مع كل جولة لم تغلوا فيها.' });
+    else note.textContent = tr({ en: 'Choose what to add to the island.', he: 'בחרו מה להוסיף לאי.', ar: 'اختاروا ما تضيفونه إلى الجزيرة.' });
   };
 
   const refreshReal = () => {
     const done = save.realPauseDay === todayKey();
     realBtn.disabled = done;
-    realBtn.textContent = done ? 'נרשם להיום ✓' : 'עצרתי גם בבית היום (+25)';
+    realBtn.textContent = done ? tr({ en: 'Logged for today ✓', he: 'נרשם להיום ✓', ar: 'سُجّل لليوم ✓' }) : tr({ en: 'I paused at home today too (+25)', he: 'עצרתי גם בבית היום (+25)', ar: 'توقفت في البيت اليوم أيضًا (+25)' });
   };
   realBtn.addEventListener('click', () => {
     if (save.realPauseDay === todayKey()) return;
@@ -541,7 +542,7 @@ export function mountIsland(root: HTMLElement, audio: AudioEngine, fx: FX, onBac
     audio.success();
     const r = realBtn.getBoundingClientRect();
     fx.confetti(r.left + r.width / 2, r.top, 30);
-    note.textContent = 'זה האימון האמיתי. כל הכבוד.';
+    note.textContent = tr({ en: 'That’s the real practice. Well done.', he: 'זה האימון האמיתי. כל הכבוד.', ar: 'هذا هو التمرين الحقيقي. أحسنتم.' });
     refreshReal();
     render();
   });
@@ -556,8 +557,15 @@ export function mountIsland(root: HTMLElement, audio: AudioEngine, fx: FX, onBac
       b.classList.toggle('full', full);
       b.classList.toggle('poor', !full && !afford);
       const cnt = b.querySelector('.shop-count')!;
-      cnt.textContent = def.slots.length > 1 ? `${owned(def)}/${capacity(def)}` : full ? 'יש' : '';
-      b.setAttribute('aria-label', `${def.name}, ${def.cost} נקודות${full ? ', כבר באי' : ''}`);
+      cnt.textContent = def.slots.length > 1 ? `${owned(def)}/${capacity(def)}` : full ? tr({ en: 'Owned', he: 'יש', ar: 'موجود' }) : '';
+      b.setAttribute(
+        'aria-label',
+        tr({
+          en: `${def.name}, ${def.cost} points${full ? ', already on the island' : ''}`,
+          he: `${def.name}, ${def.cost} נקודות${full ? ', כבר באי' : ''}`,
+          ar: `${def.name}، ${def.cost} نقطة${full ? '، موجود في الجزيرة' : ''}`,
+        }),
+      );
     }
   };
 
@@ -574,13 +582,18 @@ export function mountIsland(root: HTMLElement, audio: AudioEngine, fx: FX, onBac
     b.addEventListener('click', () => {
       const slot = freeSlot(def);
       if (slot === null) {
-        note.textContent = `${def.name} כבר באי.`;
+        note.textContent = tr({ en: `${def.name} is already on the island.`, he: `${def.name} כבר באי.`, ar: `${def.name} موجود في الجزيرة.` });
         return;
       }
       if (save.zen < def.cost) {
         audio.miss();
         b.animate([{ transform: 'translateX(-6px)' }, { transform: 'translateX(6px)' }, { transform: 'none' }], { duration: 220 });
-        note.textContent = `חסרות ${def.cost - save.zen} נקודות זן. עוד ערב רגוע אחד וזה שלכם.`;
+        const short = def.cost - save.zen;
+        note.textContent = tr({
+          en: `${short} more zen points needed. One more calm evening and it’s yours.`,
+          he: `חסרות ${short} נקודות זן. עוד ערב רגוע אחד וזה שלכם.`,
+          ar: `ينقصكم ${short} نقطة هدوء. مساء هادئ واحد آخر ويصبح لكم.`,
+        });
         return;
       }
       save.zen -= def.cost;
@@ -596,7 +609,7 @@ export function mountIsland(root: HTMLElement, audio: AudioEngine, fx: FX, onBac
         const r = canvas.getBoundingClientRect();
         fx.confetti(r.left + L.cx + pos[0] * L.rx * 0.86, r.top + L.cy + pos[1] * L.ry * 0.8 - 20, 22);
       }
-      note.textContent = `${def.name} נוסף לאי.`;
+      note.textContent = tr({ en: `${def.name} added to the island.`, he: `${def.name} נוסף לאי.`, ar: `أُضيف ${def.name} إلى الجزيرة.` });
       render();
     });
     cards.set(def.id, b);

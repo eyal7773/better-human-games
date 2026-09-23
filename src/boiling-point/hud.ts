@@ -1,5 +1,6 @@
 import { h, clamp, lerp } from '../shared/dom';
 import { pebbleSVG } from './art';
+import { tr } from '../shared/i18n';
 
 type RGB = [number, number, number];
 const hex = (s: string): RGB => [1, 3, 5].map((i) => parseInt(s.slice(i, i + 2), 16)) as RGB;
@@ -37,19 +38,19 @@ export class HUD {
     this.temp = h('div', { class: 'hud-temp', 'aria-live': 'off' }, '20°');
     this.cover = h('div', { class: 'hud-cover' });
     this.zenNum = h('span', { class: 'hud-zen-num' }, '0');
-    this.zenEl = h('div', { class: 'hud-zen', title: 'נקודות זן', html: pebbleSVG('pebble hud-pebble') });
+    this.zenEl = h('div', { class: 'hud-zen', title: tr({ en: 'Zen points', he: 'נקודות זן', ar: 'نقاط الهدوء' }), html: pebbleSVG('pebble hud-pebble') });
     this.zenEl.append(this.zenNum);
     this.el = h(
       'header',
       { class: 'hud' },
-      h('button', { class: 'hud-menu', 'aria-label': 'תפריט', onclick: onMenu, html: '<span></span><span></span>' }),
+      h('button', { class: 'hud-menu', 'aria-label': tr({ en: 'Menu', he: 'תפריט', ar: 'القائمة' }), onclick: onMenu, html: '<span></span><span></span>' }),
       h(
         'div',
         { class: 'hud-thermo' },
         this.temp,
         h(
           'div',
-          { class: 'hud-track', role: 'meter', 'aria-label': 'טמפרטורה', 'aria-valuemin': '20', 'aria-valuemax': '100' },
+          { class: 'hud-track', role: 'meter', 'aria-label': tr({ en: 'Temperature', he: 'טמפרטורה', ar: 'درجة الحرارة' }), 'aria-valuemin': '20', 'aria-valuemax': '100' },
           this.cover,
           h('i', { class: 'hud-mark', style: { insetInlineStart: '45%' } }),
           h('i', { class: 'hud-mark', style: { insetInlineStart: '80%' } }),

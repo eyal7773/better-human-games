@@ -1,14 +1,21 @@
 {
-  "name": "נקודת רתיחה",
-  "short_name": "רתיחה",
-  "description": "לתרגל את הרגע שבין הכעס לתגובה.",
-  "lang": "he",
-  "dir": "rtl",
+  "name": "Boiling Point",
+  "short_name": "Boiling Point",
+  "description": "Practise the moment between anger and reaction.",
+  "lang": "en",
+  "dir": "auto",
   "start_url": "./boiling-point/",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#e4f6f2",
   "theme_color": "#e4f6f2",
-  "icons": [{ "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
 }

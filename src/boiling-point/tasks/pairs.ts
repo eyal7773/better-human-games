@@ -2,6 +2,7 @@ import { h, pick, shuffle } from '../../shared/dom';
 import { vibrate } from '../../shared/haptics';
 import { sockSVG } from '../art';
 import { type Task, type TaskCtx, toClient } from './types';
+import { tr } from '../../shared/i18n';
 
 interface Card {
   el: HTMLElement;
@@ -14,8 +15,8 @@ interface Card {
 
 /** Classic memory: match the sock pairs from the laundry pile. */
 export class PairsTask implements Task {
-  title = 'למצוא זוגות גרביים';
-  hint = 'הפכו שני קלפים. זוג זהה נשאר פתוח';
+  title = tr({ en: 'Find the sock pairs', he: 'למצוא זוגות גרביים', ar: 'ابحثوا عن أزواج الجوارب' });
+  hint = tr({ en: 'Flip two cards. A matching pair stays open', he: 'הפכו שני קלפים. זוג זהה נשאר פתוח', ar: 'اقلبوا بطاقتين. الزوج المتطابق يبقى مكشوفًا' });
   private cards: Card[] = [];
   private slots: { x: number; y: number }[] = [];
   private cw = 0;
@@ -48,7 +49,7 @@ export class PairsTask implements Task {
     kinds.forEach((kind, i) => {
       const el = h(
         'button',
-        { class: 'card', type: 'button', 'aria-label': 'קלף סגור' },
+        { class: 'card', type: 'button', 'aria-label': tr({ en: 'Face-down card', he: 'קלף סגור', ar: 'بطاقة مقلوبة' }) },
         h(
           'div',
           { class: 'card-inner' },
@@ -83,7 +84,7 @@ export class PairsTask implements Task {
   private setOpen(card: Card, open: boolean) {
     card.open = open;
     card.el.classList.toggle('open', open);
-    card.el.setAttribute('aria-label', open ? 'גרב' : 'קלף סגור');
+    card.el.setAttribute('aria-label', open ? tr({ en: 'Sock', he: 'גרב', ar: 'جورب' }) : tr({ en: 'Face-down card', he: 'קלף סגור', ar: 'بطاقة مقلوبة' }));
   }
 
   private tap(card: Card) {

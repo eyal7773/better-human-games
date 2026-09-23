@@ -2,14 +2,15 @@ import { h, shuffle, type Scope } from '../shared/dom';
 import type { AudioEngine } from '../shared/audio';
 import { vibrate } from '../shared/haptics';
 import type { Dilemma, Verdict } from './content';
+import { tr } from '../shared/i18n';
 
 export type ChoiceOutcome = Verdict | 'timeout';
 
 const VERDICT_TEXT: Record<ChoiceOutcome, string> = {
-  best: 'תגובה רגועה ובונה.',
-  ok: 'לא רע בכלל. יש גם דרך שמחברת יותר.',
-  bad: 'זו התגובה של הרגע הרותח. מובנת — אבל בדרך כלל מחממת עוד יותר.',
-  timeout: 'הזמן עבר. גם זה קורה — הנה מה שהיה עוזר:',
+  best: tr({ en: 'A calm, constructive response.', he: 'תגובה רגועה ובונה.', ar: 'رد هادئ وبنّاء.' }),
+  ok: tr({ en: 'Not bad at all. There’s also a way that connects more.', he: 'לא רע בכלל. יש גם דרך שמחברת יותר.', ar: 'ليس سيئًا أبدًا. هناك أيضًا طريقة تقرّب أكثر.' }),
+  bad: tr({ en: 'That’s the boiling-moment response. Understandable — but it usually heats things up even more.', he: 'זו התגובה של הרגע הרותח. מובנת — אבל בדרך כלל מחממת עוד יותר.', ar: 'هذا رد لحظة الغليان. مفهوم — لكنه عادةً يزيد الحرارة أكثر.' }),
+  timeout: tr({ en: 'Time ran out. That happens too — here’s what would have helped:', he: 'הזמן עבר. גם זה קורה — הנה מה שהיה עוזר:', ar: 'انتهى الوقت. هذا يحدث أيضًا — إليكم ما كان سيساعد:' }),
 };
 
 /** Situation → a few seconds to read → pick a response before the fuse burns out. */
@@ -22,12 +23,12 @@ export function runChoice(
 ): Promise<ChoiceOutcome> {
   return new Promise((resolve) => {
     const fuse = h('div', { class: 'fuse' }, h('div', { class: 'fuse-line' }), h('div', { class: 'fuse-spark' }));
-    const list = h('div', { class: 'choice-options', role: 'group', 'aria-label': 'איך מגיבים?' });
+    const list = h('div', { class: 'choice-options', role: 'group', 'aria-label': tr({ en: 'How do you respond?', he: 'איך מגיבים?', ar: 'كيف تردّون؟' }) });
     const feedback = h('div', { class: 'choice-feedback', 'aria-live': 'polite' });
     const card = h(
       'div',
-      { class: 'choice-card', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'רגע לפני שמגיבים' },
-      h('p', { class: 'choice-kicker' }, 'רגע לפני שמגיבים'),
+      { class: 'choice-card', role: 'dialog', 'aria-modal': 'true', 'aria-label': tr({ en: 'A moment before you respond', he: 'רגע לפני שמגיבים', ar: 'لحظة قبل أن تردّوا' }) },
+      h('p', { class: 'choice-kicker' }, tr({ en: 'A moment before you respond', he: 'רגע לפני שמגיבים', ar: 'لحظة قبل أن تردّوا' })),
       h('p', { class: 'choice-situation' }, d.situation),
       fuse,
       list,
@@ -60,7 +61,7 @@ export function runChoice(
       } else if (outcome === 'timeout') audio.miss();
       else if (outcome === 'bad') audio.sizzle();
       else audio.pluck(2);
-      const cont = h('button', { class: 'btn', type: 'button' }, 'המשך');
+      const cont = h('button', { class: 'btn', type: 'button' }, tr({ en: 'Continue', he: 'המשך', ar: 'متابعة' }));
       feedback.append(
         h('p', { class: `verdict verdict-${outcome}` }, VERDICT_TEXT[outcome]),
         h('p', { class: 'why' }, d.why),

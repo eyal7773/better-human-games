@@ -1,0 +1,159 @@
+import type { Content } from '../content';
+
+export const en: Content = {
+  dilemmas: [
+    {
+      id: 'juice',
+      situation: 'Grape juice just spilled all over the couch you cleaned this morning.',
+      options: [
+        { text: 'Oops, it happens. Let’s grab a towel and clean it up together.', v: 'best' },
+        { text: 'I need a minute on my own. Then we’ll clean it.', v: 'ok' },
+        { text: 'How many times have I said no eating on the couch?!', v: 'bad' },
+        { text: 'Great. Just great. Thanks a lot.', v: 'bad' },
+      ],
+      why: 'Accidents happen. Cleaning up together teaches responsibility — without shame.',
+    },
+    {
+      id: 'remote',
+      situation: 'The kids have been fighting over the remote for ten minutes, and you’re in the middle of an important call.',
+      options: [
+        { text: 'Finish the call, then help them agree on turns.', v: 'best' },
+        { text: 'Switch off the TV until the call is over.', v: 'ok' },
+        { text: 'Yell: “Enough! Nobody’s watching anything!”', v: 'bad' },
+        { text: 'Ignore it and turn up the phone.', v: 'bad' },
+      ],
+      why: 'Close one thing at a time, and offer a fair way forward instead of adding more noise.',
+    },
+    {
+      id: 'milk',
+      situation: 'Your partner forgot to buy milk again, and there’s nothing for breakfast tomorrow.',
+      options: [
+        { text: '“This frustrates me. Let’s find a way so it doesn’t happen again.”', v: 'best' },
+        { text: 'Pop out and buy it yourself, without saying a word.', v: 'ok' },
+        { text: '“I can’t count on you for anything!”', v: 'bad' },
+        { text: 'Slam the fridge and stay silent all evening.', v: 'bad' },
+      ],
+      why: 'A sentence that starts with “I” says what bothers you without blaming, and opens a shared solution.',
+    },
+    {
+      id: 'dressing',
+      situation: 'Your little one refuses to get dressed, and you’re already late for daycare.',
+      options: [
+        { text: '“Do you want the red shirt or the blue one?”', v: 'best' },
+        { text: 'Dress him quietly, even while he protests.', v: 'ok' },
+        { text: '“If you don’t get dressed now — no tablet for a week!”', v: 'bad' },
+        { text: 'Shout “We’re late!” and pull him by the arm.', v: 'bad' },
+      ],
+      why: 'A small choice gives a child back a sense of control, and the struggle gets shorter.',
+    },
+    {
+      id: 'drum',
+      situation: 'The baby just fell asleep, and the big one starts drumming on a pot.',
+      options: [
+        { text: 'Crouch to his level and whisper: “Let’s drum outside.”', v: 'best' },
+        { text: 'Take the pot and hand him something quiet.', v: 'ok' },
+        { text: 'Shout “Quiet!” — and the baby wakes up.', v: 'bad' },
+        { text: 'Snatch the spoon out of his hand.', v: 'bad' },
+      ],
+      why: 'Getting down to eye level and offering an alternative stops the noise without waking everyone.',
+    },
+    {
+      id: 'room',
+      situation: 'You’ve asked three times for the room to be tidied. Nothing happened.',
+      options: [
+        { text: '“Let’s tidy together for five minutes. I’m setting a timer.”', v: 'best' },
+        { text: '“Once the room is tidy — you can go out and play.”', v: 'ok' },
+        { text: '“You never listen to me!”', v: 'bad' },
+        { text: 'Stuff everything into a bag and dump it in the storeroom.', v: 'bad' },
+      ],
+      why: 'Doing it together, with a clear time limit, turns a demand into a task that can actually be done.',
+    },
+    {
+      id: 'dinner',
+      situation: 'You cooked for an hour. The first thing said at the table: “Yuck, I’m not eating that.”',
+      options: [
+        { text: '“You don’t have to like it. One bite to taste, and there’s bread if you’re hungry.”', v: 'best' },
+        { text: '“Next time, help me choose what we cook.”', v: 'ok' },
+        { text: '“Eat and be quiet, some kids have no food at all!”', v: 'bad' },
+        { text: 'Snatch the plate away with a bang.', v: 'bad' },
+      ],
+      why: 'Respect his taste and keep the rule — without a power struggle over the plate.',
+    },
+    {
+      id: 'homework',
+      situation: 'Half an hour on one math sheet, and he “doesn’t get any of it”.',
+      options: [
+        { text: '“Let’s take a five-minute break and come back to one problem.”', v: 'best' },
+        { text: '“We’ll ask the teacher tomorrow. That’s enough for today.”', v: 'ok' },
+        { text: '“It’s so simple! What’s so hard?!”', v: 'bad' },
+        { text: 'Angrily solve the whole sheet for him yourself.', v: 'bad' },
+      ],
+      why: 'A frustrated brain doesn’t learn. A short break resets you both.',
+    },
+    {
+      id: 'shoes',
+      situation: 'Someone left shoes in the doorway. You tripped over them. Again.',
+      options: [
+        { text: '“Ouch. Let’s find the shoes a permanent spot.”', v: 'best' },
+        { text: 'Move them aside and talk about it later.', v: 'ok' },
+        { text: '“Who’s the slob?! Everyone here, now!”', v: 'bad' },
+        { text: 'Kick the shoes to the end of the hallway.', v: 'bad' },
+      ],
+      why: 'First acknowledge the pain, then fix the problem — a fixed spot saves the next time.',
+    },
+    {
+      id: 'fight',
+      situation: '“He hit me!” — “She started it!” — both shouting at once.',
+      options: [
+        { text: '“I hear that you’re both angry. Each of you tells it in turn.”', v: 'best' },
+        { text: 'Separate them into different rooms for a few minutes.', v: 'ok' },
+        { text: '“You’re both punished! I don’t care who started it!”', v: 'bad' },
+        { text: '“Sort it out yourselves” — and walk out slamming the door.', v: 'bad' },
+      ],
+      why: 'When both sides feel heard, it is much easier for them to calm down.',
+    },
+    {
+      id: 'phone',
+      situation: 'The phone rings for the fifth time in the middle of dinner. Work, again.',
+      options: [
+        { text: 'Silence it, say “This is our time now,” and get back to it later.', v: 'best' },
+        { text: 'Answer briefly: “I’ll call you back in an hour.”', v: 'ok' },
+        { text: 'Answer and argue loudly at the table.', v: 'bad' },
+        { text: 'Toss the phone on the couch and grumble all evening.', v: 'bad' },
+      ],
+      why: 'A clear boundary protects family time — and your patience too.',
+    },
+    {
+      id: 'bedtime',
+      situation: '“I’m thirsty.” “I need to pee.” “One more story!” — the seventh time after lights out.',
+      options: [
+        { text: '“I love you. Now it’s sleep time. I’ll check on you in five minutes.”', v: 'best' },
+        { text: 'Bring water quietly and leave without talking.', v: 'ok' },
+        { text: '“If you get up one more time — that’s it!”', v: 'bad' },
+        { text: 'Shut the door and ignore the crying.', v: 'bad' },
+      ],
+      why: 'Warmth and a limit in the same sentence: the child feels safe, and the routine holds.',
+    },
+  ],
+  shouts: [
+    'Daaaad!',
+    'Muuuum!',
+    'I’m bored!',
+    'He touched me!',
+    'Where are my socks?',
+    'I’m hungry!!',
+    'Look! Look! Look!',
+    'Why? Why? Why?',
+    'She took mine!',
+    'Five more minutes!',
+  ],
+  notifs: [
+    { app: 'P', color: '#25d366', title: 'Class parents', body: '47 new messages' },
+    { app: 'W', color: '#4d96ff', title: 'The boss', body: 'Got a minute? It’s urgent' },
+    { app: '$', color: '#ff9f1c', title: 'Electric bill', body: 'Payment failed' },
+    { app: '!', color: '#e5383b', title: 'System update', body: 'Restart required now' },
+    { app: 'G', color: '#b983ff', title: 'Grandma', body: 'Why didn’t you call?' },
+    { app: '📦', color: '#8d6e63', title: 'Deliveries', body: 'The courier couldn’t find your address' },
+  ],
+  lures: ['Tap me!', 'Hurry!!', 'Just one tap', 'Don’t miss out!'],
+};

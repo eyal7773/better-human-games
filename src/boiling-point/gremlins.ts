@@ -5,6 +5,7 @@ import type { FX } from './fx';
 import type { Task } from './tasks/types';
 import { gremlinSVG, flySVG } from './art';
 import { SHOUTS, NOTIFS, LURES } from './content';
+import { tr } from '../shared/i18n';
 
 export interface GCtx {
   scope: Scope;
@@ -71,7 +72,7 @@ async function thief(c: GCtx) {
   const W = c.board.clientWidth;
   const H = c.board.clientHeight;
   const g = new Gremlin(c.board, Math.min(78, W / 4.6));
-  baited(c, g.el, 5, 'לא להתעמת איתם');
+  baited(c, g.el, 5, tr({ en: 'don’t take them on', he: 'לא להתעמת איתם', ar: 'لا تواجهوهم' }));
   const fromLeft = Math.random() < 0.5;
   g.set(fromLeft ? -60 : W + 60, rand(H * 0.3, H * 0.8));
   const t = task.center(victim);
@@ -100,7 +101,7 @@ async function shouter(c: GCtx) {
   el.classList.add(side);
   el.style.bottom = `${rand(14, 46)}%`;
   c.layer.append(el);
-  baited(c, el, 5, 'לא עונים בצעקה');
+  baited(c, el, 5, tr({ en: 'don’t shout back', he: 'לא עונים בצעקה', ar: 'لا تردّوا بالصراخ' }));
   c.audio.whine();
   vibrate([30, 40, 30]);
   c.heat(4);
@@ -116,7 +117,7 @@ async function shuffler(c: GCtx) {
   const g = new Gremlin(c.board, Math.min(90, W / 4));
   g.el.classList.add('spinning');
   g.set(W / 2, H / 2);
-  baited(c, g.el, 5, 'לא להתעמת איתם');
+  baited(c, g.el, 5, tr({ en: 'don’t take them on', he: 'לא להתעמת איתם', ar: 'لا تواجهوهم' }));
   c.audio.whoosh();
   c.task?.shuffle();
   c.heat(3);
@@ -137,7 +138,7 @@ async function fly(c: GCtx) {
   let ty = rand(80, H - 80);
   const stop = c.audio.buzz();
   c.scope.add(stop);
-  baited(c, el, 5, 'בזבוז אנרגיה', () => {
+  baited(c, el, 5, tr({ en: 'wasted energy', he: 'בזבוז אנרגיה', ar: 'طاقة مهدورة' }), () => {
     // it always dodges
     tx = rand(40, W - 40);
     ty = rand(80, H - 80);
@@ -176,14 +177,14 @@ async function notif(c: GCtx) {
     { class: 'notif', role: 'status' },
     h('span', { class: 'notif-app', style: { background: n.color } }, n.app),
     h('div', { class: 'notif-text' }, h('b', {}, n.title), h('span', {}, n.body)),
-    h('small', {}, 'עכשיו'),
+    h('small', {}, tr({ en: 'now', he: 'עכשיו', ar: 'الآن' })),
   );
   c.layer.append(el);
   if (Math.random() < 0.4) c.audio.ring();
   else c.audio.notif();
   vibrate([60, 80, 60]);
   c.heat(3);
-  baited(c, el, 5, 'אפשר לענות אחר כך', () => el.classList.add('leaving'));
+  baited(c, el, 5, tr({ en: 'it can wait', he: 'אפשר לענות אחר כך', ar: 'يمكن الرد لاحقًا' }), () => el.classList.add('leaving'));
   await c.scope.sleep(2600);
   el.classList.add('leaving');
   await c.scope.sleep(400);
@@ -207,7 +208,7 @@ async function lure(c: GCtx) {
   el.style.top = `${rand(H * 0.18, H * 0.72)}px`;
   c.layer.append(el);
   c.audio.pop();
-  baited(c, el, 8, 'זה בדיוק מה שהם רצו', () => el.remove());
+  baited(c, el, 8, tr({ en: 'exactly what they wanted', he: 'זה בדיוק מה שהם רצו', ar: 'هذا بالضبط ما أرادوه' }), () => el.remove());
   await c.scope.sleep(3200);
   el.classList.add('leaving');
   await c.scope.sleep(300);
