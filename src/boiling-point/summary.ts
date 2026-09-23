@@ -1,6 +1,6 @@
 import { h, ltr } from '../shared/dom';
 import type { AudioEngine } from '../shared/audio';
-import type { FX } from './fx';
+import type { FX } from '../shared/fx';
 import type { HUD } from './hud';
 import type { RoundResult } from './round';
 import { tr, isRTL } from '../shared/i18n';

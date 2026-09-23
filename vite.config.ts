@@ -12,6 +12,7 @@ export default defineConfig({
       input: {
         main: page('./index.html'),
         boilingPoint: page('./boiling-point/index.html'),
+        catchMe: page('./catch-me/index.html'),
       },
     },
   },

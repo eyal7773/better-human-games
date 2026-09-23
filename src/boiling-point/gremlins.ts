@@ -1,7 +1,7 @@
 import { h, pick, rand, ease, type Scope } from '../shared/dom';
 import type { AudioEngine } from '../shared/audio';
 import { vibrate } from '../shared/haptics';
-import type { FX } from './fx';
+import type { FX } from '../shared/fx';
 import type { Task } from './tasks/types';
 import { gremlinSVG, flySVG } from './art';
 import { SHOUTS, NOTIFS, LURES } from './content';
