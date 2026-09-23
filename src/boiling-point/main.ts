@@ -134,19 +134,19 @@ const STEPS: [string, string, string][] = tr({
   en: [
     ['🧺', 'A small chore at home', 'Tidy up, make something, match pairs. Halfway through, the nudniks show up and start interfering — on purpose.'],
     ['🌡️', 'Notice the heat', 'The thermometer rises. When you feel it starting — tap ✋ Pause. The earlier you pause, the more points.'],
-    ['🫁', 'Calm down slowly', 'A long breath, slow sand raking or tapping to a heartbeat. Fast, agitated tapping heats you up.'],
+    ['🫁', 'Calm down slowly', 'A long breath, finding where you feel it in your body and naming it, or tapping to a heartbeat. Fast, agitated tapping heats you up.'],
     ['💬', 'Choose a response', 'A real situation from home and a few seconds to decide. The calm response is worth the most zen points.'],
   ],
   he: [
     ['🧺', 'משימה קטנה מהבית', 'מסדרים, מכינים, מחפשים זוגות. באמצע מגיעים הנודניקים ומתחילים להפריע — בכוונה.'],
     ['🌡️', 'שמים לב לחום', 'המדחום עולה. כשמרגישים שזה מתחיל — לוחצים ✋ עצירה. ככל שמוקדם יותר, יותר נקודות.'],
-    ['🫁', 'נרגעים לאט', 'נשימה ארוכה, גריפת חול איטית או הקשה בקצב הלב. לחיצות מהירות ועצבניות מחממות.'],
+    ['🫁', 'נרגעים לאט', 'נשימה ארוכה, לזהות איפה זה בגוף ולתת לזה שם, או הקשה בקצב הלב. לחיצות מהירות ועצבניות מחממות.'],
     ['💬', 'בוחרים תגובה', 'מצב אמיתי מהבית וכמה שניות להחליט. התגובה הרגועה שווה הכי הרבה נקודות זן.'],
   ],
   ar: [
     ['🧺', 'مهمة صغيرة في البيت', 'ترتيب، تحضير، البحث عن أزواج. في المنتصف يصل المزعجون ويبدأون بالتشويش — عن قصد.'],
     ['🌡️', 'لاحظوا الحرارة', 'ميزان الحرارة يرتفع. عندما تشعرون أن الأمر بدأ — اضغطوا ✋ توقّف. كلما توقفتم أبكر، زادت النقاط.'],
-    ['🫁', 'اهدأوا ببطء', 'نفَس طويل، تمشيط الرمل ببطء أو النقر على إيقاع القلب. النقرات السريعة والعصبية ترفع الحرارة.'],
+    ['🫁', 'اهدأوا ببطء', 'نفَس طويل، أن تحدّدوا أين تشعرون بذلك في الجسد وتسمّوه، أو النقر على إيقاع القلب. النقرات السريعة والعصبية ترفع الحرارة.'],
     ['💬', 'اختاروا ردًّا', 'موقف حقيقي من البيت وبضع ثوانٍ للقرار. الرد الهادئ يساوي أكبر عدد من نقاط الهدوء.'],
   ],
 });
@@ -330,7 +330,7 @@ async function evening() {
   };
 
   const tasks = shuffle<TaskKind>(['order', 'sort', 'pairs']);
-  const calmsBase: CalmKind[] = ['breath', 'slide', 'heart'];
+  const calmsBase: CalmKind[] = ['breath', 'body', 'heart'];
   const shift = save.evenings % 3;
   const calms = [...calmsBase.slice(shift), ...calmsBase.slice(0, shift)];
   const dilemmas = pickDilemmas(3);

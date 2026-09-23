@@ -11,14 +11,14 @@ import { SortTask } from './tasks/sort';
 import { PairsTask } from './tasks/pairs';
 import type { Calm, CalmCtx } from './calm/types';
 import { BreathCalm } from './calm/breath';
-import { SlideCalm } from './calm/slide';
+import { BodyCalm } from './calm/body';
 import { HeartCalm } from './calm/heartbeat';
 import { type Mischief, unleash } from './gremlins';
 import { runChoice, type ChoiceOutcome } from './choice';
 import { tr } from '../shared/i18n';
 
 export type TaskKind = 'order' | 'sort' | 'pairs';
-export type CalmKind = 'breath' | 'slide' | 'heart';
+export type CalmKind = 'breath' | 'body' | 'heart';
 
 export interface RoundSpec {
   clock: string;
@@ -382,7 +382,7 @@ class Round {
       done: () => resolve('calm'),
     };
     const calm: Calm =
-      this.spec.calm === 'breath' ? new BreathCalm(ctx) : this.spec.calm === 'slide' ? new SlideCalm(ctx) : new HeartCalm(ctx);
+      this.spec.calm === 'breath' ? new BreathCalm(ctx) : this.spec.calm === 'body' ? new BodyCalm(ctx) : new HeartCalm(ctx);
     this.v.title.textContent = calm.title;
     this.v.hint.textContent = from === 'forced' ? tr({ en: 'Boiling point is close. ', he: 'הרתיחה קרובה. ', ar: 'الغليان قريب. ' }) + calm.hint : calm.hint;
     calm.mount();
@@ -390,7 +390,7 @@ class Round {
     const g = { scope: s, board: this.v.board, layer: this.v.layer, audio: this.audio, fx: this.fx, task: null, heat: this.addHeat };
     const spawn = () => {
       unleash(pick(this.t.calmMischief), g);
-      s.timeout(spawn, this.t.spawnEvery * 1.5 * rand(0.8, 1.3));
+      s.timeout(spawn, this.t.spawnEvery * 1.5 * (calm.mischiefScale ?? 1) * rand(0.8, 1.3));
     };
     s.timeout(spawn, 1800);
 
