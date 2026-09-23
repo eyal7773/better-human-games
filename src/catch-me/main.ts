@@ -258,7 +258,12 @@ async function hop(scope: Scope, px: number, py: number) {
 function chase(ms: number): Promise<'caught' | 'time'> {
   root.dataset.phase = 'chase';
   audio.startPad('home');
+  // A hop cut short by the previous boil never finished its tween, so reset the
+  // runner here — otherwise `hopping` stays true and it ignores every tap.
+  hopping = false;
+  runner.el.classList.remove('running', 'stumble');
   runner.face('tease');
+  place();
   const scope = new Scope();
   let warm = 0;
   let dodges = 0;
