@@ -17,5 +17,7 @@ export interface CalmCtx {
 export interface Calm {
   title: string;
   hint: string;
+  /** Multiplies the gap between interruptions (default 1). */
+  mischiefScale?: number;
   mount(): void;
 }
