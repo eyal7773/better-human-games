@@ -18,6 +18,7 @@ export type AudienceTag =
   | 'parent-teen'
   | 'partner'
   | 'adult-child' // grown son or daughter of an ageing parent
+  | 'grandparent'
   | 'men'
   | 'women';
 export type TopicTag =
@@ -30,7 +31,18 @@ export type TopicTag =
   | 'homework'
   | 'noise'
   | 'work-life'
-  | 'household';
+  | 'household'
+  | 'screens'
+  | 'money'
+  | 'in-laws' // grandparents and in-laws stepping into your parenting
+  | 'caregiving'
+  | 'health'
+  | 'mental-load' // the invisible work of noticing, planning and remembering
+  | 'respect'
+  | 'independence'
+  | 'honesty'
+  | 'public'
+  | 'connection';
 export type Tag = AudienceTag | TopicTag;
 
 export interface Dilemma {
