@@ -7,7 +7,8 @@ import { kettleSVG } from '../shared/kettle';
 import { FX } from '../shared/fx';
 import { HUD } from './hud';
 import { save, persist } from './save';
-import { DILEMMAS } from './content';
+import { DILEMMAS, type Dilemma } from './content';
+import { allowed, fits, weight, weightedShuffle } from '../shared/profile';
 import { playRound, type CalmKind, type PlayView, type RoundResult, type TaskKind } from './round';
 import { showSummary } from './summary';
 import { mountIsland } from './island';
@@ -229,6 +230,12 @@ function settings() {
       h('h2', { id: 'settings-title' }, T.settings),
       h('h3', {}, tr({ en: 'Language', he: 'שפה', ar: 'اللغة' })),
       langSwitcher('segmented lang-switch'),
+      h('h3', {}, tr({ en: 'My home', he: 'הבית שלי', ar: 'بيتي' })),
+      h(
+        'a',
+        { class: 'btn ghost', href: new URL('../?profile=edit', location.href).href },
+        tr({ en: 'Edit my home', he: 'עריכת הבית שלי', ar: 'تعديل بيتي' }),
+      ),
       h('h3', {}, T.choiceTime),
       seg,
       h(
@@ -259,10 +266,21 @@ function island() {
 
 const CLOCKS = ['18:30', '19:15', '20:00'];
 
+/**
+ * Prefer fresh dilemmas that fit the player's home (hot topics weighted up),
+ * then fitting ones seen lately, then any that are allowed at all.
+ */
 function pickDilemmas(n: number) {
-  const fresh = DILEMMAS.filter((d) => !save.recentDilemmas.includes(d.id));
-  const pool = shuffle(fresh.length >= n ? fresh : [...DILEMMAS]);
-  const chosen = pool.slice(0, n);
+  const recent = (d: Dilemma) => save.recentDilemmas.includes(d.id);
+  const allowedAll = DILEMMAS.filter((d) => allowed(d.tags));
+  const fitting = allowedAll.filter((d) => fits(d.tags));
+  const w = (d: Dilemma) => weight(d.tags);
+  const tiers = [
+    fitting.filter((d) => !recent(d)),
+    fitting.filter(recent),
+    allowedAll.filter((d) => !fitting.includes(d)),
+  ];
+  const chosen = tiers.flatMap((tier) => weightedShuffle(tier, w)).slice(0, n);
   save.recentDilemmas = [...save.recentDilemmas, ...chosen.map((d) => d.id)].slice(-8);
   return chosen;
 }

@@ -28,7 +28,7 @@ export const he: Content = {
     },
     {
       id: 'milk',
-      tags: ['partner', 'household'],
+      tags: ['partner', 'household', 'no-kids'],
       situation: 'בן או בת הזוג שכחו שוב לקנות חלב, ואין מה להכין מחר בבוקר.',
       options: [
         { text: '"זה מתסכל אותי. בוא נמצא דרך שזה לא יחזור."', v: 'best' },
@@ -292,7 +292,7 @@ export const he: Content = {
     },
     {
       id: 'dishes',
-      tags: ['partner', 'chores'],
+      tags: ['partner', 'chores', 'no-kids'],
       situation: 'ביקשתם הבוקר. הכיור עדיין מלא, ובן או בת הזוג על הספה.',
       options: [
         { text: '"אין לי כוח יותר. אפשר את הכלים לפני הסדרה?"', v: 'best' },
@@ -304,7 +304,7 @@ export const he: Content = {
     },
     {
       id: 'scrolling',
-      tags: ['partner', 'connection', 'screens'],
+      tags: ['partner', 'connection', 'screens', 'no-kids'],
       situation: 'מספרים לבן או לבת הזוג על יום קשה. והם גוללים בטלפון.',
       options: [
         { text: '"חמש דקות רק איתי? הטלפון יכול לחכות?"', v: 'best' },
@@ -316,7 +316,7 @@ export const he: Content = {
     },
     {
       id: 'latehome',
-      tags: ['partner', 'mealtime', 'work-life'],
+      tags: ['partner', 'mealtime', 'work-life', 'no-kids'],
       situation: 'ארוחת הערב על השולחן כבר שעה. בן או בת הזוג נכנסים — בלי טלפון, בלי הודעה.',
       options: [
         { text: '"דאגתי, והאוכל התקרר. בפעם הבאה רק הודעה, טוב?"', v: 'best' },
@@ -328,7 +328,7 @@ export const he: Content = {
     },
     {
       id: 'purchase',
-      tags: ['partner', 'money'],
+      tags: ['partner', 'money', 'no-kids'],
       situation: 'חיוב גדול וחדש בכרטיס. בן או בת הזוג לא אמרו מילה.',
       options: [
         { text: '"נבהלתי כשראיתי את זה. נסכם סכום שמעליו מתייעצים?"', v: 'best' },
@@ -400,7 +400,7 @@ export const he: Content = {
     },
     {
       id: 'samequestion',
-      tags: ['adult-child', 'caregiving', 'health'],
+      tags: ['adult-child', 'caregiving', 'health', 'no-kids'],
       situation: 'אמא שלכם שואלת איזה יום היום — בפעם הרביעית בשעה האחרונה.',
       options: [
         { text: 'עונים ברכות, וכותבים את זה בגדול על לוח על המקרר.', v: 'best' },
@@ -412,7 +412,7 @@ export const he: Content = {
     },
     {
       id: 'carkeys',
-      tags: ['adult-child', 'caregiving', 'health', 'independence'],
+      tags: ['adult-child', 'caregiving', 'health', 'independence', 'no-kids'],
       situation: 'אבא שלכם שוב שרט את האוטו, ועדיין מתעקש שהוא "נוהג מצוין".',
       options: [
         { text: '"אבא, זה מפחיד אותי. בוא נלך יחד לבדיקת נהיגה."', v: 'best' },
@@ -424,7 +424,7 @@ export const he: Content = {
     },
     {
       id: 'homeaide',
-      tags: ['adult-child', 'caregiving'],
+      tags: ['adult-child', 'caregiving', 'no-kids'],
       situation: 'סוף סוף מצאתם מטפלת. אמא שלכם שולחת אותה הביתה כבר ביום הראשון.',
       options: [
         { text: '"את רוצה להסתדר לבד. מה יגרום לעזרה שלה להרגיש לך בסדר?"', v: 'best' },
@@ -436,7 +436,7 @@ export const he: Content = {
     },
     {
       id: 'brotherturn',
-      tags: ['adult-child', 'siblings', 'caregiving'],
+      tags: ['adult-child', 'siblings', 'caregiving', 'no-kids'],
       situation: 'אחיכם מבטל שוב את התור שלו אצל אבא: "מטורף בעבודה." הכול עליכם. שוב.',
       options: [
         { text: '"אני על אדים. תיקח את ימי ראשון, או תשתתף בתשלום לעזרה?"', v: 'best' },
@@ -460,7 +460,7 @@ export const he: Content = {
     },
     {
       id: 'techcall',
-      tags: ['adult-child', 'caregiving', 'work-life'],
+      tags: ['adult-child', 'caregiving', 'work-life', 'no-kids'],
       situation: 'באמצע דדליין, אבא מתקשר בפעם החמישית: "הטלפון שוב מקולקל."',
       options: [
         { text: '"עכשיו אי אפשר. בשבע, שיחת וידאו, ונסדר את זה ביחד."', v: 'best' },
@@ -517,6 +517,30 @@ export const he: Content = {
         { text: '"יאללה, תישארו ערים. מחר תהיו הבעיה של ההורים."', v: 'bad' },
       ],
       why: 'חם ותקיף, עם קצת הומור — ילדים בודקים גבולות, לא את האהבה שלכם.',
+    },
+    {
+      id: 'handoff',
+      tags: ['single-parent', 'parent-young-child', 'parent-school-age', 'bedtime'],
+      situation: 'הילדים חוזרים מההורה השני באיחור של שעתיים, עייפים ומתוחים.',
+      options: [
+        { text: 'קודם מרגיעים את הילדים; אחר כך הודעה: "בפעם הבאה נעמוד בשש?"', v: 'best' },
+        { text: 'לא אומרים כלום ומשכיבים לבד.', v: 'ok' },
+        { text: 'בדלת, מול הילדים: "תמיד מאחרים אצלך!"', v: 'bad' },
+        { text: 'לילדים: "ברור. מה חדש אצל ההורה השני."', v: 'bad' },
+      ],
+      why: 'ילדים נפגעים הכי הרבה כשההורים רבים דרכם — עכשיו הילדים, ואת המבוגר אחר כך, בפרטיות.',
+    },
+    {
+      id: 'nobackup',
+      tags: ['single-parent', 'parent-young-child', 'health', 'work-life'],
+      situation: 'הקטן חולה, בעבודה צריכים אתכם, ואין למי להעביר את המשמרת.',
+      options: [
+        { text: '"מותר לי לבקש עזרה." שולחים הודעה לחבר קרוב ולמנהל.', v: 'best' },
+        { text: 'עובדים מהספה, עם סרטונים כל היום.', v: 'ok' },
+        { text: 'מתפרצים על הילד המשתעל: "לא עכשיו!"', v: 'bad' },
+        { text: '"יופי. פשוט יופי. כרגיל הכול עליי."', v: 'bad' },
+      ],
+      why: 'מאחורי כעס מסתתרת הרבה פעמים תשישות — לבקש עזרה זה כוח, לא כישלון.',
     },
   ],
   shouts: [

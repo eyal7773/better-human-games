@@ -28,7 +28,7 @@ export const en: Content = {
     },
     {
       id: 'milk',
-      tags: ['partner', 'household'],
+      tags: ['partner', 'household', 'no-kids'],
       situation: 'Your partner forgot to buy milk again, and there’s nothing for breakfast tomorrow.',
       options: [
         { text: '“This frustrates me. Let’s find a way so it doesn’t happen again.”', v: 'best' },
@@ -292,7 +292,7 @@ export const en: Content = {
     },
     {
       id: 'dishes',
-      tags: ['partner', 'chores'],
+      tags: ['partner', 'chores', 'no-kids'],
       situation: 'You asked this morning. The sink is still full, and your partner’s on the couch.',
       options: [
         { text: '“I’m wiped out. Can you do the dishes before the show?”', v: 'best' },
@@ -304,7 +304,7 @@ export const en: Content = {
     },
     {
       id: 'scrolling',
-      tags: ['partner', 'connection', 'screens'],
+      tags: ['partner', 'connection', 'screens', 'no-kids'],
       situation: 'You’re telling your partner about a hard day. They’re scrolling their phone.',
       options: [
         { text: '“Five minutes, just me? Can the phone wait?”', v: 'best' },
@@ -316,7 +316,7 @@ export const en: Content = {
     },
     {
       id: 'latehome',
-      tags: ['partner', 'mealtime', 'work-life'],
+      tags: ['partner', 'mealtime', 'work-life', 'no-kids'],
       situation: 'Dinner’s been on the table for an hour. Your partner walks in — no call, no text.',
       options: [
         { text: '“I was worried, and the food went cold. Next time, just text?”', v: 'best' },
@@ -328,7 +328,7 @@ export const en: Content = {
     },
     {
       id: 'purchase',
-      tags: ['partner', 'money'],
+      tags: ['partner', 'money', 'no-kids'],
       situation: 'A big new charge on the card. Your partner didn’t mention it.',
       options: [
         { text: '“That gave me a shock. Can we agree on an amount we check first?”', v: 'best' },
@@ -400,7 +400,7 @@ export const en: Content = {
     },
     {
       id: 'samequestion',
-      tags: ['adult-child', 'caregiving', 'health'],
+      tags: ['adult-child', 'caregiving', 'health', 'no-kids'],
       situation: 'Your mother asks what day it is — for the fourth time this hour.',
       options: [
         { text: 'Answer gently, and write it big on a board on the fridge.', v: 'best' },
@@ -412,7 +412,7 @@ export const en: Content = {
     },
     {
       id: 'carkeys',
-      tags: ['adult-child', 'caregiving', 'health', 'independence'],
+      tags: ['adult-child', 'caregiving', 'health', 'independence', 'no-kids'],
       situation: 'Your father scraped the car again, and still insists he’s “driving just fine”.',
       options: [
         { text: '“Dad, this scares me. Let’s go for a driving check together.”', v: 'best' },
@@ -424,7 +424,7 @@ export const en: Content = {
     },
     {
       id: 'homeaide',
-      tags: ['adult-child', 'caregiving'],
+      tags: ['adult-child', 'caregiving', 'no-kids'],
       situation: 'You finally found a home aide. Your mother sends her away on day one.',
       options: [
         { text: '“You want to manage on your own. What would make her help feel okay?”', v: 'best' },
@@ -436,7 +436,7 @@ export const en: Content = {
     },
     {
       id: 'brotherturn',
-      tags: ['adult-child', 'siblings', 'caregiving'],
+      tags: ['adult-child', 'siblings', 'caregiving', 'no-kids'],
       situation: 'Your brother cancels his turn with Dad again: “Work is crazy.” It’s all on you. Again.',
       options: [
         { text: '“I’m running on empty. Can you take Sundays, or chip in for help?”', v: 'best' },
@@ -460,7 +460,7 @@ export const en: Content = {
     },
     {
       id: 'techcall',
-      tags: ['adult-child', 'caregiving', 'work-life'],
+      tags: ['adult-child', 'caregiving', 'work-life', 'no-kids'],
       situation: 'Mid-deadline, Dad calls for the fifth time: “The phone’s broken again.”',
       options: [
         { text: '“Not now. Seven o’clock, video call, we’ll fix it together.”', v: 'best' },
@@ -517,6 +517,30 @@ export const en: Content = {
         { text: '“Fine, stay up. Tomorrow you’re your parents’ problem.”', v: 'bad' },
       ],
       why: 'Warm and firm, with a bit of humor — kids are testing limits, not your love.',
+    },
+    {
+      id: 'handoff',
+      tags: ['single-parent', 'parent-young-child', 'parent-school-age', 'bedtime'],
+      situation: 'The kids come back from their other parent two hours late, overtired and wired.',
+      options: [
+        { text: 'Settle the kids first; later, text: “Next time, can we stick to six?”', v: 'best' },
+        { text: 'Say nothing and do bedtime on your own.', v: 'ok' },
+        { text: 'At the door, in front of the kids: “You’re ALWAYS late!”', v: 'bad' },
+        { text: 'To the kids: “Of course. Nothing new over there.”', v: 'bad' },
+      ],
+      why: 'Kids get hurt most when parents fight through them — the kids now, the adult later, in private.',
+    },
+    {
+      id: 'nobackup',
+      tags: ['single-parent', 'parent-young-child', 'health', 'work-life'],
+      situation: 'Your little one is sick, work needs you, and there’s no one to hand over to.',
+      options: [
+        { text: '“I’m allowed to ask for help.” Text a friend and your manager.', v: 'best' },
+        { text: 'Work from the couch with cartoons on all day.', v: 'ok' },
+        { text: 'Snap at the coughing kid: “Not NOW!”', v: 'bad' },
+        { text: '“Great. Just great. As always, it’s all on me.”', v: 'bad' },
+      ],
+      why: 'Anger often hides exhaustion — reaching out for help is strength, not failure.',
     },
   ],
   shouts: [

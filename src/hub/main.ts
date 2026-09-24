@@ -1,8 +1,13 @@
 import '../shared/base.css';
 import './hub.css';
+import './home-builder.css';
 import { kettleSVG, setKettleMood } from '../shared/kettle';
 import { lang, langSwitcher, tr } from '../shared/i18n';
 import { buddySVG } from '../catch-me/buddy';
+import { h } from '../shared/dom';
+import { avatarSVG } from '../shared/avatar';
+import { profile } from '../shared/profile';
+import { openHomeBuilder } from './home-builder';
 
 // The page ships in English; other languages swap text in by data-i18n key.
 const TEXT: Record<string, { he: string; ar: string }> = {
@@ -47,7 +52,15 @@ document
       ar: 'ألعاب قصيرة للهاتف تدرّب على لحظات الحياة الصعبة: أن نلاحظ، أن نتوقف، وأن نختار ردًّا.',
     }),
   );
-document.querySelector('.hub-bar')?.append(langSwitcher());
+// "My home": your character sits next to the language switch and opens the builder.
+const meBtn = h('button', { class: 'hub-me', type: 'button', 'aria-label': tr({ en: 'My home', he: 'הבית שלי', ar: 'بيتي' }) });
+const paintMe = () => {
+  if (profile.status === 'done') meBtn.innerHTML = avatarSVG(profile.shape, profile.color);
+  else meBtn.textContent = '🏠';
+};
+paintMe();
+meBtn.addEventListener('click', () => openHomeBuilder({ edit: true, onChange: paintMe }));
+document.querySelector('.hub-bar')?.append(h('div', { class: 'hub-tools' }, meBtn, langSwitcher()));
 document.documentElement.removeAttribute('data-i18n-pending');
 
 const holder = document.getElementById('hub-kettle');
@@ -70,4 +83,14 @@ if (buddy) {
   const card = buddy.closest('.game-card');
   card?.addEventListener('pointerenter', () => buddy.classList.add('dodge'));
   card?.addEventListener('pointerleave', () => buddy.classList.remove('dodge'));
+}
+
+// First visit opens the builder once; games link back here with ?profile=edit.
+const params = new URLSearchParams(location.search);
+if (params.get('profile') === 'edit') {
+  params.delete('profile');
+  history.replaceState(null, '', `${location.pathname}${params.size ? `?${params}` : ''}${location.hash}`);
+  openHomeBuilder({ edit: true, onChange: paintMe });
+} else if (profile.status === 'new') {
+  openHomeBuilder({ onChange: paintMe });
 }
