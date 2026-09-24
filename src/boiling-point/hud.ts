@@ -6,12 +6,14 @@ type RGB = [number, number, number];
 const hex = (s: string): RGB => [1, 3, 5].map((i) => parseInt(s.slice(i, i + 2), 16)) as RGB;
 const mix = (a: RGB, b: RGB, t: number) => `rgb(${a.map((v, i) => Math.round(lerp(v, b[i], t))).join(',')})`;
 
-// Colour temperature of the room: cool lagoon mist → warm afternoon → scorching.
+// Colour temperature of the room: cool sky → sunny afternoon → scorching.
 const STOPS: { at: number; top: RGB; bottom: RGB }[] = [
-  { at: 0, top: hex('#e4f6f2'), bottom: hex('#b9e4dc') },
-  { at: 0.45, top: hex('#fff1d6'), bottom: hex('#ffd29a') },
-  { at: 0.75, top: hex('#ffc9a3'), bottom: hex('#ff8a5c') },
-  { at: 1, top: hex('#ff8a6b'), bottom: hex('#d7263d') },
+  { at: 0, top: hex('#bfe7ff'), bottom: hex('#8fd2ff') },
+  // A pale midpoint keeps blue → yellow from passing through grey.
+  { at: 0.25, top: hex('#eef9ff'), bottom: hex('#dcf1ff') },
+  { at: 0.45, top: hex('#fff4c2'), bottom: hex('#ffd45a') },
+  { at: 0.75, top: hex('#ffc27a'), bottom: hex('#ff7a3c') },
+  { at: 1, top: hex('#ff7a5c'), bottom: hex('#e0262f') },
 ];
 
 export function heatGradient(heat01: number) {
