@@ -7,7 +7,7 @@ import { kettleSVG } from '../shared/kettle';
 import { AVATAR_COLORS, AVATAR_SHAPES, avatarSVG } from '../shared/avatar';
 import { MAX_HOT, profile, resetProfile, saveProfile, type Address, type Profile } from '../shared/profile';
 import type { HouseholdTag, TopicTag } from '../shared/tags';
-import { save as bpSave, persist as bpPersist } from '../boiling-point/save';
+import { save as bpSave, grantZen } from '../boiling-point/save';
 
 /**
  * "My home": a character builder instead of a settings form. You make a little
@@ -44,6 +44,15 @@ const HOT: { tag: TopicTag; icon: string; label: string }[] = [
   { tag: 'work-life', icon: '💼', label: tr({ en: 'Work vs. home', he: 'עבודה מול בית', ar: 'العمل والبيت' }) },
 ];
 
+const COLOR_NAMES = [
+  tr({ en: 'Red', he: 'אדום', ar: 'أحمر' }),
+  tr({ en: 'Orange', he: 'כתום', ar: 'برتقالي' }),
+  tr({ en: 'Yellow', he: 'צהוב', ar: 'أصفر' }),
+  tr({ en: 'Green', he: 'ירוק', ar: 'أخضر' }),
+  tr({ en: 'Blue', he: 'כחול', ar: 'أزرق' }),
+  tr({ en: 'Purple', he: 'סגול', ar: 'بنفسجي' }),
+];
+
 const ADDRESS: { v: Address; label: string }[] = [
   { v: 'f', label: tr({ en: 'Feminine', he: 'את', ar: 'أنتِ' }) },
   { v: 'm', label: tr({ en: 'Masculine', he: 'אתה', ar: 'أنتَ' }) },
@@ -66,6 +75,7 @@ const sound = () => (audio ??= new AudioEngine(bpSave.muted));
 
 export function openHomeBuilder(opts: { edit?: boolean; onChange?: () => void } = {}) {
   document.querySelector('.hb')?.remove();
+  const opener = document.activeElement as HTMLElement | null;
   const draft: Profile = structuredClone(profile);
   if (draft.status !== 'done') draft.address = 'x';
   const first = !opts.edit && profile.status === 'new';
@@ -87,7 +97,10 @@ export function openHomeBuilder(opts: { edit?: boolean; onChange?: () => void } 
     vibrate(8);
   };
 
+  let closed = false;
   function close() {
+    if (closed) return;
+    closed = true;
     // Closing the first-time builder counts as "later": it won't pop up again.
     if (profile.status === 'new') {
       profile.status = 'skipped';
@@ -96,6 +109,7 @@ export function openHomeBuilder(opts: { edit?: boolean; onChange?: () => void } 
     root.classList.add('leaving');
     document.documentElement.classList.remove('hb-open');
     setTimeout(() => root.remove(), 220);
+    opener?.focus({ preventScroll: true });
     opts.onChange?.();
   }
   closeBtn.addEventListener('click', close);
@@ -105,10 +119,7 @@ export function openHomeBuilder(opts: { edit?: boolean; onChange?: () => void } 
     const reward = !profile.rewarded;
     Object.assign(profile, draft, { status: 'done', rewarded: true });
     saveProfile();
-    if (reward) {
-      bpSave.zen += REWARD;
-      bpPersist();
-    }
+    if (reward) grantZen(REWARD);
     opts.onChange?.();
     go(4, reward);
   }
@@ -184,7 +195,7 @@ export function openHomeBuilder(opts: { edit?: boolean; onChange?: () => void } 
       'div',
       { class: 'hb-swatches', role: 'radiogroup', 'aria-label': tr({ en: 'Colour', he: 'צבע', ar: 'اللون' }) },
       ...AVATAR_COLORS.map((c, i) => {
-        const b = h('button', { class: 'hb-swatch', type: 'button', role: 'radio', 'aria-checked': String(draft.color === i), style: { background: c } });
+        const b = h('button', { class: 'hb-swatch', type: 'button', role: 'radio', 'aria-label': COLOR_NAMES[i], 'aria-checked': String(draft.color === i), style: { background: c } });
         b.addEventListener('click', () => {
           tap();
           sound().coin(i);

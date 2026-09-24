@@ -15,7 +15,7 @@ export interface Profile {
   address: Address;
   household: HouseholdTag[];
   hot: TopicTag[]; // up to MAX_HOT topics that get picked more often
-  rewarded: boolean;
+  rewarded: boolean; // the one-time reward for finishing; survives a reset
 }
 
 export const MAX_HOT = 3;
@@ -32,36 +32,62 @@ const DEFAULTS: Profile = {
   rewarded: false,
 };
 
-export const profile: Profile = load(KEY, DEFAULTS);
+const STATUSES: readonly Profile['status'][] = ['new', 'skipped', 'done'];
+const ADDRESSES: readonly Address[] = ['f', 'm', 'x'];
+
+/** Stored data may be old, hand-edited or corrupt: keep only what we understand. */
+export function sanitize(raw: Partial<Profile>): Profile {
+  const p = { ...structuredClone(DEFAULTS), ...raw };
+  const int = (n: unknown) => (Number.isInteger(n) && (n as number) >= 0 ? (n as number) : 0);
+  const list = (v: unknown) => (Array.isArray(v) ? v : []);
+  return {
+    v: 1,
+    status: STATUSES.includes(p.status) ? p.status : 'new',
+    shape: int(p.shape),
+    color: int(p.color),
+    address: ADDRESSES.includes(p.address) ? p.address : 'x',
+    household: [...new Set(list(p.household).filter((t): t is HouseholdTag => HOUSEHOLD_TAGS.includes(t)))],
+    hot: [...new Set(list(p.hot).filter((t): t is TopicTag => typeof t === 'string'))].slice(0, MAX_HOT),
+    rewarded: p.rewarded === true,
+  };
+}
+
+export const profile: Profile = sanitize(load<Partial<Profile>>(KEY, {}));
 
 export function saveProfile() {
   store(KEY, profile);
 }
 
+/** Forget the home, but not that the reward was already given. */
 export function resetProfile() {
-  Object.assign(profile, structuredClone(DEFAULTS), { status: 'skipped' });
+  Object.assign(profile, structuredClone(DEFAULTS), { status: 'skipped', rewarded: profile.rewarded });
   saveProfile();
 }
 
 const ADDRESS_GENDER: Record<Address, GenderTag | null> = { f: 'women', m: 'men', x: null };
 
+const isGender = (t: Tag): t is GenderTag => GENDER_TAGS.includes(t as GenderTag);
+const isHousehold = (t: Tag): t is HouseholdTag => HOUSEHOLD_TAGS.includes(t as HouseholdTag);
+
 /**
- * Whether content with these tags suits the player. Gender-specific content
- * only goes to players who chose that form of address — with or without a
- * profile. Otherwise content fits when it shares an audience with the home,
- * or when the player hasn't described their home.
+ * Gender-specific content only goes to players who chose that form of
+ * address — with or without a profile. It is never an acceptable fallback.
  */
-export function fits(tags: readonly Tag[], p: Profile = profile): boolean {
-  const gender = tags.filter((t): t is GenderTag => GENDER_TAGS.includes(t as GenderTag));
-  if (gender.length && !gender.includes(ADDRESS_GENDER[p.address]!)) return false;
-  if (p.status !== 'done' || !p.household.length) return true;
-  const audience = tags.filter((t): t is HouseholdTag => HOUSEHOLD_TAGS.includes(t as HouseholdTag));
-  return !audience.length || audience.some((t) => p.household.includes(t));
+export function allowed(tags: readonly Tag[], p: Profile = profile): boolean {
+  const gender = tags.filter(isGender);
+  const mine = ADDRESS_GENDER[p.address];
+  return !gender.length || (mine !== null && gender.includes(mine));
 }
 
-/** Gender-specific content that doesn't match is never an acceptable fallback. */
-export function allowed(tags: readonly Tag[], p: Profile = profile): boolean {
-  return fits(tags, { ...p, status: 'new' });
+/**
+ * Whether content suits the player's home: it shares an audience with it, has
+ * no audience at all, or the player hasn't described their home.
+ */
+export function fits(tags: readonly Tag[], p: Profile = profile): boolean {
+  if (!allowed(tags, p)) return false;
+  if (p.status !== 'done' || !p.household.length) return true;
+  const audience = tags.filter(isHousehold);
+  return !audience.length || audience.some((t) => p.household.includes(t));
 }
 
 /** Hot-button topics come up twice as often. */
@@ -70,9 +96,9 @@ export function weight(tags: readonly Tag[], p: Profile = profile): number {
 }
 
 /** Random order where heavier items tend to come first (weighted sampling). */
-export function weightedShuffle<T>(items: T[], w: (item: T) => number): T[] {
+export function weightedShuffle<T>(items: readonly T[], w: (item: T) => number, random = Math.random): T[] {
   return items
-    .map((item) => ({ item, key: Math.pow(Math.random(), 1 / w(item)) }))
+    .map((item) => ({ item, key: Math.pow(random(), 1 / w(item)) }))
     .sort((a, b) => b.key - a.key)
     .map((x) => x.item);
 }

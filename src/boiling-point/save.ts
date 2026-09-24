@@ -52,6 +52,16 @@ export function persist() {
   store(KEY, save);
 }
 
+/**
+ * Adds zen points from outside the game (e.g. the hub). Re-reads storage
+ * first, so progress saved since this page loaded isn't overwritten.
+ */
+export function grantZen(n: number) {
+  Object.assign(save, load(KEY, DEFAULTS));
+  save.zen += n;
+  persist();
+}
+
 export function todayKey() {
   const d = new Date();
   return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;

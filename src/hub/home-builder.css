@@ -532,7 +532,7 @@ html.hb-open body {
   background: var(--sun);
   box-shadow: 0 3px 0 var(--sun-deep);
 }
-.nope {
+.hb .nope {
   animation: hb-nope 360ms ease-in-out;
 }
 @keyframes hb-nope {

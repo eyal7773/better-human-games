@@ -89,7 +89,8 @@ if (buddy) {
 const params = new URLSearchParams(location.search);
 if (params.get('profile') === 'edit') {
   params.delete('profile');
-  history.replaceState(null, '', `${location.pathname}${params.size ? `?${params}` : ''}${location.hash}`);
+  const rest = params.toString();
+  history.replaceState(null, '', `${location.pathname}${rest ? `?${rest}` : ''}${location.hash}`);
   openHomeBuilder({ edit: true, onChange: paintMe });
 } else if (profile.status === 'new') {
   openHomeBuilder({ onChange: paintMe });
