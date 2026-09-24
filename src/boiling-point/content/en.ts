@@ -4,6 +4,7 @@ export const en: Content = {
   dilemmas: [
     {
       id: 'juice',
+      tags: ['parent-young-child', 'parent-school-age', 'mess'],
       situation: 'Grape juice just spilled all over the couch you cleaned this morning.',
       options: [
         { text: 'Oops, it happens. Let’s grab a towel and clean it up together.', v: 'best' },
@@ -15,6 +16,7 @@ export const en: Content = {
     },
     {
       id: 'remote',
+      tags: ['parent-young-child', 'parent-school-age', 'siblings', 'work-life', 'noise'],
       situation: 'The kids have been fighting over the remote for ten minutes, and you’re in the middle of an important call.',
       options: [
         { text: 'Finish the call, then help them agree on turns.', v: 'best' },
@@ -26,6 +28,7 @@ export const en: Content = {
     },
     {
       id: 'milk',
+      tags: ['partner', 'household'],
       situation: 'Your partner forgot to buy milk again, and there’s nothing for breakfast tomorrow.',
       options: [
         { text: '“This frustrates me. Let’s find a way so it doesn’t happen again.”', v: 'best' },
@@ -37,6 +40,7 @@ export const en: Content = {
     },
     {
       id: 'dressing',
+      tags: ['parent-young-child', 'morning-rush'],
       situation: 'Your little one refuses to get dressed, and you’re already late for daycare.',
       options: [
         { text: '“Do you want the red shirt or the blue one?”', v: 'best' },
@@ -48,6 +52,7 @@ export const en: Content = {
     },
     {
       id: 'drum',
+      tags: ['parent-young-child', 'siblings', 'noise', 'bedtime'],
       situation: 'The baby just fell asleep, and the big one starts drumming on a pot.',
       options: [
         { text: 'Crouch to his level and whisper: “Let’s drum outside.”', v: 'best' },
@@ -59,6 +64,7 @@ export const en: Content = {
     },
     {
       id: 'room',
+      tags: ['parent-school-age', 'parent-teen', 'chores', 'mess'],
       situation: 'You’ve asked three times for the room to be tidied. Nothing happened.',
       options: [
         { text: '“Let’s tidy together for five minutes. I’m setting a timer.”', v: 'best' },
@@ -70,6 +76,7 @@ export const en: Content = {
     },
     {
       id: 'dinner',
+      tags: ['parent-young-child', 'parent-school-age', 'mealtime'],
       situation: 'You cooked for an hour. The first thing said at the table: “Yuck, I’m not eating that.”',
       options: [
         { text: '“You don’t have to like it. One bite to taste, and there’s bread if you’re hungry.”', v: 'best' },
@@ -81,6 +88,7 @@ export const en: Content = {
     },
     {
       id: 'homework',
+      tags: ['parent-school-age', 'homework'],
       situation: 'Half an hour on one math sheet, and he “doesn’t get any of it”.',
       options: [
         { text: '“Let’s take a five-minute break and come back to one problem.”', v: 'best' },
@@ -92,6 +100,7 @@ export const en: Content = {
     },
     {
       id: 'shoes',
+      tags: ['parent-school-age', 'parent-teen', 'partner', 'household', 'mess'],
       situation: 'Someone left shoes in the doorway. You tripped over them. Again.',
       options: [
         { text: '“Ouch. Let’s find the shoes a permanent spot.”', v: 'best' },
@@ -103,6 +112,7 @@ export const en: Content = {
     },
     {
       id: 'fight',
+      tags: ['parent-young-child', 'parent-school-age', 'siblings', 'noise'],
       situation: '“He hit me!” — “She started it!” — both shouting at once.',
       options: [
         { text: '“I hear that you’re both angry. Each of you tells it in turn.”', v: 'best' },
@@ -114,6 +124,7 @@ export const en: Content = {
     },
     {
       id: 'phone',
+      tags: ['parent-young-child', 'parent-school-age', 'parent-teen', 'partner', 'work-life', 'mealtime'],
       situation: 'The phone rings for the fifth time in the middle of dinner. Work, again.',
       options: [
         { text: 'Silence it, say “This is our time now,” and get back to it later.', v: 'best' },
@@ -125,6 +136,7 @@ export const en: Content = {
     },
     {
       id: 'bedtime',
+      tags: ['parent-young-child', 'bedtime'],
       situation: '“I’m thirsty.” “I need to pee.” “One more story!” — the seventh time after lights out.',
       options: [
         { text: '“I love you. Now it’s sleep time. I’ll check on you in five minutes.”', v: 'best' },

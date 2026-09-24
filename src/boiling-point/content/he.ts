@@ -4,6 +4,7 @@ export const he: Content = {
   dilemmas: [
     {
       id: 'juice',
+      tags: ['parent-young-child', 'parent-school-age', 'mess'],
       situation: 'מיץ ענבים נשפך על הספה שניקיתם הבוקר.',
       options: [
         { text: 'אוף, קורה. בוא נביא מגבת וננקה ביחד.', v: 'best' },
@@ -15,6 +16,7 @@ export const he: Content = {
     },
     {
       id: 'remote',
+      tags: ['parent-young-child', 'parent-school-age', 'siblings', 'work-life', 'noise'],
       situation: 'הילדים רבים על השלט כבר עשר דקות, ואתם באמצע שיחה חשובה.',
       options: [
         { text: 'מסיימים את השיחה, ואז עוזרים להם לקבוע תורות.', v: 'best' },
@@ -26,6 +28,7 @@ export const he: Content = {
     },
     {
       id: 'milk',
+      tags: ['partner', 'household'],
       situation: 'בן או בת הזוג שכחו שוב לקנות חלב, ואין מה להכין מחר בבוקר.',
       options: [
         { text: '"זה מתסכל אותי. בוא נמצא דרך שזה לא יחזור."', v: 'best' },
@@ -37,6 +40,7 @@ export const he: Content = {
     },
     {
       id: 'dressing',
+      tags: ['parent-young-child', 'morning-rush'],
       situation: 'הקטן מסרב להתלבש, ואתם כבר מאחרים לגן.',
       options: [
         { text: '"אתה רוצה את החולצה האדומה או הכחולה?"', v: 'best' },
@@ -48,6 +52,7 @@ export const he: Content = {
     },
     {
       id: 'drum',
+      tags: ['parent-young-child', 'siblings', 'noise', 'bedtime'],
       situation: 'התינוק בדיוק נרדם, והגדול מתחיל לתופף על סיר.',
       options: [
         { text: 'מתכופפים לגובה שלו ולוחשים: "בוא נתופף בחוץ."', v: 'best' },
@@ -59,6 +64,7 @@ export const he: Content = {
     },
     {
       id: 'room',
+      tags: ['parent-school-age', 'parent-teen', 'chores', 'mess'],
       situation: 'ביקשתם שלוש פעמים לסדר את החדר. לא קרה כלום.',
       options: [
         { text: '"בוא נסדר יחד חמש דקות. אני מפעיל טיימר."', v: 'best' },
@@ -70,6 +76,7 @@ export const he: Content = {
     },
     {
       id: 'dinner',
+      tags: ['parent-young-child', 'parent-school-age', 'mealtime'],
       situation: 'בישלתם שעה. הדבר הראשון שנאמר ליד השולחן: "איכס, אני לא אוכל את זה."',
       options: [
         { text: '"מותר לא לאהוב. ביס אחד לטעום, ויש לחם אם אתה רעב."', v: 'best' },
@@ -81,6 +88,7 @@ export const he: Content = {
     },
     {
       id: 'homework',
+      tags: ['parent-school-age', 'homework'],
       situation: 'חצי שעה על דף חשבון אחד, והוא "לא מבין כלום".',
       options: [
         { text: '"בוא ניקח הפסקה של חמש דקות ונחזור לתרגיל אחד."', v: 'best' },
@@ -92,6 +100,7 @@ export const he: Content = {
     },
     {
       id: 'shoes',
+      tags: ['parent-school-age', 'parent-teen', 'partner', 'household', 'mess'],
       situation: 'מישהו השאיר נעליים בכניסה. מעדתם עליהן. שוב.',
       options: [
         { text: '"איי. בואו נמצא לנעליים מקום קבוע."', v: 'best' },
@@ -103,6 +112,7 @@ export const he: Content = {
     },
     {
       id: 'fight',
+      tags: ['parent-young-child', 'parent-school-age', 'siblings', 'noise'],
       situation: '"הוא הרביץ לי!" — "היא התחילה!" — שניהם צועקים יחד.',
       options: [
         { text: '"אני שומע ששניכם כועסים. כל אחד מספר בתורו."', v: 'best' },
@@ -114,6 +124,7 @@ export const he: Content = {
     },
     {
       id: 'phone',
+      tags: ['parent-young-child', 'parent-school-age', 'parent-teen', 'partner', 'work-life', 'mealtime'],
       situation: 'הטלפון מצלצל בפעם החמישית באמצע ארוחת הערב. שוב מהעבודה.',
       options: [
         { text: 'משתיקים, אומרים "עכשיו זה זמן שלנו", וחוזרים לזה אחר כך.', v: 'best' },
@@ -125,6 +136,7 @@ export const he: Content = {
     },
     {
       id: 'bedtime',
+      tags: ['parent-young-child', 'bedtime'],
       situation: '"אני צמא." "אני צריך פיפי." "עוד סיפור!" — הפעם השביעית אחרי כיבוי אורות.',
       options: [
         { text: '"אני אוהב אותך. עכשיו זמן שינה. אבדוק אותך בעוד חמש דקות."', v: 'best' },

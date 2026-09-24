@@ -4,6 +4,7 @@ export const ar: Content = {
   dilemmas: [
     {
       id: 'juice',
+      tags: ['parent-young-child', 'parent-school-age', 'mess'],
       situation: 'انسكب عصير العنب على الكنبة التي نظّفتموها هذا الصباح.',
       options: [
         { text: 'أوف، بتصير. تعال نجيب منشفة وننظّف سوا.', v: 'best' },
@@ -15,6 +16,7 @@ export const ar: Content = {
     },
     {
       id: 'remote',
+      tags: ['parent-young-child', 'parent-school-age', 'siblings', 'work-life', 'noise'],
       situation: 'الأولاد يتشاجرون على جهاز التحكّم منذ عشر دقائق، وأنتم في منتصف مكالمة مهمة.',
       options: [
         { text: 'تُنهون المكالمة، ثم تساعدونهم على الاتفاق على الأدوار.', v: 'best' },
@@ -26,6 +28,7 @@ export const ar: Content = {
     },
     {
       id: 'milk',
+      tags: ['partner', 'household'],
       situation: 'شريك الحياة نسي مرة أخرى شراء الحليب، ولا يوجد شيء لفطور الغد.',
       options: [
         { text: '«هذا يُحبطني. تعال نلاقي طريقة حتى ما يتكرّر.»', v: 'best' },
@@ -37,6 +40,7 @@ export const ar: Content = {
     },
     {
       id: 'dressing',
+      tags: ['parent-young-child', 'morning-rush'],
       situation: 'الصغير يرفض أن يلبس، وأنتم متأخرون أصلًا عن الروضة.',
       options: [
         { text: '«بدّك القميص الأحمر ولا الأزرق؟»', v: 'best' },
@@ -48,6 +52,7 @@ export const ar: Content = {
     },
     {
       id: 'drum',
+      tags: ['parent-young-child', 'siblings', 'noise', 'bedtime'],
       situation: 'الرضيع نام للتوّ، والكبير بدأ يطبّل على طنجرة.',
       options: [
         { text: 'تنزلون إلى مستواه وتهمسون: «تعال نطبّل برّا.»', v: 'best' },
@@ -59,6 +64,7 @@ export const ar: Content = {
     },
     {
       id: 'room',
+      tags: ['parent-school-age', 'parent-teen', 'chores', 'mess'],
       situation: 'طلبتم ثلاث مرات ترتيب الغرفة. لم يحدث شيء.',
       options: [
         { text: '«تعال نرتّب سوا خمس دقايق. رح أشغّل مؤقّت.»', v: 'best' },
@@ -70,6 +76,7 @@ export const ar: Content = {
     },
     {
       id: 'dinner',
+      tags: ['parent-young-child', 'parent-school-age', 'mealtime'],
       situation: 'طبختم ساعة كاملة. أول ما قيل على الطاولة: «إيييه، ما بدّي آكل هاد.»',
       options: [
         { text: '«مسموح ما يعجبك. لقمة وحدة تذوق، وفي خبز إذا جعت.»', v: 'best' },
@@ -81,6 +88,7 @@ export const ar: Content = {
     },
     {
       id: 'homework',
+      tags: ['parent-school-age', 'homework'],
       situation: 'نصف ساعة على ورقة حساب واحدة، وهو «مش فاهم ولا إشي».',
       options: [
         { text: '«خلّينا ناخذ استراحة خمس دقايق ونرجع لتمرين واحد.»', v: 'best' },
@@ -92,6 +100,7 @@ export const ar: Content = {
     },
     {
       id: 'shoes',
+      tags: ['parent-school-age', 'parent-teen', 'partner', 'household', 'mess'],
       situation: 'أحدهم ترك حذاءه عند المدخل. تعثّرتم به. مرة أخرى.',
       options: [
         { text: '«آخ. تعالوا نلاقي للأحذية مكان ثابت.»', v: 'best' },
@@ -103,6 +112,7 @@ export const ar: Content = {
     },
     {
       id: 'fight',
+      tags: ['parent-young-child', 'parent-school-age', 'siblings', 'noise'],
       situation: '«ضربني!» — «هي اللي بلّشت!» — الاثنان يصرخان معًا.',
       options: [
         { text: '«أنا سامع إنكم الاثنين زعلانين. كل واحد يحكي بدوره.»', v: 'best' },
@@ -114,6 +124,7 @@ export const ar: Content = {
     },
     {
       id: 'phone',
+      tags: ['parent-young-child', 'parent-school-age', 'parent-teen', 'partner', 'work-life', 'mealtime'],
       situation: 'الهاتف يرنّ للمرة الخامسة في منتصف العشاء. من العمل مجددًا.',
       options: [
         { text: 'تكتمون الصوت، تقولون «هذا وقتنا الآن»، وتعودون للأمر لاحقًا.', v: 'best' },
@@ -125,6 +136,7 @@ export const ar: Content = {
     },
     {
       id: 'bedtime',
+      tags: ['parent-young-child', 'bedtime'],
       situation: '«عطشان.» «بدّي أروح عالحمّام.» «كمان قصة!» — للمرة السابعة بعد إطفاء الأضواء.',
       options: [
         { text: '«بحبّك. هلّأ وقت النوم. رح أطلّ عليك بعد خمس دقايق.»', v: 'best' },

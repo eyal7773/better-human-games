@@ -5,8 +5,37 @@ import { ar } from './content/ar';
 
 export type Verdict = 'best' | 'ok' | 'bad';
 
+/**
+ * Tags let us match dilemmas to the player. They are always English, and the
+ * same in every language file.
+ * - Who it fits: a dilemma may fit several audiences. A gender tag is added only
+ *   when the situation is specific to it; no gender tag means it fits everyone.
+ * - What it's about: the kind of flashpoint.
+ */
+export type AudienceTag =
+  | 'parent-young-child' // ages 0–6
+  | 'parent-school-age' // ages 6–12
+  | 'parent-teen'
+  | 'partner'
+  | 'adult-child' // grown son or daughter of an ageing parent
+  | 'men'
+  | 'women';
+export type TopicTag =
+  | 'mess'
+  | 'chores'
+  | 'mealtime'
+  | 'bedtime'
+  | 'morning-rush'
+  | 'siblings'
+  | 'homework'
+  | 'noise'
+  | 'work-life'
+  | 'household';
+export type Tag = AudienceTag | TopicTag;
+
 export interface Dilemma {
   id: string;
+  tags: Tag[];
   situation: string;
   options: { text: string; v: Verdict }[];
   why: string;
