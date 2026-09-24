@@ -28,7 +28,7 @@ export const ar: Content = {
     },
     {
       id: 'milk',
-      tags: ['partner', 'household'],
+      tags: ['partner', 'household', 'no-kids'],
       situation: 'شريك الحياة نسي مرة أخرى شراء الحليب، ولا يوجد شيء لفطور الغد.',
       options: [
         { text: '«هذا يُحبطني. تعال نلاقي طريقة حتى ما يتكرّر.»', v: 'best' },
@@ -292,7 +292,7 @@ export const ar: Content = {
     },
     {
       id: 'dishes',
-      tags: ['partner', 'chores'],
+      tags: ['partner', 'chores', 'no-kids'],
       situation: 'طلبتم هذا الصباح. المجلى ما زال مليئًا، وشريك الحياة على الكنبة.',
       options: [
         { text: '«أنا هلكان. فيك تجلي قبل المسلسل؟»', v: 'best' },
@@ -304,7 +304,7 @@ export const ar: Content = {
     },
     {
       id: 'scrolling',
-      tags: ['partner', 'connection', 'screens'],
+      tags: ['partner', 'connection', 'screens', 'no-kids'],
       situation: 'تحكون لشريك الحياة عن يوم صعب. وهو يقلّب في الهاتف.',
       options: [
         { text: '«خمس دقايق إلي بس؟ التلفون بيقدر يستنّى؟»', v: 'best' },
@@ -316,7 +316,7 @@ export const ar: Content = {
     },
     {
       id: 'latehome',
-      tags: ['partner', 'mealtime', 'work-life'],
+      tags: ['partner', 'mealtime', 'work-life', 'no-kids'],
       situation: 'العشاء على الطاولة منذ ساعة. شريك الحياة يدخل — بلا اتصال، بلا رسالة.',
       options: [
         { text: '«كنت قلقان، والأكل برد. المرة الجاية بس ابعت رسالة، ماشي؟»', v: 'best' },
@@ -328,7 +328,7 @@ export const ar: Content = {
     },
     {
       id: 'purchase',
-      tags: ['partner', 'money'],
+      tags: ['partner', 'money', 'no-kids'],
       situation: 'مصروف كبير جديد على البطاقة. شريك الحياة لم يذكره.',
       options: [
         { text: '«انصدمت لما شفته. منتّفق على مبلغ، فوقه منتشاور؟»', v: 'best' },
@@ -400,7 +400,7 @@ export const ar: Content = {
     },
     {
       id: 'samequestion',
-      tags: ['adult-child', 'caregiving', 'health'],
+      tags: ['adult-child', 'caregiving', 'health', 'no-kids'],
       situation: 'والدتكم تسأل أيّ يوم اليوم — للمرة الرابعة خلال ساعة.',
       options: [
         { text: 'تجيبون بلطف، وتكتبونه بخط كبير على لوح فوق الثلاجة.', v: 'best' },
@@ -412,7 +412,7 @@ export const ar: Content = {
     },
     {
       id: 'carkeys',
-      tags: ['adult-child', 'caregiving', 'health', 'independence'],
+      tags: ['adult-child', 'caregiving', 'health', 'independence', 'no-kids'],
       situation: 'والدكم خدش السيارة مرة أخرى، وما زال يصرّ أنه «بيسوق ممتاز».',
       options: [
         { text: '«بابا، هالشي بيخوّفني. تعال نروح سوا نعمل فحص سواقة.»', v: 'best' },
@@ -424,7 +424,7 @@ export const ar: Content = {
     },
     {
       id: 'homeaide',
-      tags: ['adult-child', 'caregiving'],
+      tags: ['adult-child', 'caregiving', 'no-kids'],
       situation: 'أخيرًا وجدتم مساعدة منزلية. والدتكم تصرفها منذ اليوم الأول.',
       options: [
         { text: '«بدّك تدبّري حالك لحالك. شو بيخلّي مساعدتها مريحة إلك؟»', v: 'best' },
@@ -436,7 +436,7 @@ export const ar: Content = {
     },
     {
       id: 'brotherturn',
-      tags: ['adult-child', 'siblings', 'caregiving'],
+      tags: ['adult-child', 'siblings', 'caregiving', 'no-kids'],
       situation: 'أخوكم يلغي دوره عند الوالد مرة أخرى: «الشغل مجنون.» كل شيء عليكم. مجددًا.',
       options: [
         { text: '«أنا خلصت طاقتي. بتاخد يوم الأحد، أو بتشارك بدفع مساعدة؟»', v: 'best' },
@@ -460,7 +460,7 @@ export const ar: Content = {
     },
     {
       id: 'techcall',
-      tags: ['adult-child', 'caregiving', 'work-life'],
+      tags: ['adult-child', 'caregiving', 'work-life', 'no-kids'],
       situation: 'في وسط موعد تسليم، يتصل الوالد للمرة الخامسة: «التلفون خربان مرة تانية.»',
       options: [
         { text: '«هلّق ما بقدر. الساعة سبعة، مكالمة فيديو، ومنصلّحه سوا.»', v: 'best' },
@@ -517,6 +517,30 @@ export const ar: Content = {
         { text: '«يلا، اسهروا. بكرا بتصيروا مشكلة أهلكم.»', v: 'bad' },
       ],
       why: 'دافئ وحازم مع قليل من الفكاهة — الأطفال يختبرون الحدود، لا حبّكم.',
+    },
+    {
+      id: 'handoff',
+      tags: ['single-parent', 'parent-young-child', 'parent-school-age', 'bedtime'],
+      situation: 'يعود الأولاد من عند الوالد الآخر متأخرين ساعتين، متعبين ومتوتّرين.',
+      options: [
+        { text: 'تهدّئون الأولاد أولًا؛ ولاحقًا رسالة: «المرة الجاية منلتزم بالستة؟»', v: 'best' },
+        { text: 'لا تقولون شيئًا وتنيّمونهم وحدكم.', v: 'ok' },
+        { text: 'عند الباب، أمام الأولاد: «دايمًا متأخّرين عندك!»', v: 'bad' },
+        { text: 'للأولاد: «أكيد. شو الجديد عند التاني.»', v: 'bad' },
+      ],
+      why: 'الأطفال يتأذّون أكثر حين يتخاصم الأهل عبرهم — الأولاد الآن، والبالغ لاحقًا على انفراد.',
+    },
+    {
+      id: 'nobackup',
+      tags: ['single-parent', 'parent-young-child', 'health', 'work-life'],
+      situation: 'الصغير مريض، والعمل يحتاجكم، ولا أحد تسلّمونه المهمة.',
+      options: [
+        { text: '«مسموح إطلب مساعدة.» ترسلون رسالة لصديق مقرّب وللمدير.', v: 'best' },
+        { text: 'تعملون من الكنبة، والرسوم المتحركة شغّالة طوال اليوم.', v: 'ok' },
+        { text: 'تنفجرون على الطفل الذي يسعل: «مش هلّق!»', v: 'bad' },
+        { text: '«رائع. رائع جدًا. كالعادة كل شي عليّ.»', v: 'bad' },
+      ],
+      why: 'كثيرًا ما يخفي الغضب إرهاقًا — طلب المساعدة قوة، لا فشل.',
     },
   ],
   shouts: [
