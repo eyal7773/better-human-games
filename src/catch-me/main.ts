@@ -28,8 +28,18 @@ const MAX_SPEEDUP = 1.5;
 const LOOKAHEAD_MS = 160;
 /** Chance a dodge turns into a feint: it plays tired, then bolts at the last moment. */
 const FEINT_CHANCE = 0.15;
-/** Left alone, it hops off by itself every so often (ms). */
-const RESTLESS_MS: [number, number] = [1500, 3000];
+/** Between hops it jogs around on its own, in screen-widths per second (start → end of a chase). */
+const JOG_SPEED: [number, number] = [0.15, 0.35];
+/** A pointer close by makes it run this much faster, away from it. */
+const PANIC_BOOST = 2;
+/** It jogs for a while (ms)… */
+const JOG_MS: [number, number] = [2000, 4000];
+/** …then stops to taunt you for a moment (ms) — your window of hope. */
+const PAUSE_MS: [number, number] = [500, 1000];
+/** How sharply its path wanders (radians per second). */
+const WANDER_TURN = 2.5;
+/** Chance per second of tripping mid-jog. */
+const TRIP_PER_SEC = 0.08;
 
 const T = {
   title: tr({ en: 'Catch Me', he: 'תפוס אותי', ar: 'امسكني' }),
@@ -295,10 +305,13 @@ function chase(ms: number): Promise<'caught' | 'time'> {
   let dodges = 0;
   let stumbling = false;
   let feinting = false;
-  let lastHop = performance.now();
+  let jogging = true; // false while it stops to taunt
+  let heading = rand(0, Math.PI * 2);
+  let bob = 0;
   const started = performance.now();
   // Last known pointer, and its velocity (px/ms) for guessing where it's headed.
-  const ptr = { x: 0, y: 0, vx: 0, vy: 0, t: 0 };
+  // `active`: a finger is on the screen, or a mouse is over the field.
+  const ptr = { x: 0, y: 0, vx: 0, vy: 0, t: 0, active: false };
   setVar('--warm', 0);
 
   /** 0 → 1 over the chase: it gets jumpier, faster and cheekier as time goes on. */
@@ -318,7 +331,6 @@ function chase(ms: number): Promise<'caught' | 'time'> {
 
     /** Hop away from a point; false if the chase ended mid-hop. */
     const flee = async (px: number, py: number, boost = 1) => {
-      lastHop = performance.now();
       await hop(scope, px, py, speed() * boost);
       if (!scope.alive) return false;
       runner.face('tease');
@@ -334,22 +346,26 @@ function chase(ms: number): Promise<'caught' | 'time'> {
       if (dodges >= 2 && Math.random() < FEINT_CHANCE) return feint();
       if (Math.random() < 0.45) say(pick(TAUNTS));
       if (!(await flee(px, py))) return;
-      // Now and then it trips over its own sneakers — the only way to catch it.
-      if (dodges >= 6 && Math.random() < 0.15) {
-        stumbling = true;
-        runner.face('dizzy');
-        runner.el.classList.add('stumble');
-        audio.slip();
-        scope.timeout(() => {
-          stumbling = false;
-          runner.el.classList.remove('stumble');
-          runner.face('tease');
-        }, 750);
-      }
+      if (dodges >= 6 && Math.random() < 0.15) trip();
+    };
+
+    // Now and then it trips over its own sneakers — the only way to catch it.
+    const trip = () => {
+      stumbling = true;
+      runner.el.classList.remove('running');
+      runner.face('dizzy');
+      runner.el.classList.add('stumble');
+      audio.slip();
+      scope.timeout(() => {
+        stumbling = false;
+        runner.el.classList.remove('stumble');
+        runner.face('tease');
+      }, 750);
     };
 
     const feint = () => {
       feinting = true;
+      runner.el.classList.remove('running');
       runner.face('calm');
       say(pick(FEINTS));
       // If you don't take the bait, it doesn't wait forever.
@@ -384,6 +400,7 @@ function chase(ms: number): Promise<'caught' | 'time'> {
     // heading its way fast → it runs early, away from where the pointer is going.
     scope.on<PointerEvent>(field, 'pointermove', (e) => {
       const p = track(e);
+      if (e.pointerType === 'mouse') ptr.active = true;
       runner.look(p.x - pos.x, p.y - pos.y);
       if (feinting) {
         if (near(p, 0.8)) bolt();
@@ -396,8 +413,15 @@ function chase(ms: number): Promise<'caught' | 'time'> {
         void dodge(ahead.x, ahead.y);
       }
     });
+    const release = (e: PointerEvent) => {
+      if (e.pointerType !== 'mouse') ptr.active = false;
+    };
+    scope.on<PointerEvent>(field, 'pointerup', release);
+    scope.on<PointerEvent>(field, 'pointercancel', release);
+    scope.on(field, 'pointerleave', () => (ptr.active = false));
     scope.on<PointerEvent>(field, 'pointerdown', (e) => {
       const p = track(e);
+      ptr.active = true;
       runner.look(p.x - pos.x, p.y - pos.y);
       if (stumbling && near(p, 0.8)) return catchIt(e);
       if (feinting) {
@@ -446,28 +470,61 @@ function chase(ms: number): Promise<'caught' | 'time'> {
       done('caught');
     };
 
-    // It never just stands there: left alone for a moment, it hops off on its
-    // own, so a finger has to keep chasing it.
-    const restless = () => {
-      if (!hopping && !stumbling && !feinting && performance.now() - lastHop > RESTLESS_MS[0]) {
-        const b = bounds();
-        const from = ptr.t ? ptr : { x: rand(b.minX, b.maxX), y: rand(b.minY, b.maxY) };
-        void flee(from.x, from.y);
+    // It never just stands there: it jogs around on a wandering path, then stops
+    // for a moment to taunt you, then jogs off again.
+    const rhythm = () => {
+      jogging = !jogging;
+      if (!jogging && !hopping && !stumbling && !feinting) {
+        runner.el.classList.remove('running');
+        place(); // land from the jogging bob
+        runner.face('tease');
+        if (ptr.t) runner.look(ptr.x - pos.x, ptr.y - pos.y);
+        if (Math.random() < FEINT_CHANCE * 2) feint();
+        else if (Math.random() < 0.6 + 0.3 * progress()) {
+          say(pick(TAUNTS));
+          runner.el.animate([{ transform: 'translateY(0)' }, { transform: 'translateY(-10px)' }, { transform: 'none' }], {
+            duration: 320,
+            easing: 'ease-out',
+          });
+        }
       }
-      scope.timeout(restless, rand(...RESTLESS_MS) / speed());
+      scope.timeout(rhythm, rand(...(jogging ? JOG_MS : PAUSE_MS)));
     };
-    scope.timeout(restless, rand(...RESTLESS_MS));
+    scope.timeout(rhythm, rand(...JOG_MS));
 
-    scope.interval(() => {
-      if (!hopping && !stumbling && !feinting && Math.random() < 0.6 + 0.3 * progress()) {
-        say(pick(TAUNTS));
-        runner.el.animate([{ transform: 'translateY(0)' }, { transform: 'translateY(-10px)' }, { transform: 'none' }], {
-          duration: 320,
-          easing: 'ease-out',
-        });
+    /** Turn `a` toward `target` by at most `max` radians. */
+    const steer = (a: number, target: number, max: number) =>
+      a + clamp(Math.atan2(Math.sin(target - a), Math.cos(target - a)), -max, max);
+
+    const jog = (dt: number) => {
+      if (!jogging || hopping || stumbling || feinting) return;
+      const b = bounds();
+      let v = b.w * lerp(JOG_SPEED[0], JOG_SPEED[1], progress());
+      heading += rand(-1, 1) * WANDER_TURN * dt;
+      // Ease away from the edges before reaching them…
+      const edge = pos.size * 0.8;
+      if (pos.x < b.minX + edge || pos.x > b.maxX - edge || pos.y < b.minY + edge || pos.y > b.maxY - edge) {
+        heading = steer(heading, Math.atan2(b.h / 2 - pos.y, b.w / 2 - pos.x), 3 * dt);
       }
-    }, 2400);
-    scope.loop((dt) => heat(dt * 0.035));
+      // …but a pointer close by wins: run from it, sliding along a wall if pinned.
+      if (ptr.active && Math.hypot(pos.x - ptr.x, pos.y - ptr.y) < fearRadius() * 1.8) {
+        heading = steer(heading, Math.atan2(pos.y - ptr.y, pos.x - ptr.x), 8 * dt);
+        v *= PANIC_BOOST;
+      }
+      if (reducedMotion()) v *= 0.5;
+      pos.x = clamp(pos.x + Math.cos(heading) * v * dt, b.minX, b.maxX);
+      pos.y = clamp(pos.y + Math.sin(heading) * v * dt, b.minY, b.maxY);
+      runner.el.classList.add('running');
+      runner.el.classList.toggle('flip', Math.cos(heading) < 0);
+      bob += dt * 14;
+      place(reducedMotion() ? 0 : Math.abs(Math.sin(bob)) * 6);
+      if (progress() > 0.15 && Math.random() < TRIP_PER_SEC * dt) trip();
+    };
+
+    scope.loop((dt) => {
+      heat(dt * 0.035);
+      jog(dt);
+    });
     scope.on(window, 'resize', () => {
       const b = bounds();
       pos.x = clamp(pos.x, b.minX, b.maxX);
