@@ -29,15 +29,21 @@ const LOOKAHEAD_MS = 160;
 /** Chance a dodge turns into a feint: it plays tired, then bolts at the last moment. */
 const FEINT_CHANCE = 0.15;
 /** Between hops it jogs around on its own, in screen-widths per second (start → end of a chase). */
-const JOG_SPEED: [number, number] = [0.3, 0.6];
+const JOG_SPEED: [number, number] = [0.5, 0.9];
 /** A pointer close by makes it run this much faster, away from it. */
 const PANIC_BOOST = 2;
 /** It jogs for a while (ms)… */
-const JOG_MS: [number, number] = [2000, 4000];
+const JOG_MS: [number, number] = [2500, 4500];
 /** …then stops to taunt you for a moment (ms) — your window of hope. */
-const PAUSE_MS: [number, number] = [500, 1000];
+const PAUSE_MS: [number, number] = [300, 600];
 /** How sharply its path wanders (radians per second). */
-const WANDER_TURN = 2.5;
+const WANDER_TURN = 4;
+/** While it runs it keeps darting sideways and back: gap between darts (ms)… */
+const JINK_GAP_MS: [number, number] = [150, 450];
+/** …how long a dart out-and-back takes (ms)… */
+const JINK_MS: [number, number] = [200, 320];
+/** …and how far out it goes, in body-sizes. */
+const JINK_SIZE: [number, number] = [0.6, 1.3];
 /** Chance per second of tripping mid-jog. */
 const TRIP_PER_SEC = 0.08;
 
@@ -308,6 +314,7 @@ function chase(ms: number): Promise<'caught' | 'time'> {
   let jogging = true; // false while it stops to taunt
   let heading = rand(0, Math.PI * 2);
   let bob = 0;
+  const jink = { t: 0, dur: 0, amp: 0, off: 0, wait: 0 };
   const started = performance.now();
   // Last known pointer, and its velocity (px/ms) for guessing where it's headed.
   // `active`: a finger is on the screen, or a mouse is over the field.
@@ -512,8 +519,26 @@ function chase(ms: number): Promise<'caught' | 'time'> {
         v *= PANIC_BOOST;
       }
       if (reducedMotion()) v *= 0.5;
-      pos.x = clamp(pos.x + Math.cos(heading) * v * dt, b.minX, b.maxX);
-      pos.y = clamp(pos.y + Math.sin(heading) * v * dt, b.minY, b.maxY);
+      // Nonstop darts to the side and back, so it's never where you aimed.
+      let side = 0;
+      if (!reducedMotion()) {
+        if (jink.t < jink.dur) {
+          jink.t = Math.min(jink.dur, jink.t + dt);
+          const off = jink.amp * Math.sin((Math.PI * jink.t) / jink.dur);
+          side = off - jink.off;
+          jink.off = off;
+        } else if ((jink.wait -= dt) <= 0) {
+          Object.assign(jink, {
+            t: 0,
+            dur: rand(...JINK_MS) / 1000,
+            amp: pick([-1, 1]) * rand(...JINK_SIZE) * pos.size,
+            off: 0,
+            wait: rand(...JINK_GAP_MS) / 1000,
+          });
+        }
+      }
+      pos.x = clamp(pos.x + Math.cos(heading) * v * dt - Math.sin(heading) * side, b.minX, b.maxX);
+      pos.y = clamp(pos.y + Math.sin(heading) * v * dt + Math.cos(heading) * side, b.minY, b.maxY);
       runner.el.classList.add('running');
       runner.el.classList.toggle('flip', Math.cos(heading) < 0);
       bob += dt * 14;
