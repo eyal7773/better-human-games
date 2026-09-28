@@ -15,7 +15,11 @@ import { Buddy } from './buddy';
  */
 
 const HOLD_SECONDS = 4;
-const FIRST_BOIL_MS = 6000;
+const FIRST_BOIL_MS = 20000;
+/** Later chases are a bit shorter than the first, but still long enough to get annoying. */
+const NEXT_BOIL_MS: [number, number] = [15000, 24000];
+/** Share of the chase during which a catch doesn't count — it wriggles free and laughs. */
+const WRIGGLE_SHARE = 0.7;
 
 const T = {
   title: tr({ en: 'Catch Me', he: 'תפוס אותי', ar: 'امسكني' }),
@@ -268,6 +272,7 @@ function chase(ms: number): Promise<'caught' | 'time'> {
   let warm = 0;
   let dodges = 0;
   let stumbling = false;
+  const started = performance.now();
   setVar('--warm', 0);
 
   return new Promise((resolve) => {
@@ -290,7 +295,7 @@ function chase(ms: number): Promise<'caught' | 'time'> {
       if (!scope.alive) return;
       runner.face('tease');
       // Now and then it trips over its own sneakers — the only way to catch it.
-      if (dodges >= 3 && Math.random() < 0.2) {
+      if (dodges >= 6 && Math.random() < 0.15) {
         stumbling = true;
         runner.face('dizzy');
         runner.el.classList.add('stumble');
@@ -343,8 +348,20 @@ function chase(ms: number): Promise<'caught' | 'time'> {
       stumbling = false;
       runner.el.classList.remove('stumble');
       const r = runnerBtn.getBoundingClientRect();
-      fx.sparks(e?.clientX ?? r.left + r.width / 2, e?.clientY ?? r.top + r.height / 2, '#ff6b4a', 16);
+      const cx = e?.clientX ?? r.left + r.width / 2;
+      const cy = e?.clientY ?? r.top + r.height / 2;
+      fx.sparks(cx, cy, '#ff6b4a', 16);
       audio.sizzle();
+      if (performance.now() - started < ms * WRIGGLE_SHARE) {
+        // Too early — it slips out of your fingers and runs off laughing.
+        dodges = 0;
+        heat(0.12);
+        vibrate([15, 30, 15]);
+        say(pick(MOCKS));
+        const f = field.getBoundingClientRect();
+        void dodge(cx - f.left + rand(-1, 1) * 10, cy - f.top + rand(-1, 1) * 10);
+        return;
+      }
       done('caught');
     };
 
@@ -505,7 +522,7 @@ async function begin() {
     const why = await chase(wait);
     await breathe(why === 'caught');
     say(pick(TAUNTS), bubble, 1400);
-    wait = rand(4000, 9000);
+    wait = rand(...NEXT_BOIL_MS);
   }
 }
 
