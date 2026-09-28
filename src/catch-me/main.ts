@@ -29,7 +29,7 @@ const LOOKAHEAD_MS = 160;
 /** Chance a dodge turns into a feint: it plays tired, then bolts at the last moment. */
 const FEINT_CHANCE = 0.15;
 /** Between hops it jogs around on its own, in screen-widths per second (start → end of a chase). */
-const JOG_SPEED: [number, number] = [0.15, 0.35];
+const JOG_SPEED: [number, number] = [0.3, 0.6];
 /** A pointer close by makes it run this much faster, away from it. */
 const PANIC_BOOST = 2;
 /** It jogs for a while (ms)… */
