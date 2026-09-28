@@ -357,9 +357,10 @@ function chase(ms: number): Promise<'caught' | 'time'> {
         dodges = 0;
         heat(0.12);
         vibrate([15, 30, 15]);
-        say(pick(MOCKS));
         const f = field.getBoundingClientRect();
         void dodge(cx - f.left + rand(-1, 1) * 10, cy - f.top + rand(-1, 1) * 10);
+        // After dodge(), so its random taunt can't replace the mock.
+        say(pick(MOCKS));
         return;
       }
       done('caught');

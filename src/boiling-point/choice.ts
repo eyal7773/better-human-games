@@ -19,9 +19,9 @@ export function runChoice(
   scope: Scope,
   audio: AudioEngine,
   d: Dilemma,
-  seconds: number,
-  readSeconds: number,
+  timing: { readSeconds: number; choiceSeconds: number },
 ): Promise<ChoiceOutcome> {
+  const { readSeconds, choiceSeconds: seconds } = timing;
   return new Promise((resolve) => {
     const fuse = h('div', { class: 'fuse' }, h('div', { class: 'fuse-line' }), h('div', { class: 'fuse-spark' }));
     const list = h('div', { class: 'choice-options', role: 'group', 'aria-label': tr({ en: 'How do you respond?', he: 'איך מגיבים?', ar: 'كيف تردّون؟' }) });

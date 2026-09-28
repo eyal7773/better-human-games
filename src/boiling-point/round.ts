@@ -125,7 +125,7 @@ class Round {
     const calmOutcome = await this.calmPhase(taskOutcome);
     if (calmOutcome === 'boiled') return this.finish('boiled', null);
     this.phase = 'choice';
-    const choice = await runChoice(this.v.modal, this.master, this.audio, this.spec.dilemma, this.spec.choiceSeconds, this.spec.readSeconds);
+    const choice = await runChoice(this.v.modal, this.master, this.audio, this.spec.dilemma, this.spec);
     return this.finish(taskOutcome, choice);
   }
 
