@@ -54,7 +54,7 @@ const ALMOST_REACH = 1.5;
 const STREAK_CALLOUTS = [3, 5, 8, 12, 20];
 
 const T = {
-  title: tr({ en: 'Catch Me', he: 'תפוס אותי', ar: 'امسكني' }),
+  title: tr({ en: 'Catch Me Simple', he: 'תפוס אותי פשוט', ar: 'امسكني البسيط' }),
   lede: tr({
     en: 'A little button that really doesn’t want to be pressed. Try to catch it — and notice what happens to you.',
     he: 'כפתור קטן שממש לא רוצה שילחצו עליו. נסו לתפוס אותו — ושימו לב מה קורה לכם.',

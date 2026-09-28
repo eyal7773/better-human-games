@@ -26,11 +26,14 @@ export default defineConfig(({ command }) => ({
   base: '/better-human-games/',
   build: {
     target: 'es2020',
+    // three.js alone is ~600kB (≈150kB gzip); it only loads on the Catch Me page.
+    chunkSizeWarningLimit: 700,
     rollupOptions: {
       input: {
         main: page('./index.html'),
         boilingPoint: page('./boiling-point/index.html'),
         catchMe: page('./catch-me/index.html'),
+        catchMe3d: page('./catch-me-3d/index.html'),
       },
     },
   },

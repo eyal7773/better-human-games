@@ -23,7 +23,14 @@ const TEXT: Record<string, { he: string; ar: string }> = {
     ar: 'هذه اللعبة تستفزّكم عن قصد. تتدرّبون على ملاحظة الحرارة وهي تبدأ، على التوقّف، على التنفّس — وعلى اختيار ردّ لن تندموا عليه.',
   },
   bpMeta: { he: 'על כעס בבית ובמשפחה. בערך 5 דקות לערב.', ar: 'عن الغضب في البيت والعائلة. حوالي 5 دقائق في المساء.' },
-  cmTitle: { he: 'תפוס אותי', ar: 'امسكني' },
+  c3Title: { he: 'תפוס אותי', ar: 'امسكني' },
+  c3Bubble: { he: 'תפוס אותי!', ar: 'امسكني!' },
+  c3Body: {
+    he: 'ציקי, הכפתור האדום, לוחץ לכולם על הכפתורים. רודפים אחריו חדר אחרי חדר בבית צעצוע בתלת־ממד — וככל שאתם כועסים יותר, הוא חזק יותר. לשים לב ולנשום — ככה מנצחים.',
+    ar: 'زِنّو، الزر الأحمر، يضغط على أزرار الجميع. طاردوه غرفةً غرفة في بيت ألعاب ثلاثي الأبعاد — وكلما غضبتم أكثر، صار أقوى. أن تلاحظوا وتتنفّسوا — هكذا تفوزون.',
+  },
+  c3Meta: { he: 'סיפור בשישה חדרים. 2–3 דקות לחדר.', ar: 'قصة في ست غرف. 2–3 دقائق لكل غرفة.' },
+  cmTitle: { he: 'תפוס אותי פשוט', ar: 'امسكني البسيط' },
   cmBubble: { he: 'תפוס אותי!', ar: 'امسكني!' },
   cmBody: {
     he: 'כפתור קטן שממש לא רוצה שילחצו עליו. אתם רודפים אחריו, התסכול עולה — וכשזה רותח, מחזיקים ונושמים ארבע שניות.',
@@ -80,8 +87,9 @@ if (holder) {
 }
 
 // The runaway button sidesteps your pointer on its card, like in the game.
-const buddy = document.getElementById('hub-buddy');
-if (buddy) {
+for (const id of ['hub-buddy', 'hub-buddy3d']) {
+  const buddy = document.getElementById(id);
+  if (!buddy) continue;
   buddy.insertAdjacentHTML('afterbegin', buddySVG());
   const card = buddy.closest('.game-card');
   card?.addEventListener('pointerenter', () => buddy.classList.add('dodge'));

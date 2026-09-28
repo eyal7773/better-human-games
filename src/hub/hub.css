@@ -236,3 +236,51 @@ body {
 .game-card + .game-card {
   margin-top: 26px;
 }
+
+/* ---------- Catch Me (3D) card: Pesky in front of his toy house ---------- */
+.gc-art-catch3d {
+  background:
+    radial-gradient(70% 40% at 0% 100%, #7ddc5a 0 60%, transparent 61%),
+    radial-gradient(80% 45% at 100% 100%, #5fcf48 0 60%, transparent 61%),
+    linear-gradient(180deg, #ffd59a 0%, #ff9f6b 100%);
+}
+.gc-house {
+  position: absolute;
+  bottom: 30px;
+  inset-inline-end: 36px;
+  width: 120px;
+  height: 104px;
+  display: grid;
+  grid-template: 1fr 1fr / 1fr 1fr;
+  gap: 5px;
+  padding: 5px;
+  border-radius: 6px;
+  background: #fff4e0;
+  box-shadow: 0 6px 0 rgba(120, 70, 0, 0.25);
+}
+.gc-house::before {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: -10px;
+  right: -10px;
+  height: 46px;
+  background: #e8674a;
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+.gc-house i {
+  border-radius: 3px;
+  background: #ffe2b8;
+}
+.gc-house i:nth-child(2) {
+  background: #cfeeff;
+}
+.gc-house i:nth-child(3) {
+  background: #e9dcff;
+}
+.gc-house i:nth-child(4) {
+  background: #d9a066;
+}
+.gc-buddy3d {
+  margin-inline-end: 110px;
+}
