@@ -176,6 +176,13 @@ body {
   text-align: center;
   font-size: 0.9rem;
 }
+.hub-version {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.8rem;
+  color: #8a7440;
+  direction: ltr;
+}
 .hub-foot a {
   color: #6b5413;
   text-underline-offset: 4px;

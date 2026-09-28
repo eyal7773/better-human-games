@@ -62,6 +62,9 @@ paintMe();
 meBtn.addEventListener('click', () => openHomeBuilder({ edit: true, onChange: paintMe }));
 document.querySelector('.hub-bar')?.append(h('div', { class: 'hub-tools' }, meBtn, langSwitcher()));
 document.documentElement.removeAttribute('data-i18n-pending');
+document
+  .querySelector('.hub-foot')
+  ?.append(h('span', { class: 'hub-version' }, `${tr({ en: 'Version', he: 'גרסה', ar: 'الإصدار' })} ${__APP_VERSION__}`));
 
 const holder = document.getElementById('hub-kettle');
 if (holder) {
