@@ -20,6 +20,16 @@ const FIRST_BOIL_MS = 20000;
 const NEXT_BOIL_MS: [number, number] = [15000, 24000];
 /** Share of the chase during which a catch doesn't count — it wriggles free and laughs. */
 const WRIGGLE_SHARE = 0.7;
+/** It spooks when the pointer is this many body-sizes away — growing over the chase. */
+const FEAR_RADIUS: [number, number] = [2, 2.8];
+/** Hops get up to this much faster by the end of a chase. */
+const MAX_SPEEDUP = 1.5;
+/** How far ahead (ms) it guesses where a moving pointer is going. */
+const LOOKAHEAD_MS = 160;
+/** Chance a dodge turns into a feint: it plays tired, then bolts at the last moment. */
+const FEINT_CHANCE = 0.15;
+/** Left alone, it hops off by itself every so often (ms). */
+const RESTLESS_MS: [number, number] = [1500, 3000];
 
 const T = {
   title: tr({ en: 'Catch Me', he: 'תפוס אותי', ar: 'امسكني' }),
@@ -61,6 +71,16 @@ const MOCKS = tr({
   en: ['Ha ha!', 'Grumpy?', 'Hee hee!'],
   he: ['חחח!', 'עצבני?', 'חי חי!'],
   ar: ['هههه!', 'معصّب؟', 'هيهي!'],
+});
+const FEINTS = tr({
+  en: ['Phew, I’m tired…', 'Okay, you win…', 'Fine, catch me…'],
+  he: ['אוף, התעייפתי…', 'טוב, ניצחת…', 'נו, תתפוס…'],
+  ar: ['أُف، تعبت…', 'طيب، ربحت…', 'يلّا، امسكني…'],
+});
+const GOTCHAS = tr({
+  en: ['Just kidding!', 'Gotcha!', 'Almost!'],
+  he: ['סתם!', 'עבדתי עליך!', 'כמעט!'],
+  ar: ['بمزح!', 'ضحكت عليك!', 'تقريبًا!'],
 });
 
 document.title = T.title;
@@ -207,20 +227,22 @@ function say(text: string, el = bubble, ms = 1100) {
 /** Pick a landing spot well away from the pointer, inside the field. */
 function escapeFrom(px: number, py: number) {
   const b = bounds();
-  let best = { x: pos.x, y: pos.y, score: -1 };
-  for (let i = 0; i < 12; i++) {
+  let best = { x: pos.x, y: pos.y, score: -Infinity };
+  for (let i = 0; i < 16; i++) {
     const x = rand(b.minX, Math.max(b.minX, b.maxX));
     const y = rand(b.minY, Math.max(b.minY, b.maxY));
     const away = Math.hypot(x - px, y - py);
     const travel = Math.hypot(x - pos.x, y - pos.y);
-    // Far from the finger, but not always across the whole screen.
-    const score = away - Math.max(0, travel - b.w * 0.8) * 0.5 + rand(0, 70);
+    // Far from the finger, but not always across the whole screen — and never
+    // a landing that's still within easy reach.
+    const tooClose = away < pos.size * FEAR_RADIUS[1] ? 400 : 0;
+    const score = away - Math.max(0, travel - b.w * 0.8) * 0.5 + rand(0, 35) - tooClose;
     if (score > best.score) best = { x, y, score };
   }
   return best;
 }
 
-async function hop(scope: Scope, px: number, py: number) {
+async function hop(scope: Scope, px: number, py: number, speed = 1) {
   hopping = true;
   const to = escapeFrom(px, py);
   const sx = pos.x;
@@ -233,7 +255,7 @@ async function hop(scope: Scope, px: number, py: number) {
   if (Math.random() < 0.35) audio.giggle();
   const r = field.getBoundingClientRect();
   fx.steam(r.left + sx, r.top + sy + pos.size * 0.5, 3, 0.5);
-  const dur = clamp(dist / 1.7, 240, 430);
+  const dur = clamp(dist / 1.7, 240, 430) / speed;
   const height = Math.min(70, 26 + dist * 0.18);
   await scope.tween(
     dur,
@@ -272,8 +294,17 @@ function chase(ms: number): Promise<'caught' | 'time'> {
   let warm = 0;
   let dodges = 0;
   let stumbling = false;
+  let feinting = false;
+  let lastHop = performance.now();
   const started = performance.now();
+  // Last known pointer, and its velocity (px/ms) for guessing where it's headed.
+  const ptr = { x: 0, y: 0, vx: 0, vy: 0, t: 0 };
   setVar('--warm', 0);
+
+  /** 0 → 1 over the chase: it gets jumpier, faster and cheekier as time goes on. */
+  const progress = () => clamp((performance.now() - started) / ms, 0, 1);
+  const fearRadius = () => pos.size * lerp(FEAR_RADIUS[0], FEAR_RADIUS[1], progress());
+  const speed = () => lerp(1, MAX_SPEEDUP, progress());
 
   return new Promise((resolve) => {
     const done = (why: 'caught' | 'time') => {
@@ -285,15 +316,24 @@ function chase(ms: number): Promise<'caught' | 'time'> {
       setVar('--warm', warm);
     };
 
+    /** Hop away from a point; false if the chase ended mid-hop. */
+    const flee = async (px: number, py: number, boost = 1) => {
+      lastHop = performance.now();
+      await hop(scope, px, py, speed() * boost);
+      if (!scope.alive) return false;
+      runner.face('tease');
+      return true;
+    };
+
     const dodge = async (px: number, py: number) => {
-      if (hopping || stumbling) return;
+      if (hopping || stumbling || feinting) return;
       dodges++;
       heat(0.07);
       vibrate(12);
+      // Now and then it plays tired, lets you get close, and bolts at the last moment.
+      if (dodges >= 2 && Math.random() < FEINT_CHANCE) return feint();
       if (Math.random() < 0.45) say(pick(TAUNTS));
-      await hop(scope, px, py);
-      if (!scope.alive) return;
-      runner.face('tease');
+      if (!(await flee(px, py))) return;
       // Now and then it trips over its own sneakers — the only way to catch it.
       if (dodges >= 6 && Math.random() < 0.15) {
         stumbling = true;
@@ -308,26 +348,65 @@ function chase(ms: number): Promise<'caught' | 'time'> {
       }
     };
 
+    const feint = () => {
+      feinting = true;
+      runner.face('calm');
+      say(pick(FEINTS));
+      // If you don't take the bait, it doesn't wait forever.
+      scope.timeout(() => feinting && bolt(), rand(900, 1500));
+    };
+    const bolt = () => {
+      feinting = false;
+      audio.giggle();
+      void flee(ptr.x, ptr.y, 1.35).then((ok) => ok && say(pick(GOTCHAS)));
+    };
+
     const local = (e: PointerEvent) => {
       const r = field.getBoundingClientRect();
       return { x: e.clientX - r.left, y: e.clientY - r.top };
     };
-    const near = (p: { x: number; y: number }, k: number) => Math.hypot(p.x - pos.x, p.y - pos.y) < pos.size * k;
-
-    // A mouse gets close → it runs (the prototype moved on hover).
-    scope.on<PointerEvent>(field, 'pointermove', (e) => {
+    const dist = (p: { x: number; y: number }) => Math.hypot(p.x - pos.x, p.y - pos.y);
+    const near = (p: { x: number; y: number }, k: number) => dist(p) < pos.size * k;
+    const track = (e: PointerEvent) => {
       const p = local(e);
+      const dt = e.timeStamp - ptr.t;
+      if (ptr.t && dt > 0 && dt < 100) {
+        ptr.vx = (p.x - ptr.x) / dt;
+        ptr.vy = (p.y - ptr.y) / dt;
+      } else ptr.vx = ptr.vy = 0;
+      ptr.x = p.x;
+      ptr.y = p.y;
+      ptr.t = e.timeStamp;
+      return p;
+    };
+
+    // The pointer (a mouse, or a finger sliding on the screen) gets close, or is
+    // heading its way fast → it runs early, away from where the pointer is going.
+    scope.on<PointerEvent>(field, 'pointermove', (e) => {
+      const p = track(e);
       runner.look(p.x - pos.x, p.y - pos.y);
-      if (e.pointerType === 'mouse' && near(p, 0.95)) {
+      if (feinting) {
+        if (near(p, 0.8)) bolt();
+        return;
+      }
+      const ahead = { x: p.x + ptr.vx * LOOKAHEAD_MS, y: p.y + ptr.vy * LOOKAHEAD_MS };
+      const r = fearRadius();
+      if (dist(p) < r || dist(ahead) < r * 0.9) {
         if (!stumbling && !hopping) runner.face('shock');
-        void dodge(p.x, p.y);
+        void dodge(ahead.x, ahead.y);
       }
     });
     scope.on<PointerEvent>(field, 'pointerdown', (e) => {
-      const p = local(e);
+      const p = track(e);
       runner.look(p.x - pos.x, p.y - pos.y);
       if (stumbling && near(p, 0.8)) return catchIt(e);
-      if (near(p, 1.25)) {
+      if (feinting) {
+        if (near(p, 1.6)) bolt();
+        return;
+      }
+      // A finger lands without warning, so anywhere nearby is enough to spook it.
+      const reach = e.pointerType === 'mouse' ? fearRadius() : Math.max(fearRadius(), bounds().w * 0.45);
+      if (dist(p) < reach) {
         runner.face('shock');
         void dodge(p.x, p.y);
       } else {
@@ -339,6 +418,7 @@ function chase(ms: number): Promise<'caught' | 'time'> {
     scope.on(runnerBtn, 'click', (e) => {
       if ((e as MouseEvent).detail === 0) {
         if (stumbling) return catchIt();
+        if (feinting) return bolt();
         const b = bounds();
         void dodge(pos.x + rand(-1, 1) * b.w * 0.1, pos.y + rand(-1, 1) * b.h * 0.1);
       }
@@ -352,7 +432,7 @@ function chase(ms: number): Promise<'caught' | 'time'> {
       const cy = e?.clientY ?? r.top + r.height / 2;
       fx.sparks(cx, cy, '#ff6b4a', 16);
       audio.sizzle();
-      if (performance.now() - started < ms * WRIGGLE_SHARE) {
+      if (progress() < WRIGGLE_SHARE) {
         // Too early — it slips out of your fingers and runs off laughing.
         dodges = 0;
         heat(0.12);
@@ -366,8 +446,20 @@ function chase(ms: number): Promise<'caught' | 'time'> {
       done('caught');
     };
 
+    // It never just stands there: left alone for a moment, it hops off on its
+    // own, so a finger has to keep chasing it.
+    const restless = () => {
+      if (!hopping && !stumbling && !feinting && performance.now() - lastHop > RESTLESS_MS[0]) {
+        const b = bounds();
+        const from = ptr.t ? ptr : { x: rand(b.minX, b.maxX), y: rand(b.minY, b.maxY) };
+        void flee(from.x, from.y);
+      }
+      scope.timeout(restless, rand(...RESTLESS_MS) / speed());
+    };
+    scope.timeout(restless, rand(...RESTLESS_MS));
+
     scope.interval(() => {
-      if (!hopping && !stumbling && Math.random() < 0.6) {
+      if (!hopping && !stumbling && !feinting && Math.random() < 0.6 + 0.3 * progress()) {
         say(pick(TAUNTS));
         runner.el.animate([{ transform: 'translateY(0)' }, { transform: 'translateY(-10px)' }, { transform: 'none' }], {
           duration: 320,
