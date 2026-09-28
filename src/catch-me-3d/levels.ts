@@ -41,7 +41,7 @@ export const LEVELS: Level[] = [
 
 export const FINAL_LEVEL = LEVELS.length;
 /** Rooms built so far (the rest show as coming soon). */
-export const PLAYABLE = 2;
+export const PLAYABLE = 5;
 
 /** A level is soft-capped here, and hard-capped at MAX_LEVEL_MS. */
 export const TIRED_AT_MS = 150000;

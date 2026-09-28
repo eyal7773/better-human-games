@@ -12,7 +12,7 @@ import { ALMOST_REACH, Brain, CATCH_REACH, STREAK_CALLOUTS, type BrainEvents, ty
 import { PeskyModel, type FaceSet } from './pesky/model';
 import { persist, seeTrick, type Save3D } from './save';
 import type { LevelStats } from './stars';
-import { BED, FEINTS, GOTCHAS, LEVEL_NAMES, MOCKS, R, T, TAUNTS } from './story';
+import { BED, FEINTS, GOTCHAS, LEVEL_NAMES, MOCKS, R, ROOSTER_HINT, T, TAUNTS } from './story';
 import { makeAddons, type Addon } from './tricks';
 import { buildRoom } from './world/rooms';
 import { roomSize, type Room } from './world/kit';
@@ -145,7 +145,7 @@ export function playLevel(ctx: Ctx, lv: Level, o: { endless?: boolean; intro?: (
   const brain = new Brain(room.arena, events, { tricks: lv.tricks, tripPerSec: lv.tripPerSec });
   brain.teleport(0, (room.arena.minZ + room.arena.maxZ) / 2 + 0.6);
   brain.hold('tease');
-  const addons: Addon[] = makeAddons({ lv, stage, room, brain, faces: ctx.faces, world, fx, audio, endless });
+  const addons: Addon[] = makeAddons({ lv, stage, room, brain, pesky, faces: ctx.faces, world, fx, audio, endless, trick: (t) => events.trick(t) });
 
   /** Pesky's middle, on screen, and how many pixels one body spans there. */
   const locate = () => {
@@ -402,6 +402,8 @@ export function playLevel(ctx: Ctx, lv: Level, o: { endless?: boolean; intro?: (
         title = T.demoTitle;
         desc = T.demoDesc;
       }
+      // On the roof, the rooster's hint comes back while you breathe.
+      if (lv.id === 5 && kind !== 'boil') desc = `🐓 “${ROOSTER_HINT}”`;
       const kitchen = kind === 'demo' ? (room as Room & { setHeat?: (h: number) => void }) : null;
       const res = await ctx.breath.run({
         cycles,
@@ -521,7 +523,7 @@ export function playLevel(ctx: Ctx, lv: Level, o: { endless?: boolean; intro?: (
     });
 
     // Tuning/testing hook, only with ?debug=1.
-    if (ctx.debug) (window as unknown as { __c3: unknown }).__c3 = { brain, meter, locate, get phase() { return phase; }, stats };
+    if (ctx.debug) (window as unknown as { __c3: unknown }).__c3 = { brain, meter, locate, addons, get phase() { return phase; }, stats };
 
     // ------------------------------------------------------------ start
     world.start();

@@ -699,3 +699,69 @@ body.c3-breathing .c3-canvas {
 :root:lang(ar) :is(.c3-card h2, .c3-breath-title, .c3-top-title) {
   line-height: 1.3;
 }
+
+/* ---------- level 4: the shield, explained in two pictures ---------- */
+.c3-shield-art {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+.c3-shield-panel {
+  flex: 1;
+  margin: 0;
+  padding: 8px 6px;
+  border-radius: 20px;
+  background: #eef8f6;
+}
+.c3-shield-panel.on {
+  background: #fff0ee;
+}
+.c3-shield-pic {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: 108px;
+}
+.c3-who {
+  position: absolute;
+  top: 0;
+  inset-inline-start: 4px;
+  font-size: 1.7rem;
+}
+.c3-buddy {
+  width: 76px;
+  height: 84px;
+  border-radius: 50%;
+}
+.c3-shield-panel.on .c3-buddy {
+  box-shadow: 0 0 0 8px rgba(255, 42, 42, 0.25), 0 0 26px 10px rgba(255, 42, 42, 0.45);
+  animation: c3-shield 1.2s ease-in-out infinite;
+}
+.c3-shield-panel:not(.on) .c3-buddy {
+  rotate: -12deg;
+}
+@keyframes c3-shield {
+  50% {
+    box-shadow: 0 0 0 14px rgba(255, 42, 42, 0.18), 0 0 34px 14px rgba(255, 42, 42, 0.5);
+  }
+}
+.c3-buddy svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.c3-buddy [data-f] {
+  display: none;
+}
+.c3-buddy[data-face='laugh'] [data-f~='laugh'],
+.c3-buddy[data-face='dizzy'] [data-f~='dizzy'],
+.c3-buddy[data-face='tease'] [data-f~='tease'],
+.c3-buddy[data-face='calm'] [data-f~='calm'] {
+  display: inline;
+}
+.c3-shield-panel figcaption {
+  margin-top: 6px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  line-height: 1.25;
+}

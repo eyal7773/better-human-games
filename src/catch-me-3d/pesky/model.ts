@@ -200,7 +200,7 @@ export class PeskyModel {
     }
     svg.add(domeLine, dome, this.face, baseLine, base);
 
-    this.shieldMat = new THREE.MeshBasicMaterial({ color: 0xff2a2a, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending });
+    this.shieldMat = new THREE.MeshBasicMaterial({ color: 0xff1f3a, transparent: true, opacity: 0, depthWrite: false });
     this.shield = new THREE.Mesh(g.shieldGeo, this.shieldMat);
     this.shield.position.y = 0.45;
     this.shield.scale.setScalar(0.72);
@@ -229,7 +229,7 @@ export class PeskyModel {
   /** The red shield — how strong your anger makes him. 0 = off. */
   setShield(level: number) {
     this.shield.visible = level > 0.01;
-    this.shieldMat.opacity = 0.28 * level;
+    this.shieldMat.opacity = 0.34 * level;
   }
 
   update(

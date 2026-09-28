@@ -10,7 +10,8 @@ import { level, LEVELS } from './levels';
 import { loadFaces } from './pesky/model';
 import { loadSave, persist, recordLevel, unlocked } from './save';
 import { starsFor, type Stars } from './stars';
-import { STORY, T, TRICK_INFO } from './story';
+import { ROOSTER_HINT, STORY, T, TRICK_INFO } from './story';
+import { buddySVG } from '../catch-me/buddy';
 import { showMap } from './world/map';
 import { World } from './world/scene';
 import { TRICKS } from './levels';
@@ -98,7 +99,13 @@ export async function boot(app: HTMLElement) {
     hud.root.dataset.screen = 'level';
     if (id === 0) return playEndless();
     const lv = level(id)!;
-    const res = await playLevel(ctx, lv, { intro: () => hud.story(STORY[id]) });
+    const res = await playLevel(ctx, lv, {
+      intro: async () => {
+        await hud.story(STORY[id]);
+        if (id === 4) await hud.card({ cls: 'c3-story', art: shieldArt(), lines: [], buttons: [{ id: 'go', label: T.go, cls: 'warm' }] });
+        if (id === 5) await hud.card({ cls: 'c3-story', art: h('div', { class: 'c3-art' }, '🐓'), lines: [`“${ROOSTER_HINT}”`], buttons: [{ id: 'go', label: T.go, cls: 'warm' }] });
+      },
+    });
     if (res.exited) return;
     const hasBreath = lv.id !== 1;
     const stars = starsFor(res.stats, hasBreath);
@@ -126,6 +133,18 @@ export async function boot(app: HTMLElement) {
 
   const playEndless = async () => {
     /* Arrives with the finale (phase ג). */
+  };
+
+  /** Level 4: what the red shield means, in two pictures. */
+  const shieldArt = () => {
+    const panel = (who: string, face: string, shield: boolean, caption: string) =>
+      h(
+        'figure',
+        { class: `c3-shield-panel${shield ? ' on' : ''}` },
+        h('div', { class: 'c3-shield-pic' }, h('span', { class: 'c3-who' }, who), h('div', { class: 'c3-buddy', 'data-face': face, html: buddySVG() })),
+        h('figcaption', {}, caption),
+      );
+    return h('div', { class: 'c3-shield-art' }, panel('😠', 'laugh', true, T.shieldTitle), panel('😌', 'dizzy', false, T.shieldCalm));
   };
 
   const starList = (s: Stars, hasBreath: boolean) =>

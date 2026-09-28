@@ -60,8 +60,8 @@ export class World {
     this.ratio = this.maxRatio;
     this.renderer.setPixelRatio(this.ratio);
     this.renderer.setClearColor(0x000000, 0);
-    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.15;
+    this.renderer.toneMapping = THREE.NeutralToneMapping;
+    this.renderer.toneMappingExposure = 0.95;
     parent.prepend(this.canvas);
 
     const pmrem = new THREE.PMREMGenerator(this.renderer);
@@ -69,8 +69,8 @@ export class World {
     this.scene.environmentIntensity = 0.55;
     pmrem.dispose();
 
-    this.hemi = new THREE.HemisphereLight(0xfff6e0, 0x9a8cb8, 1.5);
-    this.sun = new THREE.DirectionalLight(0xffffff, 2.2);
+    this.hemi = new THREE.HemisphereLight(0xfff6e0, 0x9a8cb8, 1.1);
+    this.sun = new THREE.DirectionalLight(0xffffff, 1.7);
     this.sun.position.set(-3, 8, 5);
     this.scene.add(this.hemi, this.sun);
 
