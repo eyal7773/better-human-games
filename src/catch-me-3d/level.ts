@@ -7,7 +7,7 @@ import type { BreathOrb } from './breath';
 import type { Debug } from './debug';
 import { BoilGate, Calibrator, Frustration, Grip, NOTICE_MIN, type Notice } from './frustration';
 import type { Hud } from './hud';
-import { MAX_LEVEL_MS, TIRED_AT_MS, type Level, type Trick } from './levels';
+import { ENDLESS_BOILS, MAX_LEVEL_MS, TIRED_AT_MS, type Level, type Trick } from './levels';
 import { ALMOST_REACH, Brain, CATCH_REACH, STREAK_CALLOUTS, type BrainEvents, type Ptr, type Say } from './pesky/brain';
 import { PeskyModel, type FaceSet } from './pesky/model';
 import { persist, seeTrick, type Save3D } from './save';
@@ -184,6 +184,7 @@ export function playLevel(ctx: Ctx, lv: Level, o: { endless?: boolean; intro?: (
       phase = 'done';
       stats.completed = !exited;
       scope.dispose();
+      ctx.breath.cancel();
       unsub();
       world.stop();
       world.onResize = undefined;
@@ -393,6 +394,7 @@ export function playLevel(ctx: Ctx, lv: Level, o: { endless?: boolean; intro?: (
         const base = meter.baseline;
         const peak = meter.peakRate;
         desc = peak > base * 1.3 ? T.mirror(fmt(base), fmt(peak)) : T.mirrorPlain;
+        if (endless) desc += ` ${T.boilsLeft(Math.max(0, ENDLESS_BOILS - stats.boils))}`;
         const r = hud.mirror.getBoundingClientRect();
         for (let i = 0; i < 10; i++) fx.steam(r.left + r.width / 2 + rand(-10, 10), r.top, 1, 1.6);
       } else if (kind === 'inTime') {
@@ -427,7 +429,7 @@ export function playLevel(ctx: Ctx, lv: Level, o: { endless?: boolean; intro?: (
       if (!chaseStart) chaseStart = performance.now();
       brain.resume();
       if (kind === 'demo') scope.timeout(() => hud.tapResult(innerWidth / 2, innerHeight * 0.3, T.slowed, 'c3-hit'), 1800);
-      if (endless && stats.boils >= 3) {
+      if (endless && stats.boils >= ENDLESS_BOILS) {
         phase = 'done';
         scope.timeout(() => finish(false), 400);
       }

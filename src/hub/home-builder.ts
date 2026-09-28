@@ -5,6 +5,8 @@ import { FX } from '../shared/fx';
 import { vibrate } from '../shared/haptics';
 import { kettleSVG } from '../shared/kettle';
 import { AVATAR_COLORS, AVATAR_SHAPES, avatarSVG } from '../shared/avatar';
+import { buddySVG } from '../catch-me/buddy';
+import { loadSave as loadCatchMe } from '../catch-me-3d/save';
 import { MAX_HOT, profile, resetProfile, saveProfile, type Address, type Profile } from '../shared/profile';
 import type { HouseholdTag, TopicTag } from '../shared/tags';
 import { save as bpSave, grantZen } from '../boiling-point/save';
@@ -255,6 +257,8 @@ export function openHomeBuilder(opts: { edit?: boolean; onChange?: () => void } 
   // ---------------------------------------------------------------- 2 household
   function house() {
     const residents = h('div', { class: 'hb-residents' }, h('span', { class: 'hb-me', html: avatarSVG(draft.shape, draft.color) }));
+    // Pesky moves in once you've made friends with him in Catch Me.
+    if (loadCatchMe().finished) residents.append(h('span', { class: 'hb-pesky', title: tr({ en: 'Pesky', he: 'ציקי', ar: 'زِنّو' }), html: buddySVG() }));
     for (const t of draft.household) {
       const item = HOUSEHOLD.find((x) => x.tag === t);
       if (item && t !== 'no-kids' && t !== 'single-parent') residents.append(h('span', { class: 'hb-res', 'data-tag': t }, item.icon));

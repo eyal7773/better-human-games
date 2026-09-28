@@ -8,6 +8,7 @@ import { h } from '../shared/dom';
 import { avatarSVG } from '../shared/avatar';
 import { profile } from '../shared/profile';
 import { openHomeBuilder } from './home-builder';
+import { loadSave as loadCatchMe } from '../catch-me-3d/save';
 
 // The page ships in English; other languages swap text in by data-i18n key.
 const TEXT: Record<string, { he: string; ar: string }> = {
@@ -61,9 +62,12 @@ document
   );
 // "My home": your character sits next to the language switch and opens the builder.
 const meBtn = h('button', { class: 'hub-me', type: 'button', 'aria-label': tr({ en: 'My home', he: 'הבית שלי', ar: 'بيتي' }) });
+// Once the Catch Me story is finished, Pesky lives in your home, next to you.
+const peskyHome = loadCatchMe().finished;
 const paintMe = () => {
   if (profile.status === 'done') meBtn.innerHTML = avatarSVG(profile.shape, profile.color);
   else meBtn.textContent = '🏠';
+  if (peskyHome) meBtn.append(h('span', { class: 'hub-pesky', html: buddySVG() }));
 };
 paintMe();
 meBtn.addEventListener('click', () => openHomeBuilder({ edit: true, onChange: paintMe }));

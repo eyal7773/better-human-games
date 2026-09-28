@@ -82,8 +82,8 @@ export function showMap(world: World, layer: HTMLElement, save: Save3D, faces: F
 
   // Pesky, waving from the lawn.
   const pesky = new PeskyModel(faces);
-  pesky.root.position.set(-1.2, 0, 2.2);
-  pesky.update(0, { x: -1.2, z: 2.2, y: 0, running: false, stumbling: false, faceX: 0.3, faceZ: 1, reduced: true });
+  pesky.root.position.set(-2.1, 0, 2.7);
+  pesky.update(0, { x: -2.1, z: 2.7, y: 0, running: false, stumbling: false, faceX: 0.3, faceZ: 1, reduced: true });
   g.add(pesky.root);
 
   // A sky backdrop with a sun.
@@ -99,7 +99,8 @@ export function showMap(world: World, layer: HTMLElement, save: Save3D, faces: F
       }),
     }),
   );
-  sky.position.set(0, 3, -6);
+  sky.position.set(0, 1, -6);
+  sky.scale.set(1.6, 1.6, 1);
   g.add(sky);
 
   world.show(g);

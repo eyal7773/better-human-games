@@ -1,5 +1,5 @@
 import { load, store } from '../shared/storage';
-import { PLAYABLE, TRICKS, type Trick } from './levels';
+import { TRICKS, type Trick } from './levels';
 import { countStars, mergeStars, newStarCount, ZEN_PER_STAR, type Stars } from './stars';
 
 /** Progress in the 3D story. The hub reads `finished` to seat Pesky in "My home". */
@@ -78,7 +78,7 @@ export function recordLevel(save: Save3D, id: number, earned: Stars): number {
 }
 
 /** A level is open once the one before it is done; done levels can be replayed. */
-export const unlocked = (save: Save3D, id: number) => id <= PLAYABLE && (id === 1 || save.done.includes(id - 1));
+export const unlocked = (save: Save3D, id: number) => id === 1 || save.done.includes(id - 1);
 
 export const totalStars = (save: Save3D) => Object.values(save.stars).reduce((n, s) => n + countStars(s), 0);
 

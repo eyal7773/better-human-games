@@ -6,11 +6,13 @@ import { BreathOrb } from './breath';
 import { Debug } from './debug';
 import { Hud } from './hud';
 import { playLevel, type Ctx } from './level';
-import { level, LEVELS } from './levels';
+import { ENDLESS_ROOMS, FINAL_LEVEL, level, LEVELS, type Level } from './levels';
+import { playFinale } from './finale';
+import { pick } from '../shared/dom';
 import { loadFaces } from './pesky/model';
 import { loadSave, persist, recordLevel, unlocked } from './save';
 import { starsFor, type Stars } from './stars';
-import { ROOSTER_HINT, STORY, T, TRICK_INFO } from './story';
+import { ENDING, ROOSTER_HINT, STORY, T, TRICK_INFO } from './story';
 import { buddySVG } from '../catch-me/buddy';
 import { showMap } from './world/map';
 import { World } from './world/scene';
@@ -99,6 +101,7 @@ export async function boot(app: HTMLElement) {
     hud.root.dataset.screen = 'level';
     if (id === 0) return playEndless();
     const lv = level(id)!;
+    if (id === FINAL_LEVEL) return playLast();
     const res = await playLevel(ctx, lv, {
       intro: async () => {
         await hud.story(STORY[id]);
@@ -131,8 +134,55 @@ export async function boot(app: HTMLElement) {
     if (choice === 'again') return play(id);
   };
 
-  const playEndless = async () => {
-    /* Arrives with the finale (phase ג). */
+  /** Level 6, then the ending: the buttons go back, and Pesky moves into your home. */
+  const playLast = async () => {
+    const res = await playFinale(ctx);
+    if (res.exited) return;
+    const stars = starsFor(res.stats, true);
+    const zen = recordLevel(save, FINAL_LEVEL, stars);
+    if (zen) grantZen(zen);
+    const first = !save.finished;
+    save.finished = true;
+    persist(save);
+    const victims = () => h('div', { class: 'c3-art c3-victims' }, ...['📺', '🫖', '🤖', '🧙', '🐓'].map((e) => h('span', {}, e)));
+    const withPesky = () =>
+      h('div', { class: 'c3-art' }, h('div', { class: 'c3-buddy', 'data-face': 'calm', html: buddySVG() }), h('span', { class: 'c3-heart' }, '💛'));
+    await hud.story([ENDING[0]], withPesky);
+    await hud.story([ENDING[1]], victims);
+    const choice = await hud.card({
+      cls: 'c3-results',
+      art: withPesky(),
+      title: T.friends,
+      lines: [ENDING[2], starList(stars, true), ...(zen ? [h('p', { class: 'c3-zen' }, T.zen(zen))] : []), ...(first ? [h('p', { class: 'c3-newtrick' }, `∞ ${T.endless}`)] : [])],
+      buttons: [
+        { id: 'home', label: T.toHome, cls: 'warm' },
+        { id: 'map', label: T.map, cls: 'ghost' },
+      ],
+    });
+    if (choice === 'home') location.href = import.meta.env.BASE_URL;
+  };
+
+  /** Endless: a random room, every trick, escalating; the run ends after three boils or on leaving. */
+  const playEndless = async (): Promise<void> => {
+    const room = pick(ENDLESS_ROOMS);
+    const lv: Level = { id: 0, room, catches: Infinity, tricks: ['zigzag', 'hide', 'decoy', 'bed', 'clones', 'portals'], mechanic: 'chase', forcedBoil: true, notice: true, noticePulse: false, tripPerSec: 0.08 };
+    const res = await playLevel(ctx, lv, { endless: true, intro: () => hud.story([T.endless + '…', T.endlessDesc]) });
+    const best = res.calmStars > save.endlessBest;
+    if (best) save.endlessBest = res.calmStars;
+    persist(save);
+    const choice = await hud.card({
+      cls: 'c3-results',
+      title: T.runOver,
+      lines: [
+        h('p', { class: 'c3-calm-stars' }, `★ ${T.calmStars(res.calmStars)}`),
+        best && res.calmStars > 0 ? h('p', { class: 'c3-zen' }, T.newBest) : h('p', {}, T.best(save.endlessBest)),
+      ],
+      buttons: [
+        { id: 'again', label: T.again2, cls: 'warm' },
+        { id: 'map', label: T.map, cls: 'ghost' },
+      ],
+    });
+    if (choice === 'again') return playEndless();
   };
 
   /** Level 4: what the red shield means, in two pictures. */

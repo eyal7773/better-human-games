@@ -32,6 +32,7 @@ export class BreathOrb {
   private desc = h('p', { class: 'c3-breath-desc' });
   private msg = h('p', { class: 'c3-breath-msg', 'aria-live': 'polite' });
   private count = h('div', { class: 'c3-breath-count', 'aria-hidden': 'true' });
+  private abort: (() => void) | null = null;
 
   constructor(
     parent: HTMLElement,
@@ -55,7 +56,7 @@ export class BreathOrb {
   }
 
   /** Breathe `cycles` times. Resolves once the last breath out is done. */
-  run(o: { cycles: number; title: string; desc: string; onProgress?: (inhale: number) => void; endless?: boolean }): Promise<BreathResult> {
+  run(o: { cycles: number; title: string; desc: string; onProgress?: (inhale: number) => void; onCycle?: (n: number) => void; endless?: boolean }): Promise<BreathResult> {
     const scope = new Scope();
     this.el.hidden = false;
     this.el.classList.remove('holding', 'out');
@@ -150,7 +151,8 @@ export class BreathOrb {
             phase = 'in';
             this.el.classList.remove('out');
             this.audio.bell(cycle * 2, 0.5);
-            if (cycle >= o.cycles) return finish();
+            o.onCycle?.(cycle);
+            if (cycle >= o.cycles || !this.abort) return finish();
             this.label.textContent = T.holdToStart;
             this.msg.textContent = T.again;
             paintCount();
@@ -163,11 +165,19 @@ export class BreathOrb {
       });
 
       const finish = () => {
+        this.abort = null;
         scope.dispose();
         this.el.classList.remove('holding', 'out');
         this.el.hidden = true;
+        this.audio.setWhistle(0);
         resolve(res);
       };
+      this.abort = finish;
     });
+  }
+
+  /** Leaving the room mid-breath: close the orb (the pending run resolves). */
+  cancel() {
+    this.abort?.();
   }
 }

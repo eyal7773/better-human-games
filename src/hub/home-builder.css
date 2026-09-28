@@ -602,3 +602,35 @@ html.hb-open body {
     width: 110px;
   }
 }
+
+/* ---------- Pesky, once he's your friend (Catch Me) ---------- */
+.hub-me {
+  position: relative;
+}
+.hub-pesky {
+  position: absolute;
+  bottom: -4px;
+  inset-inline-end: -14px;
+  width: 26px;
+  height: 29px;
+  pointer-events: none;
+}
+.hb-pesky {
+  width: 46px;
+  height: 52px;
+}
+.hub-pesky svg,
+.hb-pesky svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: visible;
+}
+.hub-pesky [data-f],
+.hb-pesky [data-f] {
+  display: none;
+}
+.hub-pesky [data-f~='calm'],
+.hb-pesky [data-f~='calm'] {
+  display: inline;
+}
