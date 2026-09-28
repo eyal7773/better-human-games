@@ -19,6 +19,7 @@ export interface Save {
   growth: number; // +1 for every round finished without boiling over
   muted: boolean;
   choiceSeconds: number;
+  readSeconds: number; // reading time before the response options appear
   seenHowTo: boolean;
   recentDilemmas: string[];
   realPauseDay: string | null;
@@ -40,6 +41,7 @@ const DEFAULTS: Save = {
   growth: 0,
   muted: false,
   choiceSeconds: 5,
+  readSeconds: 4,
   seenHowTo: false,
   recentDilemmas: [],
   realPauseDay: null,

@@ -28,6 +28,7 @@ export interface RoundSpec {
   level: number;
   coach: boolean; // show first-time guidance
   choiceSeconds: number;
+  readSeconds: number;
 }
 
 export interface RoundResult {
@@ -124,7 +125,7 @@ class Round {
     const calmOutcome = await this.calmPhase(taskOutcome);
     if (calmOutcome === 'boiled') return this.finish('boiled', null);
     this.phase = 'choice';
-    const choice = await runChoice(this.v.modal, this.master, this.audio, this.spec.dilemma, this.spec.choiceSeconds);
+    const choice = await runChoice(this.v.modal, this.master, this.audio, this.spec.dilemma, this.spec.choiceSeconds, this.spec.readSeconds);
     return this.finish(taskOutcome, choice);
   }
 

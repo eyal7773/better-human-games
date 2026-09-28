@@ -21,6 +21,7 @@ const T = {
   howTo: tr({ en: 'How to play', he: 'איך משחקים', ar: 'كيف نلعب' }),
   settings: tr({ en: 'Settings', he: 'הגדרות', ar: 'الإعدادات' }),
   choiceTime: tr({ en: 'Time to choose a response', he: 'זמן לבחירת תגובה', ar: 'وقت اختيار الرد' }),
+  readTime: tr({ en: 'Time to read before the answers appear', he: 'זמן קריאה לפני שהתשובות מופיעות', ar: 'وقت القراءة قبل ظهور الإجابات' }),
   pausesInTime: tr({ en: 'Paused in time', he: 'עצירות בזמן', ar: 'توقّفات في الوقت' }),
   calmResponses: tr({ en: 'Calm responses', he: 'תגובות רגועות', ar: 'ردود هادئة' }),
   zenPoints: tr({ en: 'Zen points', he: 'נקודות זן', ar: 'نقاط الهدوء' }),
@@ -192,20 +193,22 @@ function howTo() {
 
 function settings() {
   const close = () => overlay.remove();
-  const times = [5, 8, 12];
-  const seg = h(
-    'div',
-    { class: 'segmented', role: 'radiogroup', 'aria-label': T.choiceTime },
-    ...times.map((t) => {
-      const b = h('button', { type: 'button', role: 'radio', 'aria-checked': String(save.choiceSeconds === t) }, tr({ en: `${t} sec`, he: `${t} שניות`, ar: `${t} ثوانٍ` }));
-      b.addEventListener('click', () => {
-        save.choiceSeconds = t;
-        persist();
-        seg.querySelectorAll('button').forEach((x) => x.setAttribute('aria-checked', String(x === b)));
-      });
-      return b;
-    }),
-  );
+  const secondsPicker = (label: string, times: number[], key: 'choiceSeconds' | 'readSeconds') => {
+    const seg = h(
+      'div',
+      { class: 'segmented', role: 'radiogroup', 'aria-label': label },
+      ...times.map((t) => {
+        const b = h('button', { type: 'button', role: 'radio', 'aria-checked': String(save[key] === t) }, tr({ en: `${t} sec`, he: `${t} שניות`, ar: `${t} ثوانٍ` }));
+        b.addEventListener('click', () => {
+          save[key] = t;
+          persist();
+          seg.querySelectorAll('button').forEach((x) => x.setAttribute('aria-checked', String(x === b)));
+        });
+        return b;
+      }),
+    );
+    return seg;
+  };
   let armed = false;
   const reset = h('button', { class: 'btn ghost danger', type: 'button' }, tr({ en: 'Reset progress', he: 'איפוס ההתקדמות', ar: 'إعادة ضبط التقدّم' }));
   reset.addEventListener('click', () => {
@@ -236,8 +239,19 @@ function settings() {
         { class: 'btn ghost', href: new URL('../?profile=edit', location.href).href },
         tr({ en: 'Edit my home', he: 'עריכת הבית שלי', ar: 'تعديل بيتي' }),
       ),
+      h('h3', {}, T.readTime),
+      secondsPicker(T.readTime, [2, 4, 6, 8], 'readSeconds'),
+      h(
+        'p',
+        { class: 'sheet-note' },
+        tr({
+          en: 'Default: 4 seconds to read the situation before the answers show up.',
+          he: 'במקור: 4 שניות לקרוא את המצב לפני שהתשובות מופיעות.',
+          ar: 'الافتراضي: 4 ثوانٍ لقراءة الموقف قبل ظهور الإجابات.',
+        }),
+      ),
       h('h3', {}, T.choiceTime),
-      seg,
+      secondsPicker(T.choiceTime, [5, 8, 12], 'choiceSeconds'),
       h(
         'p',
         { class: 'sheet-note' },
@@ -366,6 +380,7 @@ async function evening() {
         level: baseLevel + i * 0.6,
         coach: save.rounds < 2,
         choiceSeconds: save.choiceSeconds,
+        readSeconds: save.readSeconds,
       },
       audio,
       fx,

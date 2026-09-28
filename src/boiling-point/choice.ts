@@ -20,6 +20,7 @@ export function runChoice(
   audio: AudioEngine,
   d: Dilemma,
   seconds: number,
+  readSeconds: number,
 ): Promise<ChoiceOutcome> {
   return new Promise((resolve) => {
     const fuse = h('div', { class: 'fuse' }, h('div', { class: 'fuse-line' }), h('div', { class: 'fuse-spark' }));
@@ -105,6 +106,6 @@ export function runChoice(
         else scope.timeout(tick, 1000);
       };
       scope.timeout(tick, 1000);
-    }, 2000);
+    }, readSeconds * 1000);
   });
 }
