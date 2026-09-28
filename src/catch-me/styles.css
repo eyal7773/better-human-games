@@ -573,3 +573,20 @@ body {
     margin: 12px 24px 24px;
   }
 }
+
+/* ---------- tap feedback: what just happened to your tap ---------- */
+.float-text.cm-miss {
+  color: #b3261e;
+}
+.float-text.cm-almost {
+  color: #c25e00;
+  font-size: 1.15rem;
+}
+.float-text.cm-hit {
+  color: #1f7a3a;
+  font-size: 1.3rem;
+}
+.float-text.cm-hit.cm-big {
+  font-size: 1.8rem;
+  padding: 4px 16px;
+}

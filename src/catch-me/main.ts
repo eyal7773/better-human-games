@@ -29,9 +29,9 @@ const LOOKAHEAD_MS = 160;
 /** Chance a dodge turns into a feint: it plays tired, then bolts at the last moment. */
 const FEINT_CHANCE = 0.15;
 /** Between hops it jogs around on its own, in screen-widths per second (start → end of a chase). */
-const JOG_SPEED: [number, number] = [0.5, 0.9];
+const JOG_SPEED: [number, number] = [0.65, 1.1];
 /** A pointer close by makes it run this much faster, away from it. */
-const PANIC_BOOST = 2;
+const PANIC_BOOST = 2.2;
 /** It jogs for a while (ms)… */
 const JOG_MS: [number, number] = [2500, 4500];
 /** …then stops to taunt you for a moment (ms) — your window of hope. */
@@ -39,13 +39,19 @@ const PAUSE_MS: [number, number] = [300, 600];
 /** How sharply its path wanders (radians per second). */
 const WANDER_TURN = 4;
 /** While it runs it keeps darting sideways and back: gap between darts (ms)… */
-const JINK_GAP_MS: [number, number] = [150, 450];
+const JINK_GAP_MS: [number, number] = [100, 350];
 /** …how long a dart out-and-back takes (ms)… */
-const JINK_MS: [number, number] = [200, 320];
+const JINK_MS: [number, number] = [170, 280];
 /** …and how far out it goes, in body-sizes. */
-const JINK_SIZE: [number, number] = [0.6, 1.3];
+const JINK_SIZE: [number, number] = [1, 1.9];
 /** Chance per second of tripping mid-jog. */
 const TRIP_PER_SEC = 0.08;
+/** While it's down, a tap this close (body-sizes) catches it — generous, so a real catch feels fair. */
+const CATCH_REACH = 1.1;
+/** A missed tap this close (body-sizes) counts as "almost". */
+const ALMOST_REACH = 1.5;
+/** Miss streaks it calls out, to rub it in. */
+const STREAK_CALLOUTS = [3, 5, 8, 12, 20];
 
 const T = {
   title: tr({ en: 'Catch Me', he: 'תפוס אותי', ar: 'امسكني' }),
@@ -98,6 +104,16 @@ const GOTCHAS = tr({
   he: ['סתם!', 'עבדתי עליך!', 'כמעט!'],
   ar: ['بمزح!', 'ضحكت عليك!', 'تقريبًا!'],
 });
+
+/** Feedback at your finger: what just happened to *your* tap. */
+const R = {
+  miss: tr({ en: '✗ Missed!', he: '✗ פספסת!', ar: '✗ فاتك!' }),
+  almost: tr({ en: 'Almost!', he: 'כמעט!', ar: 'تقريبًا!' }),
+  hit: tr({ en: '✓ Got it!', he: '✓ תפסת!', ar: '✓ أمسكته!' }),
+  notReally: tr({ en: '…or not!', he: '…או שלא!', ar: '…أو لا!' }),
+  caught: tr({ en: '✓ Caught it!', he: '✓ תפסת אותו!', ar: '✓ أمسكته!' }),
+  streak: (n: number) => tr({ en: `${n} misses in a row!`, he: `${n} פספוסים ברצף!`, ar: `${n} مرات فاتك على التوالي!` }),
+};
 
 document.title = T.title;
 
@@ -312,6 +328,9 @@ function chase(ms: number): Promise<'caught' | 'time'> {
   let stumbling = false;
   let feinting = false;
   let jogging = true; // false while it stops to taunt
+  let frozen = false; // a beat of hit-stop when you get your hands on it
+  let misses = 0; // taps in a row that didn't catch it
+  let caught = false; // a real catch, celebrating before the chase ends
   let heading = rand(0, Math.PI * 2);
   let bob = 0;
   const jink = { t: 0, dur: 0, amp: 0, off: 0, wait: 0 };
@@ -345,7 +364,7 @@ function chase(ms: number): Promise<'caught' | 'time'> {
     };
 
     const dodge = async (px: number, py: number) => {
-      if (hopping || stumbling || feinting) return;
+      if (hopping || stumbling || feinting || frozen) return;
       dodges++;
       heat(0.07);
       vibrate(12);
@@ -364,6 +383,7 @@ function chase(ms: number): Promise<'caught' | 'time'> {
       runner.el.classList.add('stumble');
       audio.slip();
       scope.timeout(() => {
+        if (!stumbling) return; // caught meanwhile — catchIt() took over
         stumbling = false;
         runner.el.classList.remove('stumble');
         runner.face('tease');
@@ -430,24 +450,39 @@ function chase(ms: number): Promise<'caught' | 'time'> {
       const p = track(e);
       ptr.active = true;
       runner.look(p.x - pos.x, p.y - pos.y);
-      if (stumbling && near(p, 0.8)) return catchIt(e);
+      if (frozen) return;
+      if (stumbling && near(p, CATCH_REACH)) return catchIt(e);
       if (feinting) {
         if (near(p, 1.6)) bolt();
-        return;
-      }
-      // A finger lands without warning, so anywhere nearby is enough to spook it.
-      const reach = e.pointerType === 'mouse' ? fearRadius() : Math.max(fearRadius(), bounds().w * 0.45);
-      if (dist(p) < reach) {
-        runner.face('shock');
-        void dodge(p.x, p.y);
       } else {
-        fx.ring(e.clientX, e.clientY, 'rgba(229, 56, 59, 0.55)', 30);
-        heat(0.02);
+        // A finger lands without warning, so anywhere nearby is enough to spook it.
+        const reach = e.pointerType === 'mouse' ? fearRadius() : Math.max(fearRadius(), bounds().w * 0.45);
+        if (dist(p) < reach) {
+          runner.face('shock');
+          void dodge(p.x, p.y);
+        }
       }
+      // After dodge(), so its random taunt can't hide a streak call-out.
+      missed(e, near(p, ALMOST_REACH));
     });
+
+    /** A tap that didn't catch it: say so, right where you tapped. */
+    const missed = (e: PointerEvent, almost: boolean) => {
+      misses++;
+      fx.ring(e.clientX, e.clientY, 'rgba(229, 56, 59, 0.55)', almost ? 44 : 30);
+      fx.floatText(e.clientX, e.clientY - 12, almost ? R.almost : R.miss, almost ? 'cm-almost' : 'cm-miss');
+      audio.miss();
+      vibrate(almost ? [10, 30, 10] : 8);
+      heat(almost ? 0.05 : 0.02);
+      if (STREAK_CALLOUTS.includes(misses)) {
+        runner.face('laugh');
+        say(R.streak(misses), bubble, 1400);
+      }
+    };
     // Keyboard players get the same runaround.
     scope.on(runnerBtn, 'click', (e) => {
       if ((e as MouseEvent).detail === 0) {
+        if (frozen) return;
         if (stumbling) return catchIt();
         if (feinting) return bolt();
         const b = bounds();
@@ -461,27 +496,43 @@ function chase(ms: number): Promise<'caught' | 'time'> {
       const r = runnerBtn.getBoundingClientRect();
       const cx = e?.clientX ?? r.left + r.width / 2;
       const cy = e?.clientY ?? r.top + r.height / 2;
+      // Either way, first you really do get it: hit-stop, sparks, a clear "Got it!".
+      frozen = true;
+      runner.el.classList.remove('running');
+      runner.face('shock');
       fx.sparks(cx, cy, '#ff6b4a', 16);
       audio.sizzle();
+      vibrate([30, 40, 30]);
       if (progress() < WRIGGLE_SHARE) {
-        // Too early — it slips out of your fingers and runs off laughing.
-        dodges = 0;
-        heat(0.12);
-        vibrate([15, 30, 15]);
-        const f = field.getBoundingClientRect();
-        void dodge(cx - f.left + rand(-1, 1) * 10, cy - f.top + rand(-1, 1) * 10);
-        // After dodge(), so its random taunt can't replace the mock.
-        say(pick(MOCKS));
+        // Too early — the win is snatched away: it slips out and runs off laughing.
+        fx.floatText(cx, cy - 12, R.hit, 'cm-hit');
+        scope.timeout(() => {
+          frozen = false;
+          misses++;
+          dodges = 0;
+          heat(0.12);
+          fx.floatText(cx, cy - 40, R.notReally, 'cm-miss');
+          audio.giggle();
+          const f = field.getBoundingClientRect();
+          void dodge(cx - f.left + rand(-1, 1) * 10, cy - f.top + rand(-1, 1) * 10);
+          // After dodge(), so its random taunt can't replace the mock.
+          say(pick(MOCKS));
+        }, 420);
         return;
       }
-      done('caught');
+      caught = true;
+      misses = 0;
+      runner.face('dizzy');
+      fx.floatText(cx, cy - 12, R.caught, 'cm-hit cm-big');
+      audio.success();
+      scope.timeout(() => done('caught'), 750);
     };
 
     // It never just stands there: it jogs around on a wandering path, then stops
     // for a moment to taunt you, then jogs off again.
     const rhythm = () => {
       jogging = !jogging;
-      if (!jogging && !hopping && !stumbling && !feinting) {
+      if (!jogging && !hopping && !stumbling && !feinting && !frozen) {
         runner.el.classList.remove('running');
         place(); // land from the jogging bob
         runner.face('tease');
@@ -504,7 +555,7 @@ function chase(ms: number): Promise<'caught' | 'time'> {
       a + clamp(Math.atan2(Math.sin(target - a), Math.cos(target - a)), -max, max);
 
     const jog = (dt: number) => {
-      if (!jogging || hopping || stumbling || feinting) return;
+      if (!jogging || hopping || stumbling || feinting || frozen) return;
       const b = bounds();
       let v = b.w * lerp(JOG_SPEED[0], JOG_SPEED[1], progress());
       heading += rand(-1, 1) * WANDER_TURN * dt;
@@ -556,7 +607,7 @@ function chase(ms: number): Promise<'caught' | 'time'> {
       pos.y = clamp(pos.y, b.minY, b.maxY);
       place();
     });
-    scope.timeout(() => done('time'), ms);
+    scope.timeout(() => done(caught ? 'caught' : 'time'), ms);
   });
 }
 
