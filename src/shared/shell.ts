@@ -155,6 +155,13 @@ export class Shell {
     requestAnimationFrame(() => (this.live.textContent = text));
   }
 
+  /** A short message floating up from an element — seen and announced. */
+  notice(el: Element, text: string) {
+    const r = el.getBoundingClientRect();
+    this.fx.floatText(r.left + r.width / 2, r.top + 4, text);
+    this.announce(text);
+  }
+
   clearStage() {
     this.stage.replaceChildren();
     this.layer.replaceChildren();
@@ -194,14 +201,14 @@ export class Shell {
       );
       tile.addEventListener('click', () => {
         if (open) o.onPlay(l.id);
-        else this.announce(S.locked);
+        else this.notice(tile, S.locked);
       });
       return tile;
     });
     const extras = (o.extras ?? []).map((x) => {
       const b = h('button', { class: `btn ghost sh-extra${x.locked ? ' locked' : ''}`, type: 'button' }, x.locked ? `🔒 ${x.label}` : x.label);
       b.addEventListener('click', () => {
-        if (x.locked) this.announce(x.lockedHint ?? S.locked);
+        if (x.locked) this.notice(b, x.lockedHint ?? S.locked);
         else x.onClick();
       });
       if (x.locked && x.lockedHint) b.title = x.lockedHint;

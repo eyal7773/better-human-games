@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { allowed, fits, MAX_HOT, sanitize, weight, weightedShuffle, type Profile } from './profile';
+import { allowed, fits, heSelf, MAX_HOT, sanitize, weight, weightedShuffle, type Profile } from './profile';
 import type { Tag } from './tags';
 
 const p = (o: Partial<Profile> = {}): Profile => sanitize({ status: 'done', ...o });
@@ -75,5 +75,13 @@ describe('sanitize', () => {
     expect(out.shape).toBe(0);
     expect(out.household).toEqual(['partner']);
     expect(out.hot).toHaveLength(MAX_HOT);
+  });
+});
+
+describe('heSelf', () => {
+  it('agrees with how the player wants to be addressed', () => {
+    expect(heSelf('מרגיש', 'מרגישה', p({ address: 'm' }))).toBe('מרגיש');
+    expect(heSelf('מרגיש', 'מרגישה', p({ address: 'f' }))).toBe('מרגישה');
+    expect(heSelf('מרגיש', 'מרגישה', p({ address: 'x' }))).toBe('מרגיש/ה');
   });
 });

@@ -55,6 +55,11 @@ export function faceSVG(who: Who) {
 export function setFaceMood(svg: Element | null, mood: number, spikes = 0) {
   if (!svg) return;
   const m = clamp(mood, -1, 1);
+  // Called every frame: skip the DOM writes when nothing visible changed.
+  const key = `${m.toFixed(2)}|${clamp(spikes, 0, 1).toFixed(2)}`;
+  const el = svg as SVGElement;
+  if (el.dataset.mood === key) return;
+  el.dataset.mood = key;
   const q = (sel: string) => svg.querySelector(sel);
   const qa = (sel: string) => svg.querySelectorAll(sel);
   // Mouth: smile up for positive, frown for negative.

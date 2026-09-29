@@ -36,7 +36,6 @@ export interface Progress {
   album: string[];
   /** Level ids completed (first star) at least once. */
   done: string[];
-  seenHowTo: boolean;
 }
 
 const obj = (v: unknown) => (v && typeof v === 'object' && !Array.isArray(v) ? (v as Record<string, unknown>) : {});
@@ -60,7 +59,6 @@ export function sanitizeProgress(raw: unknown): Progress {
     best,
     album: strings(r.album),
     done: strings(r.done),
-    seenHowTo: r.seenHowTo === true,
   };
 }
 

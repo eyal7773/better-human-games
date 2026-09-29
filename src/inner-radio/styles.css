@@ -304,9 +304,11 @@
 
 /* ---------------------------------------------------------------- tiles */
 .ir-tray {
+  flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   overflow-y: auto;
   padding: 10px;
   border-radius: var(--r-md);
@@ -328,15 +330,16 @@
 .ir-tile,
 .ir-ghost {
   appearance: none;
-  padding: 7px 12px;
+  padding: 5px 11px;
   border-radius: 14px;
   border: 2px solid;
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   line-height: 1.25;
   text-align: start;
   cursor: grab;
-  touch-action: none;
+  /* Vertical swipes scroll the tray; tapping (or dragging with a mouse) places a tile. */
+  touch-action: pan-y;
 }
 .ir-tile[aria-pressed='true'] {
   outline: 3px solid var(--play);
@@ -351,7 +354,8 @@
   box-shadow: 0 10px 20px -8px rgba(29, 43, 79, 0.5);
 }
 .ir-say-btn {
-  margin-top: 4px;
+  flex: none;
+  margin-top: 8px;
 }
 
 /* ---------------------------------------------------------------- cards */

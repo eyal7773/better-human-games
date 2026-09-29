@@ -231,7 +231,10 @@ async function play(level: Level | null) {
     else closeCard();
   });
 
+  /** Not deciding is deciding: an open card becomes "let it be" after this long. */
+  const CARD_MS = 4000;
   let cardTimer = 0;
+  scope.add(() => clearTimeout(cardTimer));
   function openCard(x: Hassle) {
     inspecting = x;
     x.inspected = true;
@@ -267,11 +270,10 @@ async function play(level: Level | null) {
     shell.announce(`${info.label}. ${threat ? `${T.threatens} ${p.name}` : `${T.takes} ${(info as (typeof BUBBLES)[number]).takes}`}`);
     letBtn.focus({ preventScroll: true });
     clearTimeout(cardTimer);
-    // Not deciding is deciding: after a few seconds it's "let it be".
-    cardTimer = window.setTimeout(() => inspecting === x && closeCard(), 4500);
-    scope.add(() => clearTimeout(cardTimer));
+    cardTimer = window.setTimeout(() => inspecting === x && closeCard(), CARD_MS);
   }
   function closeCard() {
+    clearTimeout(cardTimer);
     inspecting = null;
     pop.hidden = true;
     slow = 1;

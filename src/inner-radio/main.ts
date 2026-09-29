@@ -142,7 +142,7 @@ async function showAlbum() {
     const on = found.includes(id);
     const b = h(
       'button',
-      { class: `ir-station-card${on ? '' : ' off'}`, type: 'button', style: { '--c': e.color } as Partial<CSSStyleDeclaration> },
+      { class: `ir-station-card${on ? '' : ' off'}`, type: 'button', style: { '--c': e.color } },
       h('b', {}, on ? e.name : '? ? ?'),
       h('span', {}, on ? e.body : T.albumEmpty),
       on ? h('i', {}, e.example) : null,
@@ -232,6 +232,8 @@ async function play(scene: Scene, free: boolean) {
   const img = nctx.createImageData(noise.width, noise.height);
   let staticLevel = 1;
   const drawNoise = () => {
+    noise.style.opacity = (staticLevel * 0.92).toFixed(3);
+    if (staticLevel < 0.01) return;
     const d = img.data;
     for (let i = 0; i < d.length; i += 4) {
       const v = Math.random() * 255;
@@ -239,7 +241,6 @@ async function play(scene: Scene, free: boolean) {
       d[i + 3] = 255;
     }
     nctx.putImageData(img, 0, 0);
-    noise.style.opacity = (staticLevel * 0.92).toFixed(3);
   };
 
   // Scene card first: the moment, and the hot thought in a bubble.
@@ -267,6 +268,7 @@ async function play(scene: Scene, free: boolean) {
   let faintShown = false;
   let t = 0;
   hint.textContent = T.hintTurn;
+  knob.setAttribute('aria-valuenow', String(Math.round(dial * 100)));
 
   const setDial = (v: number, turned: number) => {
     dial = clamp(v, 0, 1);
@@ -321,7 +323,7 @@ async function play(scene: Scene, free: boolean) {
 
   const addLabel = (s: Station) => {
     const e = EMOTION[s.id];
-    labels.append(h('span', { class: 'ir-label', style: { left: `${s.pos * 100}%`, '--c': e.color } as Partial<CSSStyleDeclaration> }, e.name));
+    labels.append(h('span', { class: 'ir-label', style: { left: `${s.pos * 100}%`, '--c': e.color } }, e.name));
   };
 
   let doneTuning: () => void = () => {};
@@ -427,6 +429,7 @@ async function play(scene: Scene, free: boolean) {
   await scope.sleep(600);
   if (!scope.alive) return;
   showSay(T.under, 'note');
+  scope.timeout(() => say.classList.contains('note') && say.classList.remove('show'), 5000);
   hint.textContent = T.edit;
   radio.hidden = true;
   tray.hidden = false;
@@ -445,8 +448,10 @@ async function play(scene: Scene, free: boolean) {
     rowEls.forEach((row, r) =>
       row.querySelectorAll<HTMLButtonElement>('.ir-tile').forEach((b, k) => b.setAttribute('aria-pressed', String(options[r][k] === slots[editable[r]].tile))),
     );
+  // "Say it" stays below the tray, so it's reachable however long the tray scrolls.
   const sayBtn = h('button', { class: 'btn warm ir-say-btn', type: 'button' }, T.say);
-  tray.append(...rowEls, sayBtn);
+  tray.append(...rowEls);
+  tray.after(sayBtn);
   markChosen();
 
   /**

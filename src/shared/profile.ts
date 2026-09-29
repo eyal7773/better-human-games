@@ -54,6 +54,14 @@ export function sanitize(raw: Partial<Profile>): Profile {
 
 export const profile: Profile = sanitize(load<Partial<Profile>>(KEY, {}));
 
+/**
+ * A Hebrew first-person word that agrees with the player: masculine, feminine,
+ * or both with a slash ("מרגיש/ה") when they chose not to say.
+ */
+export function heSelf(m: string, f: string, p: Profile = profile) {
+  return p.address === 'f' ? f : p.address === 'm' ? m : `${m}/ה`;
+}
+
 export function saveProfile() {
   store(KEY, profile);
 }

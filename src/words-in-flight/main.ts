@@ -101,8 +101,8 @@ const art = () =>
     'div',
     { class: 'wf-art' },
     h('span', { class: 'wf-art-word t' }, tr({ en: 'you ALWAYS', he: 'אתה תמיד', ar: 'أنت دائمًا' })),
-    h('span', { class: 'wf-art-word f' }, tr({ en: 'I feel', he: 'אני מרגיש', ar: 'أشعر' })),
-    h('span', { class: 'wf-art-word x' }, tr({ en: 'I need help', he: 'אני צריך עזרה', ar: 'أحتاج مساعدة' })),
+    h('span', { class: 'wf-art-word f' }, tr({ en: 'I feel', he: 'אני מרגיש/ה', ar: 'أشعر' })),
+    h('span', { class: 'wf-art-word x' }, tr({ en: 'I need help', he: 'אני צריך/ה עזרה', ar: 'أحتاج مساعدة' })),
   );
 
 function showMenu() {

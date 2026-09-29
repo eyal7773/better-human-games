@@ -218,8 +218,12 @@ async function play(scene: Scene, mine = false) {
   const resize = () => {
     W = root.clientWidth;
     H = root.clientHeight;
-    canvas.width = shadowLayer.width = W * dpr;
-    canvas.height = shadowLayer.height = H * dpr;
+    canvas.width = W * dpr;
+    canvas.height = H * dpr;
+    // The shadow is blurred anyway: its layer can stay at CSS resolution, which
+    // keeps the per-frame blur cheap on phones.
+    shadowLayer.width = W;
+    shadowLayer.height = H;
     geo.wx = 14;
     geo.wy = 8;
     geo.ww = W - 28;
@@ -353,7 +357,7 @@ async function play(scene: Scene, mine = false) {
     const size = P * Math.min(m, 9);
     sctx.setTransform(1, 0, 0, 1, 0, 0);
     sctx.clearRect(0, 0, shadowLayer.width, shadowLayer.height);
-    sctx.setTransform(dpr * size, 0, 0, dpr * size, dpr * wallX(sx), dpr * cy);
+    sctx.setTransform(size, 0, 0, size, wallX(sx), cy);
     sctx.fillStyle = '#1e1226';
     puppetPath(sctx, scene.puppet);
     sctx.fill();
@@ -365,7 +369,7 @@ async function play(scene: Scene, mine = false) {
     // Your own shadow roaring back.
     if (twoMonsters > 0) {
       const s2 = P * 5.2;
-      sctx.setTransform(dpr * s2, 0, 0, dpr * s2, dpr * (wx + ww * (sx < 0.5 ? 0.78 : 0.22)), dpr * (cy + wh * 0.1));
+      sctx.setTransform(s2, 0, 0, s2, wx + ww * (sx < 0.5 ? 0.78 : 0.22), cy + wh * 0.1);
       puppetPath(sctx, 'blob');
       sctx.fill();
       if (monsterPath(sctx, 1)) sctx.fill();
@@ -376,7 +380,7 @@ async function play(scene: Scene, mine = false) {
     ctx.save();
     ctx.globalAlpha = 0.82;
     ctx.filter = `blur(${Math.min(8, penumbra(m) * ww).toFixed(1)}px)`;
-    ctx.drawImage(shadowLayer, 0, 0, W, H);
+    ctx.drawImage(shadowLayer, wx, wy, ww, wh, wx, wy, ww, wh);
     ctx.restore();
     // Something real: the thorns that stay glow red.
     if (scene.real && m < 2) {

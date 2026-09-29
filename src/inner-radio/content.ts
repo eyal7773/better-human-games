@@ -1,10 +1,7 @@
 import { tr } from '../shared/i18n';
-import { profile } from '../shared/profile';
+import { heSelf } from '../shared/profile';
 import type { Who } from '../shared/face';
 import type { Emotion, Tile } from './logic';
-
-/** Hebrew verbs agree with the speaker: the player picks how to be addressed in "My home". */
-const heMe = (m: string, f: string) => (profile.address === 'f' ? f : profile.address === 'm' ? m : `${m}/ה`);
 
 type L = { en: string; he: string; ar: string };
 
@@ -156,8 +153,8 @@ export function feelingText(ids: readonly Emotion[]) {
 
 // Openers are the same everywhere: the angry one blames, the direct one owns the feeling.
 export const OPENERS: Tile[] = [
-  { v: -1, text: tr({ en: 'You always make me feel', he: `בגללך אני תמיד ${heMe('מרגיש', 'מרגישה')}`, ar: 'بسببك أشعر دائمًا' }) },
-  { v: 1, text: tr({ en: 'I feel', he: `אני ${heMe('מרגיש', 'מרגישה')}`, ar: 'أشعر' }) },
+  { v: -1, text: tr({ en: 'You always make me feel', he: `בגללך אני תמיד ${heSelf('מרגיש', 'מרגישה')}`, ar: 'بسببك أشعر دائمًا' }) },
+  { v: 1, text: tr({ en: 'I feel', he: `אני ${heSelf('מרגיש', 'מרגישה')}`, ar: 'أشعر' }) },
 ];
 
 const VAGUE: Tile = { v: 0, text: tr({ en: 'when… you know', he: 'כש... נו, ברור', ar: 'عندما... مفهوم' }) };
