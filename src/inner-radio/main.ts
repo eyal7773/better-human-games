@@ -1,5 +1,6 @@
-import './styles.css';
+// The shell first, so each game's styles come after (and win over) the shared ones.
 import { Shell } from '../shared/shell';
+import './styles.css';
 import { h, clamp, pick, rand, reducedMotion, Scope } from '../shared/dom';
 import { tr } from '../shared/i18n';
 import { vibrate } from '../shared/haptics';
