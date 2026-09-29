@@ -41,8 +41,11 @@ export const lang: Lang = detect();
 export const dir: 'ltr' | 'rtl' = LANGS.find((l) => l.code === lang)!.dir;
 export const isRTL = dir === 'rtl';
 
-document.documentElement.lang = lang;
-document.documentElement.dir = dir;
+// Guarded so content modules can be imported by tests running without a DOM.
+if (typeof document !== 'undefined') {
+  document.documentElement.lang = lang;
+  document.documentElement.dir = dir;
+}
 
 /** Picks the current language's string. English is the fallback. */
 export function tr<T>(s: { en: T; he: T; ar: T }): T {

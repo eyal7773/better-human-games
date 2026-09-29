@@ -108,6 +108,15 @@ export class AudioEngine {
     if (this.ctx) this.master.gain.setTargetAtTime(m ? 0 : 0.9, this.ctx.currentTime, 0.05);
   }
 
+  /**
+   * For games that build their own continuous layers (radio static, a roar,
+   * buzzing): the effects bus, the reverb send and the shared noise buffer.
+   * Null until unlock(). Muting still works — it acts on the master gain.
+   */
+  graph(): { ctx: AudioContext; out: AudioNode; verb: AudioNode; noise: AudioBuffer } | null {
+    return this.ctx ? { ctx: this.ctx, out: this.sfx, verb: this.verb, noise: this.noiseBuf } : null;
+  }
+
   private impulse(sec: number, decay: number) {
     const ctx = this.ctx!;
     const len = Math.floor(ctx.sampleRate * sec);
