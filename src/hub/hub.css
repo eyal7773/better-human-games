@@ -284,3 +284,90 @@ body {
 .gc-buddy3d {
   margin-inline-end: 110px;
 }
+
+/* ---------- the four anger games: small moving previews on hover ---------- */
+.gc-svg {
+  width: 210px;
+  margin-bottom: 18px;
+  overflow: visible;
+}
+.gc-art-radio {
+  background:
+    radial-gradient(90% 30% at 0% 100%, #ff8a5c 0 60%, transparent 61%),
+    linear-gradient(180deg, #ffd08a 0%, #ffab70 100%);
+}
+.gc-needle {
+  transition: transform 700ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.game-card:hover .gc-needle,
+.game-card:focus .gc-needle {
+  transform: translateX(44px);
+}
+.gc-art-words {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background:
+    radial-gradient(rgba(255, 255, 255, 0.35) 2px, transparent 2.4px) 0 0 / 24px 24px,
+    linear-gradient(180deg, #7ec8ff 0%, #c9ebff 100%);
+}
+.gc-word {
+  padding: 6px 16px;
+  border-radius: 999px;
+  border: 3px solid;
+  font-weight: 700;
+  box-shadow: 0 4px 0 rgba(29, 43, 79, 0.15);
+  transition: transform 300ms ease, opacity 300ms;
+}
+.gc-word.t {
+  background: #ff5a4e;
+  border-color: #b3261e;
+  color: #fff;
+  transform: rotate(-6deg) translateX(-34px);
+}
+.gc-word.f {
+  background: #c6f3da;
+  border-color: #1f9e6d;
+  color: #0a5e43;
+  transform: rotate(3deg) translateX(28px);
+}
+.gc-word.x {
+  background: #dff0ff;
+  border-color: #2f7fd8;
+  color: #134a8c;
+}
+.game-card:hover .gc-word.t,
+.game-card:focus .gc-word.t {
+  transform: rotate(-20deg) translate(-60px, 10px);
+  opacity: 0.3;
+}
+.gc-art-shadow {
+  background: radial-gradient(70% 70% at 50% 40%, #fff3cf 0%, #e2b877 55%, #6b3f2a 100%);
+}
+.gc-monster {
+  transform-origin: 100px 118px;
+  transition: transform 600ms ease;
+}
+.game-card:hover .gc-monster,
+.game-card:focus .gc-monster {
+  transform: scale(0.45);
+}
+.gc-art-fortress {
+  background:
+    radial-gradient(rgba(255, 255, 255, 0.3) 2px, transparent 2.4px) 0 0 / 24px 24px,
+    linear-gradient(180deg, #9fe0ff 0%, #d8f3ff 60%, #b8ec9a 100%);
+}
+.gc-bubble1,
+.gc-bubble2 {
+  transition: transform 900ms ease;
+}
+.game-card:hover .gc-bubble1,
+.game-card:focus .gc-bubble1 {
+  transform: translate(46px, 26px) scale(0.6);
+}
+.game-card:hover .gc-bubble2,
+.game-card:focus .gc-bubble2 {
+  transform: translate(-48px, 16px) scale(0.6);
+}
