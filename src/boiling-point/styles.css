@@ -1431,252 +1431,122 @@ body {
   }
 }
 
-/* ---------- choice: pause in the space between what happened and my response ---------- */
-.gap {
-  margin: 0 0 14px;
-}
-.gap-card {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 14px;
-  border-radius: 16px;
-  background: #eef3fb;
-  font-weight: 700;
-  font-size: 1.08rem;
-  line-height: 1.25;
-  transition: padding 360ms ease, font-size 360ms ease, background 360ms ease, opacity 360ms ease;
-}
-.gap-mine {
-  background: #f1eefb;
-}
-.gap-lock {
-  margin-inline-start: auto;
-}
-/* the space: a dashed line between the two questions, the slot on it, the hand beside it */
-.gap-mid {
+/* ---------- choice: the "thinking" slider ---------- */
+.think {
   position: relative;
-  display: grid;
-  grid-template-columns: 1fr 64px 1fr;
-  align-items: center;
-  height: 78px;
-  transition: height 360ms ease;
+  height: 64px;
+  margin: 0 0 14px;
+  border-radius: 999px;
+  background: #eef3fb;
+  box-shadow: inset 0 2px 4px rgba(29, 43, 79, 0.08);
+  overflow: hidden;
+  touch-action: pan-y;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: height 280ms ease, margin 280ms ease, opacity 280ms ease;
 }
-.gap-mid::before {
-  content: '';
+.think.held {
+  cursor: grabbing;
+}
+.think:focus-visible {
+  outline: 3px solid var(--play);
+  outline-offset: 3px;
+}
+.think-fill {
   position: absolute;
   inset-block: 0;
-  left: calc(50% - 1px);
-  border-left: 2px dashed rgba(29, 43, 79, 0.2);
+  inset-inline-start: 0;
+  width: 64px;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #ffd9a8, #bfeedd);
 }
-/* once the hand is in: the first question folds small, the second heads the answers */
-.gap.paused .gap-what {
-  padding: 6px 12px;
-  font-size: 0.92rem;
-  opacity: 0.75;
+[dir='rtl'] .think-fill {
+  background: linear-gradient(270deg, #ffd9a8, #bfeedd);
 }
-.gap.paused .gap-mid {
-  height: 56px;
-}
-.gap.paused .gap-mine {
-  padding: 4px 2px 0;
-  background: transparent;
-  font-size: 1.22rem;
-}
-.gap-slot {
-  position: relative;
-  z-index: 1;
-  justify-self: center;
-  display: grid;
-  place-items: center;
-  width: 58px;
-  height: 58px;
-  border-radius: 50%;
-  border: 3px dashed rgba(240, 67, 58, 0.55);
-  color: rgba(240, 67, 58, 0.22);
-  font-size: 1.7rem;
-  transition: transform 160ms, border-color 160ms, background 160ms;
-}
-.gap-slot {
-  background: var(--paper);
-}
-.gap-slot.near {
-  transform: scale(1.12);
-  border-color: var(--boil);
-  background: #fff0ee;
-}
-.gap.paused .gap-slot {
-  border: 0;
-  color: #fff;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 55%),
-    var(--boil);
-  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.35), 0 4px 0 #a51f1a;
-  animation: gap-land 360ms cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-@keyframes gap-land {
-  from {
-    transform: scale(1.25);
-  }
-}
-.gap.paused .gap-hand {
-  visibility: hidden;
-}
-.gap-home {
-  position: relative;
-  display: flex;
-  justify-content: center;
-}
-.gap-hand,
-.gap-ghost {
-  display: grid;
-  place-items: center;
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  font-size: 1.7rem;
-  line-height: 1;
-}
-.gap-hand {
-  appearance: none;
-  border: 0;
-  position: relative;
-  z-index: 2;
-  cursor: grab;
-  touch-action: none;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 55%),
-    var(--boil);
-  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.35), 0 5px 0 #a51f1a, 0 12px 24px -10px rgba(165, 31, 26, 0.7);
-  animation: gap-wiggle 2.6s ease-in-out infinite;
-}
-.gap-hand.held {
-  cursor: grabbing;
-  animation: none;
-  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.35), 0 10px 22px -6px rgba(165, 31, 26, 0.7);
-}
-.gap-hand[disabled] {
-  opacity: 1;
-}
-.gap-ghost {
-  position: absolute;
-  top: 0;
-  left: calc(50% - 28px);
-  background: rgba(240, 67, 58, 0.55);
-  pointer-events: none;
-}
-@keyframes gap-wiggle {
-  0%,
-  80%,
-  100% {
-    rotate: 0deg;
-  }
-  85% {
-    rotate: -12deg;
-  }
-  90% {
-    rotate: 10deg;
-  }
-  95% {
-    rotate: -6deg;
-  }
-}
-.gap-hint {
-  margin: 10px 0 0;
-  text-align: center;
-  color: var(--ink-soft);
-  font-size: 0.95rem;
-  transition: color 200ms;
-}
-.gap-hint.nudge {
-  color: var(--ink);
-  font-weight: 600;
-}
-.gap.paused .gap-hint {
-  visibility: hidden;
-  height: 0;
-  margin: 0;
-}
-
-
-/* short screens (iPhone SE and the like): tighter, so all four answers fit without scrolling */
-@media (max-height: 720px) {
-  .choice-title {
-    font-size: 1.35rem;
-    margin-bottom: 8px;
-  }
-  .thinker {
-    width: 44px;
-    height: 38px;
-  }
-  .choice-situation {
-    padding: 9px 12px;
-    font-size: 1.05rem;
-    margin-bottom: 10px;
-  }
-  .gap-mid {
-    height: 70px;
-  }
-  .gap.paused .gap-mid {
-    height: 46px;
-  }
-  .gap.paused .gap-mine {
-    font-size: 1.08rem;
-  }
-  .gap.paused .gap-slot {
-    width: 44px;
-    height: 44px;
-    font-size: 1.3rem;
-  }
-  .choice-opt {
-    padding: 10px 14px;
-    font-size: 1rem;
-  }
-  .choice-options {
-    gap: 8px;
-  }
-}
-
-/* ---------- choice ---------- */
-.choice-overlay,
-.summary-overlay {
+.think-label {
   position: absolute;
   inset: 0;
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
-  padding: 12px 12px calc(12px + var(--safe-bottom));
-  background: rgba(29, 43, 79, 0.55);
-  backdrop-filter: blur(3px);
-  animation: fade-in 260ms ease-out;
+  gap: 8px;
+  padding-inline-start: 56px;
+  color: var(--ink-soft);
+  font-weight: 600;
+  font-size: 1.02rem;
+  pointer-events: none;
 }
-.choice-overlay.closing {
-  transition: opacity 260ms;
+.think-arrows {
+  letter-spacing: -2px;
+  font-weight: 700;
+  animation: think-shimmer 1.6s ease-in-out infinite;
+}
+@keyframes think-shimmer {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+.think-knob,
+.think-ghost {
+  position: absolute;
+  top: 4px;
+  inset-inline-start: 4px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 3px 0 rgba(29, 43, 79, 0.18), 0 8px 16px -8px rgba(29, 43, 79, 0.5);
+  display: grid;
+  place-items: center;
+  padding: 5px;
+}
+.think-knob svg,
+.think-ghost svg {
+  width: 100%;
+  height: 100%;
+}
+.think-ghost {
+  opacity: 0;
+  pointer-events: none;
+  background: rgba(255, 255, 255, 0.7);
+}
+.think-bubble {
+  position: absolute;
+  top: 2px;
+  font-size: 0.9rem;
+  pointer-events: none;
+  animation: think-bubble 900ms ease-out forwards;
+}
+@keyframes think-bubble {
+  from {
+    transform: translateY(14px) scale(0.6);
+    opacity: 0.9;
+  }
+  to {
+    transform: translateY(-14px) scale(1);
+    opacity: 0;
+  }
+}
+.think.done .think-knob {
+  box-shadow: 0 0 0 4px var(--lagoon), 0 8px 16px -8px rgba(29, 43, 79, 0.5);
+}
+.think.gone {
+  height: 0;
+  margin: 0;
   opacity: 0;
 }
-.choice-card,
-.summary-card {
-  width: 100%;
-  max-width: 480px;
-  max-height: 100%;
-  overflow-y: auto;
-  padding: 22px 20px 20px;
-  border-radius: var(--r-lg);
-  background: var(--paper);
-  box-shadow: 0 24px 60px -20px rgba(20, 10, 30, 0.7);
-  animation: card-up 380ms cubic-bezier(0.34, 1.3, 0.64, 1);
+.think-coach {
+  margin: -6px 0 12px;
+  text-align: center;
+  color: var(--ink-soft);
+  font-size: 0.95rem;
 }
-@keyframes card-up {
-  from {
-    transform: translateY(60px);
-    opacity: 0;
-  }
-}
-@keyframes fade-in {
-  from {
-    opacity: 0;
-  }
-}
+
 /* the question that frames it all: big enough that the eye can't skip it */
 .choice-title {
   margin: 0 0 12px;
@@ -1735,6 +1605,71 @@ body {
   font-size: 1.15rem;
   font-weight: 600;
   line-height: 1.4;
+}
+
+/* short screens (iPhone SE and the like): tighter, so all four answers fit without scrolling */
+@media (max-height: 720px) {
+  .choice-title {
+    font-size: 1.35rem;
+    margin-bottom: 8px;
+  }
+  .thinker {
+    width: 44px;
+    height: 38px;
+  }
+  .choice-situation {
+    padding: 9px 12px;
+    font-size: 1.05rem;
+    margin-bottom: 10px;
+  }
+  .choice-opt {
+    padding: 10px 14px;
+    font-size: 1rem;
+  }
+  .choice-options {
+    gap: 8px;
+  }
+}
+
+/* ---------- choice ---------- */
+.choice-overlay,
+.summary-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 12px 12px calc(12px + var(--safe-bottom));
+  background: rgba(29, 43, 79, 0.55);
+  backdrop-filter: blur(3px);
+  animation: fade-in 260ms ease-out;
+}
+.choice-overlay.closing {
+  transition: opacity 260ms;
+  opacity: 0;
+}
+.choice-card,
+.summary-card {
+  width: 100%;
+  max-width: 480px;
+  max-height: 100%;
+  overflow-y: auto;
+  padding: 22px 20px 20px;
+  border-radius: var(--r-lg);
+  background: var(--paper);
+  box-shadow: 0 24px 60px -20px rgba(20, 10, 30, 0.7);
+  animation: card-up 380ms cubic-bezier(0.34, 1.3, 0.64, 1);
+}
+@keyframes card-up {
+  from {
+    transform: translateY(60px);
+    opacity: 0;
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
 }
 .fuse {
   position: relative;
