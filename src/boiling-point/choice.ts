@@ -28,9 +28,10 @@ const THINKER = `<svg viewBox="0 0 64 56" aria-hidden="true">
 </svg>`;
 
 const G = {
-  what: tr({ en: 'What happened', he: 'מה קרה', ar: 'ما حدث' }),
-  mine: tr({ en: 'My response', he: 'התגובה שלי', ar: 'ردّي' }),
-  hint: tr({ en: 'Drag ✋ into the space between them', he: 'גררו את ✋ אל הרווח שביניהם', ar: 'اسحبوا ✋ إلى المسافة بينهما' }),
+  title: tr({ en: 'How will you choose to respond?', he: 'איך תבחרו להגיב?', ar: 'كيف ستختارون أن تردّوا؟' }),
+  what: tr({ en: 'What actually happened?', he: 'מה קרה בעצם?', ar: 'ما الذي حدث فعلًا؟' }),
+  mine: tr({ en: 'What do I want to happen now?', he: 'מה אני רוצה שיקרה עכשיו?', ar: 'ماذا أريد أن يحدث الآن؟' }),
+  hint: tr({ en: 'Drag ✋ into the space', he: 'גררו את ✋ אל הרווח', ar: 'اسحبوا ✋ إلى المسافة' }),
   coach: tr({
     en: 'Between what happened and your response there is a space. That’s where you pause.',
     he: 'בין מה שקרה לבין התגובה שלכם יש רווח. שם עוצרים.',
@@ -43,8 +44,10 @@ const G = {
 const SNAP = 56;
 
 /**
- * Situation → you put the pause hand into the space between "what happened"
- * and "my response" → the responses open and the fuse is lit.
+ * "How will you choose to respond?" → the situation → you put the pause hand
+ * into the space between "What actually happened?" and "What do I want to
+ * happen now?" → the top folds away, the second question heads the
+ * responses, and the fuse is lit.
  */
 export function runChoice(
   layer: HTMLElement,
@@ -56,25 +59,26 @@ export function runChoice(
   const { choiceSeconds: seconds } = timing;
   return new Promise((resolve) => {
     const fuse = h('div', { class: 'fuse' }, h('div', { class: 'fuse-line' }), h('div', { class: 'fuse-spark' }));
-    const list = h('div', { class: 'choice-options', role: 'group', 'aria-label': tr({ en: 'How do you respond?', he: 'איך מגיבים?', ar: 'كيف تردّون؟' }) });
+    const list = h('div', { class: 'choice-options', role: 'group', 'aria-label': G.mine });
     const feedback = h('div', { class: 'choice-feedback', 'aria-live': 'polite' });
-    // the space between what happened and my response, and the hand that pauses there
+    // What actually happened? — a space with the pause hand beside it — What do I want to happen now?
+    // Read top to bottom, in the order it happens; the hand comes in from the side.
     const slot = h('div', { class: 'gap-slot', 'aria-hidden': 'true' }, '✋');
     const lockIcon = h('span', { class: 'gap-lock', 'aria-hidden': 'true' }, '🔒');
-    const row = h(
-      'div',
-      { class: 'gap-row' },
-      h('span', { class: 'gap-chip' }, h('span', { 'aria-hidden': 'true' }, '💥'), G.what),
-      slot,
-      h('span', { class: 'gap-chip gap-mine' }, h('span', { 'aria-hidden': 'true' }, '💬'), G.mine, lockIcon),
-    );
     const hand = h('button', { class: 'gap-hand', type: 'button', 'aria-label': G.hand }, '✋');
     const hint = h('p', { class: 'gap-hint' }, timing.coach ? G.coach : G.hint);
-    const gate = h('div', { class: 'gap' }, row, h('div', { class: 'gap-home' }, hand), hint);
+    const gate = h(
+      'div',
+      { class: 'gap' },
+      h('div', { class: 'gap-card gap-what' }, h('span', { 'aria-hidden': 'true' }, '💥'), h('span', {}, G.what)),
+      h('div', { class: 'gap-mid' }, h('span', {}), slot, h('div', { class: 'gap-home' }, hand)),
+      h('div', { class: 'gap-card gap-mine' }, h('span', { 'aria-hidden': 'true' }, '💬'), h('span', {}, G.mine), lockIcon),
+      hint,
+    );
     const card = h(
       'div',
-      { class: 'choice-card', role: 'dialog', 'aria-modal': 'true', 'aria-label': tr({ en: 'A moment before you respond', he: 'רגע לפני שמגיבים', ar: 'لحظة قبل أن تردّوا' }) },
-      h('p', { class: 'choice-kicker' }, h('span', { class: 'thinker', html: THINKER }), h('span', {}, tr({ en: 'A moment before you respond', he: 'רגע לפני שמגיבים', ar: 'لحظة قبل أن تردّوا' }))),
+      { class: 'choice-card', role: 'dialog', 'aria-modal': 'true', 'aria-label': G.title },
+      h('h2', { class: 'choice-title' }, h('span', { class: 'thinker', html: THINKER }), h('span', {}, G.title)),
       h('p', { class: 'choice-situation' }, d.situation),
       gate,
       fuse,
@@ -153,6 +157,8 @@ export function runChoice(
         });
         // keyboard users continue to the first answer; on touch nothing is pre-selected
         if (byKeyboard) buttons[0]?.focus({ preventScroll: true });
+        // on a short screen, make sure every answer is in view (the title has done its job)
+        scope.timeout(() => buttons[buttons.length - 1]?.scrollIntoView({ block: 'nearest', behavior: reducedMotion() ? 'auto' : 'smooth' }), 420);
         fuse.style.setProperty('--dur', `${seconds}s`);
         fuse.classList.add('lit');
         const tick = () => {
