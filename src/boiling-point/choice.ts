@@ -62,7 +62,7 @@ const MIN_SLIDE = 1.2;
 const BUBBLES = ['💭', '🫁', '💙'];
 
 /**
- * "How will you choose to respond?" → the situation → a "thinking" slider you
+ * The situation → "How will you choose to respond?" → a "thinking" slider you
  * slide to the end once you've thought (the face cools from angry to calm on
  * the way) → the four responses open and only then is the fuse lit.
  */
@@ -95,8 +95,9 @@ export function runChoice(
     const card = h(
       'div',
       { class: 'choice-card', role: 'dialog', 'aria-modal': 'true', 'aria-label': T.title },
-      h('h2', { class: 'choice-title' }, titleFace, h('span', {}, T.title)),
+      // the situation first, then the question it raises, right above the slider
       h('p', { class: 'choice-situation' }, d.situation),
+      h('h2', { class: 'choice-title' }, titleFace, h('span', {}, T.title)),
       track,
       coach,
       fuse,
