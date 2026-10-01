@@ -22,7 +22,6 @@ const T = {
   howTo: tr({ en: 'How to play', he: 'איך משחקים', ar: 'كيف نلعب' }),
   settings: tr({ en: 'Settings', he: 'הגדרות', ar: 'الإعدادات' }),
   choiceTime: tr({ en: 'Time to choose a response', he: 'זמן לבחירת תגובה', ar: 'وقت اختيار الرد' }),
-  readTime: tr({ en: 'Time to read before the answers appear', he: 'זמן קריאה לפני שהתשובות מופיעות', ar: 'وقت القراءة قبل ظهور الإجابات' }),
   pausesInTime: tr({ en: 'Paused in time', he: 'עצירות בזמן', ar: 'توقّفات في الوقت' }),
   calmResponses: tr({ en: 'Calm responses', he: 'תגובות רגועות', ar: 'ردود هادئة' }),
   zenPoints: tr({ en: 'Zen points', he: 'נקודות זן', ar: 'نقاط الهدوء' }),
@@ -194,7 +193,7 @@ function howTo() {
 
 function settings() {
   const close = () => overlay.remove();
-  const secondsPicker = (label: string, times: number[], key: 'choiceSeconds' | 'readSeconds') => {
+  const secondsPicker = (label: string, times: number[], key: 'choiceSeconds') => {
     const seg = h(
       'div',
       { class: 'segmented', role: 'radiogroup', 'aria-label': label },
@@ -239,17 +238,6 @@ function settings() {
         'a',
         { class: 'btn ghost', href: new URL('../?profile=edit', location.href).href },
         tr({ en: 'Edit my home', he: 'עריכת הבית שלי', ar: 'تعديل بيتي' }),
-      ),
-      h('h3', {}, T.readTime),
-      secondsPicker(T.readTime, [2, 4, 6, 8], 'readSeconds'),
-      h(
-        'p',
-        { class: 'sheet-note' },
-        tr({
-          en: 'Default: 4 seconds to read the situation before the answers show up.',
-          he: 'במקור: 4 שניות לקרוא את המצב לפני שהתשובות מופיעות.',
-          ar: 'الافتراضي: 4 ثوانٍ لقراءة الموقف قبل ظهور الإجابات.',
-        }),
       ),
       h('h3', {}, T.choiceTime),
       secondsPicker(T.choiceTime, [15, 24, 36], 'choiceSeconds'),
@@ -380,7 +368,6 @@ async function evening() {
         level: baseLevel + i * 0.6,
         coach: save.rounds < 2,
         choiceSeconds: save.choiceSeconds,
-        readSeconds: save.readSeconds,
       },
       audio,
       fx,

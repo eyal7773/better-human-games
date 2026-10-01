@@ -1431,6 +1431,156 @@ body {
   }
 }
 
+/* ---------- choice: pause in the space between what happened and my response ---------- */
+.gap {
+  margin: 0 0 14px;
+}
+.gap-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  transition: gap 420ms cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+.gap.paused .gap-row {
+  gap: 18px;
+}
+.gap-chip {
+  flex: 1 1 0;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 8px 10px;
+  border-radius: 14px;
+  background: #eef3fb;
+  font-weight: 600;
+  font-size: 0.95rem;
+  line-height: 1.2;
+  text-align: center;
+}
+.gap-mine {
+  background: #f1eefb;
+}
+.gap.paused .gap-mine {
+  background: #d8f3ec;
+}
+.gap-slot {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  border: 3px dashed rgba(240, 67, 58, 0.55);
+  color: rgba(240, 67, 58, 0.22);
+  font-size: 1.7rem;
+  transition: transform 160ms, border-color 160ms, background 160ms;
+}
+.gap-slot.near {
+  transform: scale(1.12);
+  border-color: var(--boil);
+  background: rgba(240, 67, 58, 0.08);
+}
+.gap.paused .gap-slot {
+  border: 0;
+  color: #fff;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 55%),
+    var(--boil);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.35), 0 4px 0 #a51f1a;
+  animation: gap-land 360ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes gap-land {
+  from {
+    transform: scale(1.25);
+  }
+}
+.gap.paused .gap-hand {
+  visibility: hidden;
+}
+.gap-home {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  margin-top: 14px;
+}
+.gap-hand,
+.gap-ghost {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  font-size: 1.7rem;
+  line-height: 1;
+}
+.gap-hand {
+  appearance: none;
+  border: 0;
+  position: relative;
+  z-index: 2;
+  cursor: grab;
+  touch-action: none;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 55%),
+    var(--boil);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.35), 0 5px 0 #a51f1a, 0 12px 24px -10px rgba(165, 31, 26, 0.7);
+  animation: gap-wiggle 2.6s ease-in-out infinite;
+}
+.gap-hand.held {
+  cursor: grabbing;
+  animation: none;
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.35), 0 10px 22px -6px rgba(165, 31, 26, 0.7);
+}
+.gap-hand[disabled] {
+  opacity: 1;
+}
+.gap-ghost {
+  position: absolute;
+  top: 0;
+  left: calc(50% - 28px);
+  background: rgba(240, 67, 58, 0.55);
+  pointer-events: none;
+}
+@keyframes gap-wiggle {
+  0%,
+  80%,
+  100% {
+    rotate: 0deg;
+  }
+  85% {
+    rotate: -12deg;
+  }
+  90% {
+    rotate: 10deg;
+  }
+  95% {
+    rotate: -6deg;
+  }
+}
+.gap-hint {
+  margin: 10px 0 0;
+  text-align: center;
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+  transition: color 200ms;
+}
+.gap-hint.nudge {
+  color: var(--ink);
+  font-weight: 600;
+}
+.gap.paused .gap-hint {
+  visibility: hidden;
+  height: 0;
+  margin: 0;
+}
+.gap.paused .gap-home {
+  margin-top: 0;
+  height: 0;
+}
+
 /* ---------- choice ---------- */
 .choice-overlay,
 .summary-overlay {
@@ -1582,18 +1732,9 @@ body {
 .choice-overlay:not(.live) .choice-opt {
   visibility: hidden;
 }
-.choice-overlay:not(.live) .choice-options::before {
-  content: 'קוראים את המצב…';
-  color: var(--ink-soft);
-  text-align: center;
-  padding-top: 8px;
-}
-.choice-overlay:not(.live) .choice-options {
-  position: relative;
-}
-.choice-overlay:not(.live) .choice-options::before {
-  position: absolute;
-  inset: 0 0 auto;
+.choice-overlay:not(.live) .choice-options,
+.choice-overlay:not(.live) .fuse {
+  display: none;
 }
 .choice-opt {
   appearance: none;

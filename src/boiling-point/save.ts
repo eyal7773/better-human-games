@@ -9,7 +9,6 @@ export interface Save {
   bestChoices: number;
   muted: boolean;
   choiceSeconds: number;
-  readSeconds: number; // reading time before the response options appear
   seenHowTo: boolean;
   recentDilemmas: string[];
 }
@@ -27,7 +26,6 @@ const DEFAULTS: Save = {
   bestChoices: 0,
   muted: false,
   choiceSeconds: 15,
-  readSeconds: 4,
   seenHowTo: false,
   recentDilemmas: [],
 };

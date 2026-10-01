@@ -28,7 +28,6 @@ export interface RoundSpec {
   level: number;
   coach: boolean; // show first-time guidance
   choiceSeconds: number;
-  readSeconds: number;
 }
 
 export interface RoundResult {

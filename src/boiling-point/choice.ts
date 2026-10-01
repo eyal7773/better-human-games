@@ -1,4 +1,4 @@
-import { h, shuffle, type Scope } from '../shared/dom';
+import { h, reducedMotion, shuffle, type Scope } from '../shared/dom';
 import type { AudioEngine } from '../shared/audio';
 import { vibrate } from '../shared/haptics';
 import type { Dilemma, Verdict } from './content';
@@ -27,24 +27,56 @@ const THINKER = `<svg viewBox="0 0 64 56" aria-hidden="true">
   <path d="M34 50 q-4 -8 -2 -12 q2 -3 5 -1 q2 2 0 6" fill="#ffc61a" stroke="#1d2b4f" stroke-width="2" stroke-linejoin="round"/>
 </svg>`;
 
-/** Situation → a few seconds to read → pick a response before the fuse burns out. */
+const G = {
+  what: tr({ en: 'What happened', he: 'מה קרה', ar: 'ما حدث' }),
+  mine: tr({ en: 'My response', he: 'התגובה שלי', ar: 'ردّي' }),
+  hint: tr({ en: 'Drag ✋ into the space between them', he: 'גררו את ✋ אל הרווח שביניהם', ar: 'اسحبوا ✋ إلى المسافة بينهما' }),
+  coach: tr({
+    en: 'Between what happened and your response there is a space. That’s where you pause.',
+    he: 'בין מה שקרה לבין התגובה שלכם יש רווח. שם עוצרים.',
+    ar: 'بين ما حدث وبين ردّكم مسافة. هناك نتوقّف.',
+  }),
+  hand: tr({ en: 'Pause in the space', he: 'לעצור ברווח', ar: 'توقّفوا في المسافة' }),
+};
+
+/** How close (css px) the hand must come to the space to snap in: it's about pausing, not aiming. */
+const SNAP = 56;
+
+/**
+ * Situation → you put the pause hand into the space between "what happened"
+ * and "my response" → the responses open and the fuse is lit.
+ */
 export function runChoice(
   layer: HTMLElement,
   scope: Scope,
   audio: AudioEngine,
   d: Dilemma,
-  timing: { readSeconds: number; choiceSeconds: number },
+  timing: { choiceSeconds: number; coach: boolean },
 ): Promise<ChoiceOutcome> {
-  const { readSeconds, choiceSeconds: seconds } = timing;
+  const { choiceSeconds: seconds } = timing;
   return new Promise((resolve) => {
     const fuse = h('div', { class: 'fuse' }, h('div', { class: 'fuse-line' }), h('div', { class: 'fuse-spark' }));
     const list = h('div', { class: 'choice-options', role: 'group', 'aria-label': tr({ en: 'How do you respond?', he: 'איך מגיבים?', ar: 'كيف تردّون؟' }) });
     const feedback = h('div', { class: 'choice-feedback', 'aria-live': 'polite' });
+    // the space between what happened and my response, and the hand that pauses there
+    const slot = h('div', { class: 'gap-slot', 'aria-hidden': 'true' }, '✋');
+    const lockIcon = h('span', { class: 'gap-lock', 'aria-hidden': 'true' }, '🔒');
+    const row = h(
+      'div',
+      { class: 'gap-row' },
+      h('span', { class: 'gap-chip' }, h('span', { 'aria-hidden': 'true' }, '💥'), G.what),
+      slot,
+      h('span', { class: 'gap-chip gap-mine' }, h('span', { 'aria-hidden': 'true' }, '💬'), G.mine, lockIcon),
+    );
+    const hand = h('button', { class: 'gap-hand', type: 'button', 'aria-label': G.hand }, '✋');
+    const hint = h('p', { class: 'gap-hint' }, timing.coach ? G.coach : G.hint);
+    const gate = h('div', { class: 'gap' }, row, h('div', { class: 'gap-home' }, hand), hint);
     const card = h(
       'div',
       { class: 'choice-card', role: 'dialog', 'aria-modal': 'true', 'aria-label': tr({ en: 'A moment before you respond', he: 'רגע לפני שמגיבים', ar: 'لحظة قبل أن تردّوا' }) },
       h('p', { class: 'choice-kicker' }, h('span', { class: 'thinker', html: THINKER }), h('span', {}, tr({ en: 'A moment before you respond', he: 'רגע לפני שמגיבים', ar: 'لحظة قبل أن تردّوا' }))),
       h('p', { class: 'choice-situation' }, d.situation),
+      gate,
       fuse,
       list,
       feedback,
@@ -98,29 +130,126 @@ export function runChoice(
       }),
     );
 
-    // Reading head start, then the fuse is lit.
-    scope.timeout(() => {
-      overlay.classList.add('live');
-      buttons.forEach((b, i) => {
-        b.disabled = false;
-        b.animate([{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }], {
-          duration: 260,
-          delay: i * 70,
-          fill: 'backwards',
-          easing: 'ease-out',
+    /** The pause is in: the space opens, the responses come out and the fuse is lit. */
+    let open = false;
+    const unlock = (byKeyboard = false) => {
+      if (open) return;
+      open = true;
+      gate.classList.add('paused');
+      lockIcon.textContent = '🔓';
+      hand.disabled = true;
+      audio.pluck(4);
+      vibrate(15);
+      scope.timeout(() => {
+        overlay.classList.add('live');
+        buttons.forEach((b, i) => {
+          b.disabled = false;
+          b.animate([{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }], {
+            duration: 260,
+            delay: i * 70,
+            fill: 'backwards',
+            easing: 'ease-out',
+          });
         });
-      });
-      fuse.style.setProperty('--dur', `${seconds}s`);
-      fuse.classList.add('lit');
-      const tick = () => {
-        if (settled) return;
-        remaining--;
-        // only the last five seconds tick, so the long fuse stays quiet while reading
-        if (remaining <= 5) audio.tick(remaining <= 2);
-        if (remaining <= 0) settle('timeout');
-        else scope.timeout(tick, 1000);
+        // keyboard users continue to the first answer; on touch nothing is pre-selected
+        if (byKeyboard) buttons[0]?.focus({ preventScroll: true });
+        fuse.style.setProperty('--dur', `${seconds}s`);
+        fuse.classList.add('lit');
+        const tick = () => {
+          if (settled) return;
+          remaining--;
+          // only the last five seconds tick, so the long fuse stays quiet while reading
+          if (remaining <= 5) audio.tick(remaining <= 2);
+          if (remaining <= 0) settle('timeout');
+          else scope.timeout(tick, 1000);
+        };
+        scope.timeout(tick, 1000);
+      }, 380);
+    };
+
+    const centre = (el: Element) => {
+      const r = el.getBoundingClientRect();
+      return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+    };
+    /** Moves the hand by (dx, dy) from where it rests. */
+    const place = (dx: number, dy: number, glide = false) => {
+      hand.style.transition = glide ? 'transform 260ms cubic-bezier(0.34, 1.4, 0.64, 1)' : 'none';
+      hand.style.transform = `translate(${dx}px, ${dy}px)`;
+    };
+    const toSlot = () => {
+      const a = centre(hand.parentElement!);
+      const b = centre(slot);
+      return { dx: b.x - a.x, dy: b.y - a.y };
+    };
+    const snapIn = (byKeyboard = false) => {
+      if (open) return;
+      const { dx, dy } = toSlot();
+      place(dx, dy, true);
+      hand.disabled = true;
+      // once it lands, the space takes the hand and opens up
+      scope.timeout(() => unlock(byKeyboard), 240);
+    };
+
+    /** A see-through hand shows the move: from the hand into the space. */
+    let demoing = false;
+    const demo = () => {
+      if (open || demoing || reducedMotion()) return;
+      demoing = true;
+      hint.classList.add('nudge');
+      const ghost = h('span', { class: 'gap-ghost', 'aria-hidden': 'true' }, '✋');
+      hand.parentElement!.append(ghost);
+      const { dx, dy } = toSlot();
+      const anim = ghost.animate(
+        [
+          { transform: 'translate(0, 0)', opacity: 0 },
+          { transform: 'translate(0, 0)', opacity: 0.7, offset: 0.15 },
+          { transform: `translate(${dx}px, ${dy}px)`, opacity: 0.7, offset: 0.75 },
+          { transform: `translate(${dx}px, ${dy}px)`, opacity: 0 },
+        ],
+        { duration: 1300, easing: 'ease-in-out' },
+      );
+      anim.onfinish = () => {
+        ghost.remove();
+        hint.classList.remove('nudge');
+        demoing = false;
       };
-      scope.timeout(tick, 1000);
-    }, readSeconds * 1000);
+    };
+    if (timing.coach) scope.timeout(demo, 1200);
+
+    let drag: { id: number; x: number; y: number; moved: boolean } | null = null;
+    hand.addEventListener('pointerdown', (e) => {
+      if (open) return;
+      e.preventDefault();
+      hand.setPointerCapture(e.pointerId);
+      drag = { id: e.pointerId, x: e.clientX, y: e.clientY, moved: false };
+      hand.classList.add('held');
+    });
+    hand.addEventListener('pointermove', (e) => {
+      if (!drag || e.pointerId !== drag.id) return;
+      const dx = e.clientX - drag.x;
+      const dy = e.clientY - drag.y;
+      if (Math.hypot(dx, dy) > 6) drag.moved = true;
+      place(dx, dy);
+      const near = Math.hypot(centre(hand).x - centre(slot).x, centre(hand).y - centre(slot).y) < SNAP;
+      slot.classList.toggle('near', near);
+    });
+    const release = (e: PointerEvent) => {
+      if (!drag || e.pointerId !== drag.id) return;
+      const moved = drag.moved;
+      drag = null;
+      hand.classList.remove('held');
+      slot.classList.remove('near');
+      if (Math.hypot(centre(hand).x - centre(slot).x, centre(hand).y - centre(slot).y) < SNAP) return snapIn();
+      place(0, 0, true);
+      // a tap instead of a drag: show how it's done
+      if (!moved) demo();
+    };
+    hand.addEventListener('pointerup', release);
+    hand.addEventListener('pointercancel', release);
+    // keyboards and screen readers: Enter or Space puts the hand in the space
+    hand.addEventListener('click', (e) => {
+      if ((e as MouseEvent).detail === 0) snapIn(true);
+    });
+    hand.focus({ preventScroll: true, focusVisible: false } as FocusOptions);
   });
 }
