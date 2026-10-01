@@ -12,6 +12,7 @@ import { allowed, fits, weight, weightedShuffle } from '../shared/profile';
 import { playRound, type CalmKind, type PlayView, type RoundResult, type TaskKind } from './round';
 import { showSummary } from './summary';
 import { addZen, islandHref, wallet } from '../shared/zen';
+import { currentlyOpen, isleMeta } from '../shared/isles';
 import { pebbleSVG } from './art';
 
 /** Strings used in more than one place. */
@@ -366,6 +367,7 @@ async function evening() {
   const dilemmas = pickDilemmas(3);
   const baseLevel = Math.min(3, save.evenings * 0.5);
   const results: RoundResult[] = [];
+  const openBefore = currentlyOpen();
 
   for (let i = 0; i < 3; i++) {
     const round = playRound(
@@ -400,10 +402,10 @@ async function evening() {
   }
   save.evenings++;
   persist();
-  eveningEnd(results);
+  eveningEnd(results, currentlyOpen().filter((i) => !openBefore.includes(i)));
 }
 
-function eveningEnd(results: RoundResult[]) {
+function eveningEnd(results: RoundResult[], opened: string[]) {
   clear();
   audio.startPad('home');
   const total = results.reduce((s, r) => s + r.total, 0);
@@ -447,10 +449,14 @@ function eveningEnd(results: RoundResult[]) {
       h('div', {}, h('b', {}, `${best}/3`), h('span', {}, T.calmResponses)),
       h('div', {}, h('b', {}, ltr(`+${total}`)), h('span', {}, T.zenPoints)),
     ),
+    ...opened.map((id) => {
+      const m = isleMeta(id)!;
+      return h('p', { class: 'night-newisle' }, `${m.emoji} ${tr({ en: `You opened a new island: ${m.name}!`, he: `פתחתם אי חדש באיי השקט: ${m.name}!`, ar: `فتحتم جزيرة جديدة: ${m.name}!` })}`);
+    }),
     h(
       'div',
       { class: 'home-actions' },
-      h('button', { class: 'btn', type: 'button', onclick: island }, tr({ en: 'Build on the island', he: 'לבנות באי השקט', ar: 'ابنوا في الجزيرة' })),
+      h('button', { class: 'btn', type: 'button', onclick: island }, tr({ en: 'Build on the islands', he: 'לבנות באיי השקט', ar: 'ابنوا في الجزر' })),
       h('button', { class: 'btn ghost', type: 'button', onclick: () => void evening() }, tr({ en: 'Another evening', he: 'ערב נוסף', ar: 'مساء آخر' })),
     ),
     h('button', { class: 'link', type: 'button', onclick: home }, tr({ en: 'Menu', he: 'לתפריט', ar: 'القائمة' })),

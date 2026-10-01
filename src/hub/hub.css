@@ -398,6 +398,21 @@ body {
   padding: 14px 20px 18px;
   background: var(--paper);
 }
+.ib-new {
+  display: inline-block;
+  margin-bottom: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--sun);
+  font-weight: 700;
+  font-size: 0.9rem;
+  animation: ib-glow 1.6s ease-in-out infinite alternate;
+}
+@keyframes ib-glow {
+  to {
+    box-shadow: 0 0 0 6px rgba(255, 203, 47, 0.35);
+  }
+}
 .ib-body h2 {
   margin: 0;
   font-family: var(--font-display);

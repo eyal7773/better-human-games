@@ -301,6 +301,14 @@ body {
 .sh-end-star.on i {
   color: var(--sun-deep);
 }
+.sh-newisle {
+  margin: 8px 0 0;
+  padding: 8px 12px;
+  border-radius: var(--r-md);
+  background: #e3f7f3;
+  color: var(--lagoon-deep);
+  font-weight: 700;
+}
 .sh-zen small {
   display: block;
   font-weight: 500;

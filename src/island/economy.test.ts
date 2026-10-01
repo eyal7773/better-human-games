@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { findSpot, nextExpansion, oldSlotCell, ownedCount, refusal, type IslandState, type Rule } from './economy';
+import { counter, findSpot, nextExpansion, oldSlotCell, ownedCount, refusal, type IslandState, type Rule } from './economy';
 import { firstIsland, sanitizeIsland } from './save';
 import { iso, landBounds, unIso } from './iso';
 
@@ -151,5 +151,18 @@ describe('the old island', () => {
     expect(s.placed).toHaveLength(1);
     expect(s.stored).toEqual({ tree: 2 });
     expect(s.clock).toBe('auto');
+    expect(s.welcomed).toEqual(['garden']);
+    expect(s.isle).toBe('garden');
+  });
+
+  it('counts what stands on each island', () => {
+    const s = empty();
+    put(s, 'tree', 3, 3);
+    put(s, 'tree', 4, 3);
+    s.placed.push({ id: 'tree', isle: 'shore', x: 3, y: 3, flip: false, at: 0 });
+    s.stored.tree = 5;
+    const n = counter(s, 'garden');
+    expect(n('tree')).toBe(2);
+    expect(n('pond')).toBe(0);
   });
 });

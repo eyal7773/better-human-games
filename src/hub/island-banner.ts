@@ -6,6 +6,7 @@ import { def, ITEMS } from '../island/catalog';
 import { canOwnMore } from '../island/economy';
 import { daylight, Scene, type View } from '../island/render';
 import { loadIsland } from '../island/save';
+import { currentlyOpen, isleMeta } from '../shared/isles';
 
 /**
  * The Calm Islands on the hub: a live little view of your garden, your zen,
@@ -20,12 +21,14 @@ const T = {
   enough: (name: string) => tr({ en: `Enough for: ${name}`, he: `מספיק בשביל: ${name}`, ar: `يكفي لـ: ${name}` }),
   toward: (n: number, name: string) => tr({ en: `${n} more for: ${name}`, he: `עוד ${n} בשביל: ${name}`, ar: `${n} أخرى لـ: ${name}` }),
   go: tr({ en: 'To the islands', he: 'לאיי השקט', ar: 'إلى الجزر' }),
+  fresh: tr({ en: 'New island!', he: 'אי חדש!', ar: 'جزيرة جديدة!' }),
 };
 
 function pitch() {
   if (!wallet.earned) return T.empty;
   const save = loadIsland(def);
-  const open = ITEMS.filter((d) => d.cap !== Infinity && canOwnMore(save, d)).sort((a, b) => a.cost - b.cost);
+  const isles = currentlyOpen();
+  const open = ITEMS.filter((d) => isles.includes(d.isle) && d.cap !== Infinity && canOwnMore(save, d)).sort((a, b) => a.cost - b.cost);
   const affordable = open.filter((d) => d.cost <= wallet.zen).pop();
   if (affordable) return T.enough(affordable.name);
   const next = open[0];
@@ -34,6 +37,10 @@ function pitch() {
 
 export function mountIslandBanner(before: Element | null, bar: Element | null) {
   const href = `${import.meta.env.BASE_URL}island/`;
+  const save = loadIsland(def);
+  const isles = currentlyOpen();
+  const fresh = isles.filter((i) => !save.welcomed.includes(i)).map((i) => isleMeta(i)!);
+  const shown = isles.includes(save.isle) ? save.isle : 'garden';
   const canvas = h('canvas', { class: 'ib-canvas', 'aria-hidden': 'true' });
   const banner = h(
     'a',
@@ -42,6 +49,7 @@ export function mountIslandBanner(before: Element | null, bar: Element | null) {
     h(
       'div',
       { class: 'ib-body' },
+      fresh.length ? h('span', { class: 'ib-new' }, `✨ ${T.fresh} ${fresh.map((m) => `${m.emoji} ${m.name}`).join(' · ')}`) : null,
       h('h2', {}, `🏝️ ${T.title}`),
       h('p', { class: 'ib-zen', html: pebbleSVG('pebble') }, h('b', {}, String(wallet.zen)), h('span', {}, T.points)),
       h('p', { class: 'ib-pitch' }, pitch()),
@@ -51,12 +59,11 @@ export function mountIslandBanner(before: Element | null, bar: Element | null) {
   before?.parentElement?.insertBefore(banner, before);
   bar?.prepend(h('a', { class: 'hub-isl', href, 'aria-label': `${T.title}: ${T.zen(wallet.zen)}` }, h('span', { 'aria-hidden': 'true' }, '🏝️'), h('b', {}, String(wallet.zen))));
 
-  const save = loadIsland(def);
   const scene = new Scene(canvas);
-  const view: View = { rev: 0, state: save, isle: 'garden', growth: wallet.growth, daylight: daylight(12), build: false, born: new Map(), poke: new Map() };
+  const view: View = { rev: 0, state: save, isle: shown, growth: wallet.growth, daylight: daylight(12), build: false, born: new Map(), poke: new Map() };
   const fit = () => {
     scene.resize();
-    scene.fit(save.land.garden ?? 0, 6, 0);
+    scene.fit(save.land[shown] ?? 0, 6, 0);
   };
   let visible = false;
   let raf = 0;
@@ -66,7 +73,8 @@ export function mountIslandBanner(before: Element | null, bar: Element | null) {
     t += Math.min(0.05, Math.max(0, (now - last) / 1000));
     last = now;
     const d = new Date();
-    view.daylight = daylight(save.clock === 'day' ? 12 : save.clock === 'night' ? 23 : d.getHours() + d.getMinutes() / 60);
+    const light = daylight(save.clock === 'day' ? 12 : save.clock === 'night' ? 23 : d.getHours() + d.getMinutes() / 60);
+    view.daylight = shown === 'forest' ? { dark: Math.max(0.45, light.dark), warm: Math.max(0.4, light.warm) } : light;
     scene.draw(view, t);
     raf = visible ? requestAnimationFrame(tick) : 0;
   };

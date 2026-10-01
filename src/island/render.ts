@@ -55,6 +55,28 @@ function tones(set: typeof SKY, d: Daylight): [RGB, RGB] {
   return [mix(a, set.night[0], d.dark), mix(b, set.night[1], d.dark)];
 }
 
+/** The sea's top and bottom colours for this light (for the map). */
+export const seaTones = (d: Daylight) => tones(SEA, d).map((c) => css(c));
+
+// ---------------------------------------------------------------- island looks
+
+interface Palette {
+  grass: [number[], number[]];
+  soil: string;
+  overhang: string;
+  tuft: string;
+  lit: [string, string];
+  dim: [string, string];
+}
+
+const PALETTES: Record<string, Palette> = {
+  garden: { grass: [[134, 192, 110], [126, 184, 104]], soil: '#5d8a3e', overhang: '#6fa64e', tuft: 'rgba(70,120,60,.55)', lit: ['#b98a64', '#7d5640'], dim: ['#8c6248', '#583a2c'] },
+  shore: { grass: [[240, 220, 166], [233, 211, 154]], soil: '#d9b878', overhang: '#e6c98c', tuft: 'rgba(170,140,90,.45)', lit: ['#e0b27a', '#b98452'], dim: ['#b48452', '#7e5a38'] },
+  hill: { grass: [[160, 212, 118], [150, 204, 108]], soil: '#6c9e44', overhang: '#86bb56', tuft: 'rgba(80,130,60,.55)', lit: ['#c49a72', '#8a6648'], dim: ['#9a7254', '#634632'] },
+  forest: { grass: [[86, 132, 90], [80, 124, 84]], soil: '#3e6640', overhang: '#4d7a4c', tuft: 'rgba(40,70,45,.6)', lit: ['#8a7464', '#5a4a40'], dim: ['#665446', '#3e322a'] },
+};
+export const paletteOf = (isle: string) => PALETTES[isle] ?? PALETTES.garden;
+
 // ---------------------------------------------------------------- the scene
 
 export interface Ghost {
@@ -83,6 +105,23 @@ export interface View {
   born: Map<Placed, number>;
   /** Items wobbling from a tap. */
   poke: Map<Placed, number>;
+  /** Things that move about: you and the visitors, in continuous grid coordinates. */
+  actors?: Actor[];
+  /** Breathing with the island: 0 → 1 → 0 over a breath, or undefined. */
+  breath?: number;
+}
+
+export interface Actor {
+  gx: number;
+  gy: number;
+  /** Height above the ground (a perch, a seat). */
+  lift?: number;
+  /** Draws them standing at (0, 0). */
+  draw: (c: Ctx, t: number) => void;
+  /** Out at sea: drawn with the water, not on the island. */
+  sea?: boolean;
+  /** Painter's-order override: sitting on or perched on an item draws just after it. */
+  depth?: number;
 }
 
 export function stageOf(d: ItemDef, p: Placed, growth: number) {
@@ -110,10 +149,10 @@ export class Scene {
     this.ctx = canvas.getContext('2d')!;
   }
 
-  resize() {
-    this.dpr = Math.min(2, devicePixelRatio || 1);
-    this.w = this.canvas.clientWidth;
-    this.h = this.canvas.clientHeight;
+  resize(w = this.canvas.clientWidth, h = this.canvas.clientHeight, dpr = Math.min(2, devicePixelRatio || 1)) {
+    this.dpr = dpr;
+    this.w = w;
+    this.h = h;
     for (const cv of [this.canvas, this.layer]) {
       cv.width = Math.round(this.w * this.dpr);
       cv.height = Math.round(this.h * this.dpr);
@@ -171,31 +210,43 @@ export class Scene {
     return at(v.state, def, v.isle, c.x, c.y).ground ?? null;
   }
 
-  draw(v: View, t: number) {
+  /** `backdrop: false` leaves sky and sea out (and the night layer), for pictures of an island alone. */
+  draw(v: View, t: number, backdrop = true) {
     const c = this.ctx;
     const { dpr } = this;
     c.setTransform(dpr, 0, 0, dpr, 0, 0);
     const horizonWorld = iso(0, 0).y + 40;
     const horizon = Math.max(this.h * 0.12, Math.min(this.h * 0.5, this.toScreen(0, horizonWorld).y));
-    this.sky(c, horizon, v.daylight, t);
-    this.sea(c, horizon, v.daylight, t);
+    if (backdrop) {
+      this.sky(c, horizon, v.daylight, t);
+      this.sea(c, horizon, v.daylight, t);
+    } else c.clearRect(0, 0, this.w, this.h);
 
     const z = this.cam.zoom;
     const world = (k: CanvasRenderingContext2D) => k.setTransform(dpr * z, 0, 0, dpr * z, dpr * (this.w / 2 - this.cam.x * z), dpr * (this.h / 2 - this.cam.y * z));
     const exp = v.state.land[v.isle] ?? 0;
     world(c);
     this.shore(c, exp, t);
+    if (v.state.placed.some((p) => p.id === 'dolphins' && p.isle === v.isle)) this.dolphins(c, exp, t);
+    for (const a of v.actors ?? []) {
+      if (!a.sea) continue;
+      const p = iso(a.gx, a.gy);
+      c.save();
+      c.translate(p.x, p.y);
+      a.draw(c, t);
+      c.restore();
+    }
     // The land block, ground tiles and grid only change with the island or the
     // camera: paint them once into a layer and reuse it every frame.
     const g = v.ghost?.def.kind === 'ground' ? v.ghost.cells.map((q) => `${q.x},${q.y}`).join(';') + v.ghost.ok : '';
-    const key = `${v.rev}|${exp}|${z}|${this.cam.x}|${this.cam.y}|${this.w}|${this.h}|${v.build}|${g}`;
+    const key = `${v.isle}|${v.rev}|${exp}|${z}|${this.cam.x}|${this.cam.y}|${this.w}|${this.h}|${v.build}|${g}`;
     if (key !== this.layerKey) {
       this.layerKey = key;
       const k = this.layerCtx;
       k.setTransform(1, 0, 0, 1, 0, 0);
       k.clearRect(0, 0, this.layer.width, this.layer.height);
       world(k);
-      this.land(k, exp);
+      this.land(k, exp, paletteOf(v.isle));
       this.ground(k, v);
       if (v.build) this.gridLines(k, exp);
       this.used = occupied(v);
@@ -203,14 +254,18 @@ export class Scene {
     c.setTransform(1, 0, 0, 1, 0, 0);
     c.drawImage(this.layer, 0, 0);
     world(c);
-    this.tufts(c, exp, t);
+    this.tufts(c, exp, t, paletteOf(v.isle));
     this.shimmer(c, v, t);
     if (v.build) this.marks(c, v, t);
     this.items(c, v, t);
-    if (v.state.placed.some((p) => p.id === 'fireflies' && p.isle === v.isle)) this.fireflies(c, exp, t, v.daylight.dark);
+    const has = (id: string) => v.state.placed.some((p) => p.id === id && p.isle === v.isle);
+    if (has('fireflies')) this.fireflies(c, exp, t, v.daylight.dark, [255, 245, 160]);
+    if (has('bluefireflies')) this.fireflies(c, exp, t + 40, Math.max(0.6, v.daylight.dark), [150, 220, 255]);
+    if (has('birds')) this.birds(c, exp, t);
+    if (v.breath != null) this.breathGlow(c, exp, v.breath);
 
     c.setTransform(dpr, 0, 0, dpr, 0, 0);
-    this.night(c, v, t, horizon);
+    if (backdrop) this.night(c, v, t, horizon);
   }
 
   // ------------------------------------------------------------ backdrop
@@ -309,7 +364,7 @@ export class Scene {
     c.stroke();
   }
 
-  private land(c: Ctx, exp: number) {
+  private land(c: Ctx, exp: number, pal: Palette) {
     const { lo, hi } = landBounds(exp);
     const B = iso(lo, lo);
     const R = iso(hi, lo);
@@ -319,8 +374,8 @@ export class Scene {
     // cliff faces: lit on the left, shaded on the right, with rock strata
     const face = (a: { x: number; y: number }, b: { x: number; y: number }, lit: boolean) => {
       const g = c.createLinearGradient(0, Math.min(a.y, b.y), 0, Math.max(a.y, b.y) + CLIFF);
-      g.addColorStop(0, lit ? '#b98a64' : '#8c6248');
-      g.addColorStop(1, lit ? '#7d5640' : '#583a2c');
+      g.addColorStop(0, lit ? pal.lit[0] : pal.dim[0]);
+      g.addColorStop(1, lit ? pal.lit[1] : pal.dim[1]);
       c.fillStyle = g;
       c.beginPath();
       c.moveTo(a.x, a.y);
@@ -349,7 +404,7 @@ export class Scene {
     face(L, F, true);
     face(F, R, false);
     // a band of soil under the grass
-    c.fillStyle = '#5d8a3e';
+    c.fillStyle = pal.soil;
     c.beginPath();
     c.moveTo(L.x, L.y);
     c.lineTo(F.x, F.y);
@@ -360,7 +415,7 @@ export class Scene {
     c.closePath();
     c.fill();
     // grass hanging over the edge
-    c.fillStyle = '#6fa64e';
+    c.fillStyle = pal.overhang;
     for (let k = 0; k < 24; k++) {
       const u = (k + 0.5) / 24;
       const [a, b] = k < 12 ? [L, F] : [F, R];
@@ -379,7 +434,7 @@ export class Scene {
       for (let y = lo; y < hi; y++) {
         const p = iso(x + 0.5, y + 0.5);
         const n = hash(x, y);
-        const base = (x + y) % 2 ? [134, 192, 110] : [126, 184, 104];
+        const base = (x + y) % 2 ? pal.grass[0] : pal.grass[1];
         const k = (n - 0.5) * 10;
         diamond(c, p.x, p.y, 1.02, `rgb(${base[0] + k},${base[1] + k},${base[2] + k * 0.6})`);
       }
@@ -398,9 +453,9 @@ export class Scene {
   }
 
   /** Grass tufts swaying on empty cells. */
-  private tufts(c: Ctx, exp: number, t: number) {
+  private tufts(c: Ctx, exp: number, t: number, pal: Palette) {
     const { lo, hi } = landBounds(exp);
-    c.strokeStyle = 'rgba(70,120,60,.55)';
+    c.strokeStyle = pal.tuft;
     c.lineWidth = 1.2;
     c.beginPath();
     for (let x = lo; x < hi; x++)
@@ -455,6 +510,34 @@ export class Scene {
           c.moveTo(corners[a].x, corners[a].y);
           c.lineTo(corners[b].x, corners[b].y);
           c.stroke();
+        }
+      } else if (id === 'pier') {
+        diamond(c, p.x, p.y, 1.01, '#c9935e');
+        c.strokeStyle = 'rgba(110,70,40,.55)';
+        c.lineWidth = 1.2;
+        for (let k = 1; k < 4; k++) {
+          const a = iso(x + k / 4, y);
+          const b = iso(x + k / 4, y + 1);
+          c.beginPath();
+          c.moveTo(a.x, a.y);
+          c.lineTo(b.x, b.y);
+          c.stroke();
+        }
+        for (const [joined, a, b] of edges) {
+          if (joined) continue;
+          c.beginPath();
+          c.moveTo(corners[a].x, corners[a].y);
+          c.lineTo(corners[b].x, corners[b].y);
+          c.stroke();
+        }
+      } else if (id === 'leafpath') {
+        diamond(c, p.x, p.y, 1.01, '#8a6a42');
+        for (let k = 0; k < 7; k++) {
+          const sp = iso(x + 0.15 + hash(x, y, k) * 0.7, y + 0.15 + hash(y, x, k + 9) * 0.7);
+          c.fillStyle = ['#d9822b', '#c4562a', '#e6b03a'][k % 3];
+          c.beginPath();
+          c.ellipse(sp.x, sp.y, 4, 2, hash(k, x, y) * 3, 0, Math.PI * 2);
+          c.fill();
         }
       } else {
         diamond(c, p.x, p.y, 1.01, '#e3cfa5');
@@ -546,7 +629,22 @@ export class Scene {
     }
     const now = performance.now();
     const { hi } = landBounds(v.state.land[v.isle] ?? 0);
+    // you and the visitors join the painter's order by where they stand
+    const order = (a: Actor) => a.depth ?? a.gx + a.gy + 0.5;
+    const actors = (v.actors ?? []).filter((a) => !a.sea).sort((a, b) => order(a) - order(b));
+    let ai = 0;
+    const actorsUpTo = (k: number) => {
+      while (ai < actors.length && order(actors[ai]) <= k) {
+        const a = actors[ai++];
+        const pt = iso(a.gx, a.gy);
+        c.save();
+        c.translate(pt.x, pt.y - (a.lift ?? 0));
+        a.draw(c, t);
+        c.restore();
+      }
+    };
     for (const { p, ghost } of list) {
+      actorsUpTo(key(p));
       const d = def(p.id)!;
       if (!d.draw) continue;
       const f = footprint(d, p.flip);
@@ -588,6 +686,7 @@ export class Scene {
       d.draw(c, t, stageOf(d, p, v.growth), seedOf(p), extra);
       c.restore();
     }
+    actorsUpTo(Infinity);
   }
 
   /** Draws a still item from a cached picture made at the current zoom. */
@@ -612,7 +711,78 @@ export class Scene {
     c.drawImage(sp, a.x - half, a.y - up, (sp.width / scale), (sp.height / scale));
   }
 
-  private fireflies(c: Ctx, exp: number, t: number, dark: number) {
+  /** Dolphins leaping in arcs out at sea, in front of the island. */
+  private dolphins(c: Ctx, exp: number, t: number) {
+    const { hi } = landBounds(exp);
+    for (let i = 0; i < 3; i++) {
+      const k = (t * 0.22 + i / 3) % 1;
+      if (k > 0.35) continue;
+      const j = k / 0.35;
+      const base = iso(hi + 2.2 + i * 0.6, hi - 3 + i * 3);
+      const x = base.x - 30 + j * 60;
+      const y = base.y + 40 - Math.sin(j * Math.PI) * 34;
+      c.save();
+      c.translate(x, y);
+      c.rotate((j - 0.5) * 1.6);
+      c.fillStyle = '#6a8ab0';
+      c.beginPath();
+      c.ellipse(0, 0, 13, 5, 0, 0, Math.PI * 2);
+      c.fill();
+      c.fillStyle = '#c9d8e8';
+      c.beginPath();
+      c.ellipse(1, 2, 9, 2.2, 0, 0, Math.PI * 2);
+      c.fill();
+      c.fillStyle = '#6a8ab0';
+      c.beginPath();
+      c.moveTo(-2, -4);
+      c.lineTo(2, -10);
+      c.lineTo(5, -4);
+      c.moveTo(-12, 0);
+      c.lineTo(-18, -5);
+      c.lineTo(-18, 5);
+      c.fill();
+      c.restore();
+      if (j < 0.12 || j > 0.88) blob(c, x, base.y + 42, 5, 'rgba(255,255,255,.7)');
+    }
+  }
+
+  /** A loose flock crossing high over the island. */
+  private birds(c: Ctx, exp: number, t: number) {
+    const { lo, hi } = landBounds(exp);
+    const left = iso(lo, hi).x - 120;
+    const right = iso(hi, lo).x + 120;
+    const top = iso(lo, lo).y - 140;
+    c.strokeStyle = 'rgba(40,40,60,.7)';
+    c.lineWidth = 1.6;
+    c.lineCap = 'round';
+    for (let i = 0; i < 5; i++) {
+      const k = (t * 0.035 + i * 0.03) % 1;
+      const x = left + (right - left) * k + (i % 2) * 14;
+      const y = top + Math.sin(k * 6 + i) * 10 + i * 9;
+      const f = Math.sin(t * 7 + i) * 4;
+      c.beginPath();
+      c.moveTo(x - 7, y - f);
+      c.quadraticCurveTo(x - 3, y - 3, x, y);
+      c.quadraticCurveTo(x + 3, y - 3, x + 7, y - f);
+      c.stroke();
+    }
+  }
+
+  /** While you sit and breathe, the whole island glows softly in and out. */
+  private breathGlow(c: Ctx, exp: number, b: number) {
+    const { lo, hi } = landBounds(exp);
+    const m = iso((lo + hi) / 2, (lo + hi) / 2);
+    const r = (hi - lo) * 34 * (0.75 + b * 0.35);
+    const g = c.createRadialGradient(m.x, m.y - 20, 0, m.x, m.y - 20, r);
+    g.addColorStop(0, `rgba(255, 250, 225, ${0.1 + b * 0.22})`);
+    g.addColorStop(1, 'rgba(255, 250, 225, 0)');
+    c.fillStyle = g;
+    c.beginPath();
+    c.arc(m.x, m.y - 20, r, 0, Math.PI * 2);
+    c.fill();
+  }
+
+  private fireflies(c: Ctx, exp: number, t: number, dark: number, rgb: number[]) {
     const { lo, hi } = landBounds(exp);
     const mid = (lo + hi) / 2;
     const span = (hi - lo) / 2;
@@ -623,8 +793,8 @@ export class Scene {
       const y = p.y - 20 - Math.abs(Math.sin(t * 0.5 + i)) * 30;
       const a = (0.35 + 0.65 * Math.abs(Math.sin(t * 2 + i))) * (0.5 + dark * 0.5);
       const g = c.createRadialGradient(p.x, y, 0, p.x, y, 9);
-      g.addColorStop(0, `rgba(255, 245, 160, ${a})`);
-      g.addColorStop(1, 'rgba(255, 245, 160, 0)');
+      g.addColorStop(0, `rgba(${rgb.join(',')}, ${a})`);
+      g.addColorStop(1, `rgba(${rgb.join(',')}, 0)`);
       c.fillStyle = g;
       c.beginPath();
       c.arc(p.x, y, 9, 0, Math.PI * 2);
@@ -704,7 +874,7 @@ export class Scene {
   }
 }
 
-const key = (p: Placed) => {
+export const key = (p: Placed) => {
   const d = def(p.id)!;
   const f = footprint(d, p.flip);
   return depth(p.x, p.y, f.w, f.d);

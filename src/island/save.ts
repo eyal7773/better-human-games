@@ -10,11 +10,18 @@ export interface IslandSave extends IslandState {
   clock: Clock;
   /** The three-bubble guide was seen (or skipped). */
   guided: boolean;
+  /** The island you were on last. */
+  isle: string;
+  /** Islands whose arrival was celebrated (fly-in, gift). */
+  welcomed: string[];
+  /** Visitors who moved in, in the order they came. */
+  visitors: string[];
 }
 
 const KEY = 'bhg.island.v1';
 
 const obj = (v: unknown) => (v && typeof v === 'object' && !Array.isArray(v) ? (v as Record<string, unknown>) : {});
+const strings = (v: unknown, fallback: string[]) => (Array.isArray(v) ? [...new Set(v.filter((x): x is string => typeof x === 'string'))] : fallback);
 const int = (v: unknown) => (typeof v === 'number' && Number.isInteger(v) ? v : null);
 
 /** Stored data may be old, hand-edited or corrupt: keep only what we understand. */
@@ -44,6 +51,9 @@ export function sanitizeIsland(raw: unknown, rules: Rules): IslandSave {
     muted: r.muted === true,
     clock: r.clock === 'day' || r.clock === 'night' ? r.clock : 'auto',
     guided: r.guided === true,
+    isle: typeof r.isle === 'string' ? r.isle : 'garden',
+    welcomed: strings(r.welcomed, ['garden']),
+    visitors: strings(r.visitors, []),
   };
 }
 

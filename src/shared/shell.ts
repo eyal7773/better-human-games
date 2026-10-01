@@ -5,6 +5,7 @@ import { tr } from './i18n';
 import { AudioEngine } from './audio';
 import { FX } from './fx';
 import { addZen, dailyBonus, islandHref, wallet } from './zen';
+import { currentlyOpen, isleMeta } from './isles';
 import {
   countStars,
   loadProgress,
@@ -44,6 +45,8 @@ export const S = {
   zen: (n: number) => tr({ en: `+${n} zen for your islands`, he: `+${n} זן לאיי השקט`, ar: `+${n} سكينة لجزركم` }),
   daily: (n: number) => tr({ en: `including +${n} for today’s first level`, he: `כולל +${n} על השלב הראשון של היום`, ar: `منها +${n} لأول مرحلة اليوم` }),
   island: tr({ en: 'To the islands 🏝️', he: 'לאיי השקט 🏝️', ar: 'إلى الجزر 🏝️' }),
+  newIsle: (name: string) => tr({ en: `You opened a new island: ${name}!`, he: `פתחתם אי חדש באיי השקט: ${name}!`, ar: `فتحتم جزيرة جديدة: ${name}!` }),
+  seeIsle: (name: string) => tr({ en: `See ${name} 🏝️`, he: `לראות את ${name} 🏝️`, ar: `شاهدوا ${name} 🏝️` }),
   zenLink: (n: number) => tr({ en: `${n} zen — to the Calm Islands`, he: `${n} זן — לאיי השקט`, ar: `${n} سكينة — إلى جزر السكينة` }),
   takeHome: tr({ en: 'Take it home', he: 'לקחת הביתה', ar: 'خذوها إلى البيت' }),
   howTo: tr({ en: 'How to play', he: 'איך משחקים', ar: 'كيف نلعب' }),
@@ -88,6 +91,7 @@ export class Shell {
   private live = h('p', { class: 'sr-only', 'aria-live': 'polite' });
   private zenPill = h('a', { class: 'sh-zen-pill', href: islandHref() });
   private daily = 0;
+  private newIsles: string[] = [];
 
   constructor(
     private key: string,
@@ -184,11 +188,13 @@ export class Shell {
    * pays the game's daily bonus, once a day. Returns all the zen earned.
    */
   finishLevel(id: string, stars: Stars) {
+    const before = currentlyOpen();
     const zen = recordLevel(this.progress, id, stars);
     this.persist();
     if (zen) addZen(zen);
     this.daily = stars[0] ? dailyBonus(location.pathname.split('/').filter(Boolean).pop() ?? 'game') : 0;
     this.paintZen();
+    this.newIsles = currentlyOpen().filter((i) => !before.includes(i));
     return zen + this.daily;
   }
 
@@ -296,7 +302,10 @@ export class Shell {
     const buttons: CardButton[] = [];
     if (o.hasNext) buttons.push({ id: 'next', label: S.next, cls: 'warm' });
     buttons.push({ id: 'again', label: S.again, cls: o.hasNext ? 'ghost' : 'warm' }, { id: 'menu', label: S.menu, cls: 'ghost' });
-    if (o.zen) buttons.push({ id: 'island', label: S.island, cls: 'ghost' });
+    const opened = this.newIsles.map((i) => isleMeta(i)!);
+    this.newIsles = [];
+    if (opened.length) buttons.unshift({ id: 'island', label: S.seeIsle(opened[0].name), cls: 'warm' });
+    else if (o.zen) buttons.push({ id: 'island', label: S.island, cls: 'ghost' });
     const daily = this.daily;
     this.daily = 0;
     const chosen = this.card({
@@ -306,6 +315,7 @@ export class Shell {
         starsEl,
         ...(o.lines ?? []),
         ...(o.record ? [h('p', { class: 'sh-record' }, `🏆 ${S.record}`)] : []),
+        ...opened.map((m) => h('p', { class: 'sh-newisle' }, `${m.emoji} ${S.newIsle(m.name)}`)),
         ...(o.zen ? [h('p', { class: 'sh-zen' }, `🌿 ${S.zen(o.zen)}`, daily ? h('small', {}, S.daily(daily)) : null)] : []),
         h('div', { class: 'sh-anchor' }, h('b', {}, S.takeHome), h('p', {}, o.anchor)),
       ],

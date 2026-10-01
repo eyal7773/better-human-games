@@ -46,7 +46,17 @@ export type Rules = (id: string) => Rule | undefined;
 /** Land expansions per island: 8×8 → 10×10 → 12×12. */
 export const EXPANSIONS: Record<string, number[]> = {
   garden: [250, 700],
+  shore: [300, 800],
+  hill: [400, 1000],
+  forest: [600, 1500],
 };
+
+/** How many of each item an island has (placed only; the shed doesn't count). */
+export function counter(s: IslandState, isle: string) {
+  const n = new Map<string, number>();
+  for (const p of s.placed) if (p.isle === isle) n.set(p.id, (n.get(p.id) ?? 0) + 1);
+  return (id: string) => n.get(id) ?? 0;
+}
 
 export const expansionsOf = (s: IslandState, isle: string) => s.land[isle] ?? 0;
 
