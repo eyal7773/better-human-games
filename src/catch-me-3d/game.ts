@@ -1,7 +1,7 @@
 import { AudioEngine } from '../shared/audio';
 import { h } from '../shared/dom';
 import { FX } from '../shared/fx';
-import { grantZen } from '../boiling-point/save';
+import { addZen, dailyBonus, islandHref } from '../shared/zen';
 import { BreathOrb } from './breath';
 import { Debug } from './debug';
 import { Hud } from './hud';
@@ -112,8 +112,10 @@ export async function boot(app: HTMLElement) {
     if (res.exited) return;
     const hasBreath = lv.id !== 1;
     const stars = starsFor(res.stats, hasBreath);
-    const zen = recordLevel(save, id, stars);
-    if (zen) grantZen(zen);
+    const starZen = recordLevel(save, id, stars);
+    if (starZen) addZen(starZen);
+    // The day's first finished room also pays the daily bonus (added to the wallet by dailyBonus).
+    const zen = starZen + (stars[0] ? dailyBonus('catch-me-3d') : 0);
     persist(save);
     const next = LEVELS.find((l) => l.id === id + 1);
     const choice = await hud.card({
@@ -128,8 +130,10 @@ export async function boot(app: HTMLElement) {
         ...(next && unlocked(save, next.id) ? [{ id: 'next', label: T.nextRoom, cls: 'warm' }] : []),
         { id: 'map', label: T.map, cls: next ? 'ghost' : 'warm' },
         { id: 'again', label: T.again2, cls: 'ghost' },
+        ...(zen ? [{ id: 'island', label: T.island, cls: 'ghost' }] : []),
       ],
     });
+    if (choice === 'island') return location.assign(islandHref());
     if (choice === 'next' && next) return play(next.id);
     if (choice === 'again') return play(id);
   };
@@ -139,8 +143,10 @@ export async function boot(app: HTMLElement) {
     const res = await playFinale(ctx);
     if (res.exited) return;
     const stars = starsFor(res.stats, true);
-    const zen = recordLevel(save, FINAL_LEVEL, stars);
-    if (zen) grantZen(zen);
+    const starZen = recordLevel(save, FINAL_LEVEL, stars);
+    if (starZen) addZen(starZen);
+    // The day's first finished room also pays the daily bonus (added to the wallet by dailyBonus).
+    const zen = starZen + (stars[0] ? dailyBonus('catch-me-3d') : 0);
     const first = !save.finished;
     save.finished = true;
     persist(save);

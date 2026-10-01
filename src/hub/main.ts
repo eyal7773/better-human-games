@@ -9,6 +9,7 @@ import { avatarSVG } from '../shared/avatar';
 import { profile } from '../shared/profile';
 import { openHomeBuilder } from './home-builder';
 import { loadSave as loadCatchMe } from '../catch-me-3d/save';
+import { mountIslandBanner } from './island-banner';
 
 // The page ships in English; other languages swap text in by data-i18n key.
 const TEXT: Record<string, { he: string; ar: string }> = {
@@ -98,7 +99,9 @@ const paintMe = () => {
 };
 paintMe();
 meBtn.addEventListener('click', () => openHomeBuilder({ edit: true, onChange: paintMe }));
-document.querySelector('.hub-bar')?.append(h('div', { class: 'hub-tools' }, meBtn, langSwitcher()));
+const tools = h('div', { class: 'hub-tools' }, meBtn, langSwitcher());
+document.querySelector('.hub-bar')?.append(tools);
+mountIslandBanner(document.querySelector('.game-card'), tools);
 document.documentElement.removeAttribute('data-i18n-pending');
 document
   .querySelector('.hub-foot')

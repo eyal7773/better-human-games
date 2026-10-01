@@ -105,7 +105,8 @@ export class Scope {
     let id = 0;
     const tick = (now: number) => {
       if (!this.alive) return;
-      const dt = Math.min(0.05, (now - last) / 1000);
+      // rAF timestamps can predate `last` on the first frame; never step backwards
+      const dt = Math.min(0.05, Math.max(0, (now - last) / 1000));
       last = now;
       fn(dt);
       id = requestAnimationFrame(tick);

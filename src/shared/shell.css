@@ -78,6 +78,24 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+/* The zen count, which is also the way to the islands. */
+.sh-zen-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 40px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 3px 0 var(--edge);
+  color: var(--ink);
+  font-weight: 700;
+  text-decoration: none;
+}
+.sh-zen-pill:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 var(--edge);
+}
 .sh-stage {
   position: relative;
   flex: 1;
@@ -282,6 +300,11 @@ body {
 }
 .sh-end-star.on i {
   color: var(--sun-deep);
+}
+.sh-zen small {
+  display: block;
+  font-weight: 500;
+  color: var(--ink-soft);
 }
 .sh-zen,
 .sh-record {

@@ -11,13 +11,13 @@ import { DILEMMAS, type Dilemma } from './content';
 import { allowed, fits, weight, weightedShuffle } from '../shared/profile';
 import { playRound, type CalmKind, type PlayView, type RoundResult, type TaskKind } from './round';
 import { showSummary } from './summary';
-import { mountIsland } from './island';
+import { addZen, islandHref, wallet } from '../shared/zen';
 import { pebbleSVG } from './art';
 
 /** Strings used in more than one place. */
 const T = {
   title: tr({ en: 'Boiling Point', he: 'נקודת רתיחה', ar: 'نقطة الغليان' }),
-  island: tr({ en: 'Island of Calm', he: 'אי השקט', ar: 'جزيرة السكينة' }),
+  island: tr({ en: 'Calm Islands 🏝️', he: 'איי השקט 🏝️', ar: 'جزر السكينة 🏝️' }),
   howTo: tr({ en: 'How to play', he: 'איך משחקים', ar: 'كيف نلعب' }),
   settings: tr({ en: 'Settings', he: 'הגדרות', ar: 'الإعدادات' }),
   choiceTime: tr({ en: 'Time to choose a response', he: 'זמן לבחירת תגובה', ar: 'وقت اختيار الرد' }),
@@ -82,7 +82,7 @@ function home() {
         'aria-label': tr({ en: 'All games', he: 'לכל המשחקים', ar: 'كل الألعاب' }),
         html: '<svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z" fill="currentColor"/></svg>',
       }),
-      h('div', { class: 'hud-zen', html: pebbleSVG('pebble hud-pebble') }, h('span', {}, String(save.zen))),
+      h('div', { class: 'hud-zen', html: pebbleSVG('pebble hud-pebble') }, h('span', {}, String(wallet.zen))),
       soundBtn,
     ),
     h('div', { class: 'home-hero' }, h('div', { class: 'home-temp', 'aria-hidden': 'true' }, '100°'), kettleWrap),
@@ -271,9 +271,7 @@ function settings() {
 // ---------------------------------------------------------------- island
 
 function island() {
-  clear();
-  audio.unlock();
-  teardown = mountIsland(app, audio, fx, home);
+  location.assign(islandHref());
 }
 
 // ---------------------------------------------------------------- evening
@@ -301,7 +299,7 @@ function pickDilemmas(n: number) {
 
 function buildPlayView(onMenu: () => void): PlayView {
   const hud = new HUD(onMenu);
-  hud.setZen(save.zen);
+  hud.setZen(wallet.zen);
   const clock = h('div', { class: 'scene-clock' });
   const title = h('h2', { class: 'scene-title' });
   const hint = h('p', { class: 'scene-hint', 'aria-live': 'polite' });
@@ -388,14 +386,11 @@ async function evening() {
     abortRound = round.abort;
     const r = await round.done;
     if (quit) return;
-    const zenBefore = save.zen;
-    save.zen += r.total;
-    save.earned += r.total;
+    const zenBefore = wallet.zen;
+    addZen(r.total, { growth: r.outcome !== 'boiled' });
     save.rounds++;
-    if (r.outcome !== 'boiled') {
-      save.calmRounds++;
-      save.growth++;
-    } else save.boils++;
+    if (r.outcome !== 'boiled') save.calmRounds++;
+    else save.boils++;
     if (r.outcome === 'noticed') save.noticed++;
     if (r.choice === 'best') save.bestChoices++;
     persist();

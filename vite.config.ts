@@ -38,6 +38,7 @@ export default defineConfig(({ command }) => ({
         wordsInFlight: page('./words-in-flight/index.html'),
         shadowWall: page('./shadow-wall/index.html'),
         fortress: page('./fortress/index.html'),
+        island: page('./island/index.html'),
       },
     },
   },

@@ -4,7 +4,7 @@ import { h } from './dom';
 import { tr } from './i18n';
 import { AudioEngine } from './audio';
 import { FX } from './fx';
-import { grantZen } from '../boiling-point/save';
+import { addZen, dailyBonus, islandHref, wallet } from './zen';
 import {
   countStars,
   loadProgress,
@@ -41,7 +41,10 @@ export const S = {
   next: tr({ en: 'Next level', he: 'לשלב הבא', ar: 'المرحلة التالية' }),
   locked: tr({ en: 'Locked — finish the level before it', he: 'נעול — סיימו את השלב הקודם', ar: 'مقفلة — أنهوا المرحلة السابقة' }),
   level: (n: number) => tr({ en: `Level ${n}`, he: `שלב ${n}`, ar: `المرحلة ${n}` }),
-  zen: (n: number) => tr({ en: `+${n} zen for your island`, he: `+${n} זן לאי השקט`, ar: `+${n} سكينة لجزيرتكم` }),
+  zen: (n: number) => tr({ en: `+${n} zen for your islands`, he: `+${n} זן לאיי השקט`, ar: `+${n} سكينة لجزركم` }),
+  daily: (n: number) => tr({ en: `including +${n} for today’s first level`, he: `כולל +${n} על השלב הראשון של היום`, ar: `منها +${n} لأول مرحلة اليوم` }),
+  island: tr({ en: 'To the islands 🏝️', he: 'לאיי השקט 🏝️', ar: 'إلى الجزر 🏝️' }),
+  zenLink: (n: number) => tr({ en: `${n} zen — to the Calm Islands`, he: `${n} זן — לאיי השקט`, ar: `${n} سكينة — إلى جزر السكينة` }),
   takeHome: tr({ en: 'Take it home', he: 'לקחת הביתה', ar: 'خذوها إلى البيت' }),
   howTo: tr({ en: 'How to play', he: 'איך משחקים', ar: 'كيف نلعب' }),
   gotIt: tr({ en: 'Got it', he: 'הבנתי', ar: 'فهمت' }),
@@ -83,6 +86,8 @@ export class Shell {
   private titleEl: HTMLElement;
   private layer = h('div', { class: 'sh-layer' });
   private live = h('p', { class: 'sr-only', 'aria-live': 'polite' });
+  private zenPill = h('a', { class: 'sh-zen-pill', href: islandHref() });
+  private daily = 0;
 
   constructor(
     private key: string,
@@ -114,13 +119,20 @@ export class Shell {
     this.root = h(
       'section',
       { class: `sh ${theme}` },
-      h('header', { class: 'sh-top' }, this.back, this.titleEl, sound),
+      h('header', { class: 'sh-top' }, this.back, this.titleEl, this.zenPill, sound),
       this.stage,
       this.layer,
       this.live,
     );
     document.getElementById('app')!.append(this.root);
     this.fx = new FX(document.body);
+    this.paintZen();
+  }
+
+  /** The zen count in the top bar doubles as the way to the islands. */
+  paintZen() {
+    this.zenPill.replaceChildren(h('span', { 'aria-hidden': 'true' }, '🏝️'), h('b', {}, String(wallet.zen)));
+    this.zenPill.setAttribute('aria-label', S.zenLink(wallet.zen));
   }
 
   persist() {
@@ -167,12 +179,17 @@ export class Shell {
     this.layer.replaceChildren();
   }
 
-  /** Records stars (zen only for new ones) and saves. Returns the zen earned. */
+  /**
+   * Records stars (zen only for new ones) and saves. A finished level also
+   * pays the game's daily bonus, once a day. Returns all the zen earned.
+   */
   finishLevel(id: string, stars: Stars) {
     const zen = recordLevel(this.progress, id, stars);
     this.persist();
-    if (zen) grantZen(zen);
-    return zen;
+    if (zen) addZen(zen);
+    this.daily = stars[0] ? dailyBonus(location.pathname.split('/').filter(Boolean).pop() ?? 'game') : 0;
+    this.paintZen();
+    return zen + this.daily;
   }
 
   /** The start screen: intro, a big "continue", the level grid and extra modes. */
@@ -279,18 +296,23 @@ export class Shell {
     const buttons: CardButton[] = [];
     if (o.hasNext) buttons.push({ id: 'next', label: S.next, cls: 'warm' });
     buttons.push({ id: 'again', label: S.again, cls: o.hasNext ? 'ghost' : 'warm' }, { id: 'menu', label: S.menu, cls: 'ghost' });
-    return this.card({
+    if (o.zen) buttons.push({ id: 'island', label: S.island, cls: 'ghost' });
+    const daily = this.daily;
+    this.daily = 0;
+    const chosen = this.card({
       cls: 'sh-end',
       title: o.title,
       lines: [
         starsEl,
         ...(o.lines ?? []),
         ...(o.record ? [h('p', { class: 'sh-record' }, `🏆 ${S.record}`)] : []),
-        ...(o.zen ? [h('p', { class: 'sh-zen' }, `🌿 ${S.zen(o.zen)}`)] : []),
+        ...(o.zen ? [h('p', { class: 'sh-zen' }, `🌿 ${S.zen(o.zen)}`, daily ? h('small', {}, S.daily(daily)) : null)] : []),
         h('div', { class: 'sh-anchor' }, h('b', {}, S.takeHome), h('p', {}, o.anchor)),
       ],
       buttons,
     });
+    // "To the islands" leaves the page; the game never sees that choice.
+    return chosen.then((id) => (id === 'island' ? (location.assign(islandHref()), new Promise<string>(() => {})) : id));
   }
 
   /** Information sheet (album, how to play) with a close button. */

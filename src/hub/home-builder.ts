@@ -9,7 +9,8 @@ import { buddySVG } from '../catch-me/buddy';
 import { loadSave as loadCatchMe } from '../catch-me-3d/save';
 import { MAX_HOT, profile, resetProfile, saveProfile, type Address, type Profile } from '../shared/profile';
 import type { HouseholdTag, TopicTag } from '../shared/tags';
-import { save as bpSave, grantZen } from '../boiling-point/save';
+import { save as bpSave } from '../boiling-point/save';
+import { addZen } from '../shared/zen';
 
 /**
  * "My home": a character builder instead of a settings form. You make a little
@@ -121,7 +122,7 @@ export function openHomeBuilder(opts: { edit?: boolean; onChange?: () => void } 
     const reward = !profile.rewarded;
     Object.assign(profile, draft, { status: 'done', rewarded: true });
     saveProfile();
-    if (reward) grantZen(REWARD);
+    if (reward) addZen(REWARD);
     opts.onChange?.();
     go(4, reward);
   }
