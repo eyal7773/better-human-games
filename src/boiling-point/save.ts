@@ -26,13 +26,18 @@ const DEFAULTS: Save = {
   boils: 0,
   bestChoices: 0,
   muted: false,
-  choiceSeconds: 5,
+  choiceSeconds: 15,
   readSeconds: 4,
   seenHowTo: false,
   recentDilemmas: [],
 };
 
 export const save: Save = load(KEY, DEFAULTS);
+
+// The answer time used to be 5/8/12 seconds, which was too short to read the
+// answers; it's now three times that. Saved choices move up with it.
+const OLD_CHOICE: Record<number, number> = { 5: 15, 8: 24, 12: 36 };
+if (OLD_CHOICE[save.choiceSeconds]) save.choiceSeconds = OLD_CHOICE[save.choiceSeconds];
 
 export function persist() {
   store(KEY, save);

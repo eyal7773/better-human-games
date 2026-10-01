@@ -252,14 +252,14 @@ function settings() {
         }),
       ),
       h('h3', {}, T.choiceTime),
-      secondsPicker(T.choiceTime, [5, 8, 12], 'choiceSeconds'),
+      secondsPicker(T.choiceTime, [15, 24, 36], 'choiceSeconds'),
       h(
         'p',
         { class: 'sheet-note' },
         tr({
-          en: 'Default: 5 seconds, like a real moment. You can make it longer to have time to read.',
-          he: 'במקור: 5 שניות, כמו ברגע אמיתי. אפשר להאריך כדי להספיק לקרוא.',
-          ar: 'الافتراضي: 5 ثوانٍ، كما في لحظة حقيقية. يمكن إطالتها ليتسنّى لكم القراءة.',
+          en: 'Default: 15 seconds, enough to read every answer. You can make it longer.',
+          he: 'במקור: 15 שניות, מספיק כדי לקרוא את כל התשובות. אפשר להאריך.',
+          ar: 'الافتراضي: 15 ثانية، تكفي لقراءة كل الإجابات. يمكن إطالتها.',
         }),
       ),
       reset,
