@@ -13,6 +13,20 @@ const VERDICT_TEXT: Record<ChoiceOutcome, string> = {
   timeout: tr({ en: 'Time ran out. That happens too — here’s what would have helped:', he: 'הזמן עבר. גם זה קורה — הנה מה שהיה עוזר:', ar: 'انتهى الوقت. هذا يحدث أيضًا — إليكم ما كان سيساعد:' }),
 };
 
+/** Someone thinking it over: a round face, hand on chin, eyes up, thought bubbles rising. */
+const THINKER = `<svg viewBox="0 0 64 56" aria-hidden="true">
+  <circle class="th-b1" cx="44" cy="17" r="3" fill="#fff" stroke="#1d2b4f" stroke-width="1.6"/>
+  <circle class="th-b2" cx="51" cy="10" r="4" fill="#fff" stroke="#1d2b4f" stroke-width="1.6"/>
+  <ellipse class="th-b3" cx="57" cy="4.5" rx="5.5" ry="3.8" fill="#fff" stroke="#1d2b4f" stroke-width="1.6"/>
+  <circle cx="24" cy="30" r="17" fill="#ffc61a" stroke="#1d2b4f" stroke-width="2.2"/>
+  <ellipse cx="17" cy="21" rx="5" ry="3" fill="#fff" opacity=".55" transform="rotate(-30 17 21)"/>
+  <circle cx="21" cy="25" r="2.2" fill="#1d2b4f"/><circle cx="31" cy="25" r="2.2" fill="#1d2b4f"/>
+  <circle cx="21.8" cy="24.1" r=".8" fill="#fff"/><circle cx="31.8" cy="24.1" r=".8" fill="#fff"/>
+  <path d="M18 20 q3 -2 6 0 M28 19 q3 -1.5 6 .5" fill="none" stroke="#1d2b4f" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M22 37 h6" stroke="#1d2b4f" stroke-width="2" stroke-linecap="round"/>
+  <path d="M34 50 q-4 -8 -2 -12 q2 -3 5 -1 q2 2 0 6" fill="#ffc61a" stroke="#1d2b4f" stroke-width="2" stroke-linejoin="round"/>
+</svg>`;
+
 /** Situation → a few seconds to read → pick a response before the fuse burns out. */
 export function runChoice(
   layer: HTMLElement,
@@ -29,7 +43,7 @@ export function runChoice(
     const card = h(
       'div',
       { class: 'choice-card', role: 'dialog', 'aria-modal': 'true', 'aria-label': tr({ en: 'A moment before you respond', he: 'רגע לפני שמגיבים', ar: 'لحظة قبل أن تردّوا' }) },
-      h('p', { class: 'choice-kicker' }, tr({ en: 'A moment before you respond', he: 'רגע לפני שמגיבים', ar: 'لحظة قبل أن تردّوا' })),
+      h('p', { class: 'choice-kicker' }, h('span', { class: 'thinker', html: THINKER }), h('span', {}, tr({ en: 'A moment before you respond', he: 'רגע לפני שמגיבים', ar: 'لحظة قبل أن تردّوا' }))),
       h('p', { class: 'choice-situation' }, d.situation),
       fuse,
       list,
@@ -101,7 +115,8 @@ export function runChoice(
       const tick = () => {
         if (settled) return;
         remaining--;
-        audio.tick(remaining <= 2);
+        // only the last five seconds tick, so the long fuse stays quiet while reading
+        if (remaining <= 5) audio.tick(remaining <= 2);
         if (remaining <= 0) settle('timeout');
         else scope.timeout(tick, 1000);
       };
