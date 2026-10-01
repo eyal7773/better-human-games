@@ -33,6 +33,8 @@ describe('openIsles', () => {
     expect(openIsles(0, () => false)).toEqual(['garden']);
     expect(openIsles(0, (g) => g === 'words-in-flight')).toEqual(['garden', 'hill']);
     expect(openIsles(950, () => false)).toEqual(['garden', 'shore', 'hill']);
-    expect(openIsles(5000, () => false)).toHaveLength(4);
+    expect(openIsles(3000, () => false)).toHaveLength(5);
+    expect(openIsles(5000, () => false)).toHaveLength(6);
+    expect(openIsles(0, (g) => g === 'catch-me-3d')).toEqual(['garden', 'toys']);
   });
 });

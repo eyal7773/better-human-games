@@ -14,6 +14,8 @@ export const MAP_POS: Record<string, { x: number; y: number }> = {
   hill: { x: 130, y: -120 },
   garden: { x: -115, y: 40 },
   shore: { x: 125, y: 150 },
+  lighthouse: { x: -115, y: 290 },
+  toys: { x: 130, y: 400 },
 };
 const SNAP_W = 230;
 const SNAP_H = 210;

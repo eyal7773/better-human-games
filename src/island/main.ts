@@ -10,7 +10,12 @@ import { currentlyOpen, isleMeta, ISLES } from '../shared/isles';
 import { profile } from '../shared/profile';
 import { CATEGORIES, def, ITEMS, VISITORS, visitor, type Category, type ItemDef } from './catalog';
 import { at, canOwnMore, counter, findSpot, nextExpansion, ownedCount, refusal, type Placed, type Refusal } from './economy';
-import { besideItem, Me, placeGuest, startCell, walkMap, type Guest, type WalkMap } from './actors';
+import { besideItem, Me, placeGuest, startCell, Train, walkMap, type Guest, type WalkMap } from './actors';
+import { BOTTLE_ZEN, hashStr, NOTES, openBottle, washUp, weatherOf, type Bottle } from './bottles';
+import { AWARDS } from './awards';
+import { usePeskyImage } from './art/creatures';
+import { buddySVG } from '../catch-me/buddy';
+import type { PadMood } from '../shared/audio';
 import { WorldMap } from './map';
 import { footprint, cellsOf, landBounds, iso, START_SIZE } from './iso';
 import { daylight, Scene, type Ghost, type View } from './render';
@@ -53,6 +58,17 @@ const T = {
   land: tr({ en: 'Land', he: 'שטח', ar: 'أرض' }),
   map: tr({ en: 'Map of the islands', he: 'מפת האיים', ar: 'خريطة الجزر' }),
   mapNote: tr({ en: 'Choose an island. Tap a closed one to see how to get there.', he: 'בחרו אי. לחיצה על אי סגור מראה איך מגיעים אליו.', ar: 'اختاروا جزيرة. اضغطوا على جزيرة مغلقة لتروا كيف تصلون إليها.' }),
+  way1Story: (game: string) => tr({ en: `Finish the story in “${game}”`, he: `לסיים את הסיפור ב"${game}"`, ar: `أنهوا القصة في «${game}»` }),
+  bottleHere: tr({ en: '🍾 A bottle washed up on the beach! Tap it.', he: '🍾 בקבוק נפלט לחוף! לחצו עליו.', ar: '🍾 قارورة جرفها الموج إلى الشاطئ! اضغطوا عليها.' }),
+  letterTitle: tr({ en: '✉️ A letter from the sea', he: '✉️ מכתב מהים', ar: '✉️ رسالة من البحر' }),
+  letterZen: tr({ en: `+${BOTTLE_ZEN} zen`, he: `+${BOTTLE_ZEN} זן`, ar: `+${BOTTLE_ZEN} سكينة` }),
+  letters: tr({ en: '✉️ Letters from the sea', he: '✉️ מכתבים מהים', ar: '✉️ رسائل من البحر' }),
+  lettersNote: tr({ en: 'A few bottles wash up every day — no more than three wait for you, so there’s no rush.', he: 'כל יום נפלטים כמה בקבוקים — לא יותר משלושה מחכים לכם, אז אין לחץ.', ar: 'كل يوم تجرف الأمواج بضع قوارير — لا تنتظركم أكثر من ثلاث، فلا عجلة.' }),
+  unread: tr({ en: 'Still at sea…', he: 'עוד בים…', ar: 'ما زالت في البحر…' }),
+  allLetters: (n: number, of: number) => tr({ en: `All letters (${n}/${of})`, he: `כל המכתבים (${n}/${of})`, ar: `كل الرسائل (${n}/${of})` }),
+  awardLocked: (how: string) => tr({ en: `🏆 Earned in the games: ${how}`, he: `🏆 מרוויחים את זה במשחקים: ${how}`, ar: `🏆 يُكسب في الألعاب: ${how}` }),
+  awardReady: (name: string) => tr({ en: `🏆 You earned “${name}” — it’s waiting in the “Earned” tab.`, he: `🏆 הרווחתם את "${name}" — הוא מחכה בלשונית "הישגים".`, ar: `🏆 ربحتم «${name}» — ينتظركم في تبويب «إنجازات».` }),
+  free: tr({ en: 'Free', he: 'חינם', ar: 'مجانًا' }),
   mapAll: tr({ en: 'Choose an island.', he: 'בחרו אי.', ar: 'اختاروا جزيرة.' }),
   backTo: (name: string) => tr({ en: `Back to ${name}`, he: `חזרה ל${name}`, ar: `العودة إلى ${name}` }),
   notYet: tr({ en: 'You haven’t been here yet. There are two ways to get here:', he: 'עוד לא הגעתם לכאן. יש שתי דרכים להגיע:', ar: 'لم تصلوا إلى هنا بعد. هناك طريقتان للوصول:' }),
@@ -177,7 +193,8 @@ const buildBtn = h('button', { class: 'btn warm isl-build', type: 'button' }, T.
 const realBtn = h('button', { class: 'isl-real', type: 'button' });
 const whoBtn = h('button', { class: 'link isl-who', type: 'button' }, T.who);
 const mapLink = h('button', { class: 'link isl-maplink', type: 'button' });
-const viewBar = h('div', { class: 'isl-panel isl-view' }, note, h('div', { class: 'isl-actions' }, buildBtn, realBtn), h('div', { class: 'isl-links' }, whoBtn, mapLink));
+const lettersBtn = h('button', { class: 'link isl-who', type: 'button' }, T.letters);
+const viewBar = h('div', { class: 'isl-panel isl-view' }, note, h('div', { class: 'isl-actions' }, buildBtn, realBtn), h('div', { class: 'isl-links' }, whoBtn, lettersBtn, mapLink));
 const mapNote = h('p', { class: 'isl-note', 'aria-live': 'polite' });
 const lockCard = h('div', { class: 'isl-lock', hidden: true });
 const mapBack = h('button', { class: 'btn isl-mapback', type: 'button' });
@@ -302,10 +319,12 @@ function setMode(m: Mode) {
   if (m.k === 'view') {
     undo = [];
     // a newcomer's hello outlasts leaving build mode
-    note.textContent = news ?? (save.placed.some((p) => p.isle === isle) ? `${T.welcome(isleMeta(isle)!.name)} ${T.tapToWalk}` : T.empty);
+    const bottleNote = save.beach.pending.some((b) => b.isle === isle) ? T.bottleHere : null;
+    note.textContent = news ?? bottleNote ?? (save.placed.some((p) => p.isle === isle) ? `${T.welcome(isleMeta(isle)!.name)} ${T.tapToWalk}` : T.empty);
     news = null;
     const locked = ISLES.length - open.length;
     mapLink.textContent = locked ? `🏝️ ${T.moreIsles(locked)}` : `🗺️ ${T.allOpen}`;
+    lettersBtn.hidden = !save.beach.letters.length;
   }
   requestAnimationFrame(refit);
 }
@@ -326,8 +345,10 @@ function updateGhost() {
 }
 
 function renderSheet() {
+  const cats = CATEGORIES.filter((c) => ITEMS.some((d) => d.isle === isle && d.cat === c.id));
+  if (tab !== 'land' && !cats.some((c) => c.id === tab)) tab = 'plants';
   tabs.replaceChildren(
-    ...[...CATEGORIES.map((c) => ({ id: c.id as Category | 'land', label: `${c.icon} ${c.label}` })), { id: 'land' as const, label: `🏝️ ${T.land}` }].map((c) => {
+    ...[...cats.map((c) => ({ id: c.id as Category | 'land', label: `${c.icon} ${c.label}` })), { id: 'land' as const, label: `🏝️ ${T.land}` }].map((c) => {
       const b = h('button', { class: `isl-tab${c.id === tab ? ' on' : ''}`, type: 'button', role: 'tab', 'aria-selected': String(c.id === tab) }, c.label);
       b.addEventListener('click', () => {
         tab = c.id;
@@ -359,6 +380,19 @@ function renderSheet() {
       const n = ownedCount(save, d.id);
       const full = !canOwnMore(save, d) && !stored(d.id);
       const free = stored(d.id) > 0;
+      if (d.award) {
+        const earned = AWARDS[d.award].done();
+        const card = h(
+          'button',
+          { class: `isl-card isl-card-award${full ? ' full' : earned ? '' : ' locked'}`, type: 'button' },
+          thumb(d),
+          h('span', { class: 'isl-card-name' }, d.name),
+          h('span', { class: 'isl-card-desc' }, d.desc),
+          h('span', { class: 'isl-card-cost' }, full ? T.owned : earned ? T.free : '🔒'),
+        );
+        card.addEventListener('click', () => (earned || free ? choose(d, card) : say(T.awardLocked(AWARDS[d.award!].how))));
+        return card;
+      }
       const card = h(
         'button',
         { class: `isl-card${full ? ' full' : !free && wallet.zen < d.cost ? ' poor' : ''}${d.icon ? ' icon' : ''}`, type: 'button' },
@@ -774,6 +808,11 @@ function pointerEnd(e: PointerEvent) {
   const hit = scene.hit(view, p.x, p.y);
   if (mode.k === 'view') {
     if (tappedMe(p.x, p.y)) return meHello();
+    const bottle = tappedBottle(p.x, p.y);
+    if (bottle) {
+      if (!me.go(bottle.cell, wm.walk, () => readLetter(bottle.b))) readLetter(bottle.b);
+      return;
+    }
     if (hit && def(hit.id)!.kind === 'item') return visit(hit);
     const c = scene.cellAt(p.x, p.y);
     if (wm.walk(c.x, c.y)) me.go(c, wm.walk);
@@ -921,6 +960,118 @@ function showAlbum() {
   close.focus({ preventScroll: true });
 }
 
+// ---------------------------------------------------------------- bottles and letters
+
+/** Where a bottle lies: a free cell on the island's front edges, the same one every time. */
+function bottleCell(b: Bottle) {
+  const edge: { x: number; y: number }[] = [];
+  for (let k = wm.lo; k < wm.hi; k++) {
+    if (wm.walk(wm.hi - 1, k)) edge.push({ x: wm.hi - 1, y: k });
+    if (k < wm.hi - 1 && wm.walk(k, wm.hi - 1)) edge.push({ x: k, y: wm.hi - 1 });
+  }
+  return edge.length ? edge[Math.floor(hashStr(b.id) * edge.length)] : null;
+}
+
+const bottlesHere = () =>
+  save.beach.pending
+    .filter((b) => b.isle === isle)
+    .map((b) => ({ b, cell: bottleCell(b) }))
+    .filter((x): x is { b: Bottle; cell: { x: number; y: number } } => !!x.cell);
+
+function drawBottle(c: CanvasRenderingContext2D, t: number, seed: number) {
+  const bob = Math.sin(t * 2 + seed) * 1.2;
+  c.fillStyle = 'rgba(30,50,40,.2)';
+  c.beginPath();
+  c.ellipse(0, 1, 11, 4, 0, 0, Math.PI * 2);
+  c.fill();
+  c.save();
+  c.translate(0, -5 + bob);
+  c.rotate(-0.35);
+  c.fillStyle = 'rgba(120, 200, 170, .85)';
+  c.beginPath();
+  c.ellipse(0, 0, 10, 5, 0, 0, Math.PI * 2);
+  c.fill();
+  c.fillRect(8, -2, 7, 4);
+  c.fillStyle = '#a8784e';
+  c.fillRect(14, -2.2, 3, 4.4);
+  c.fillStyle = '#fff4d8';
+  c.fillRect(-5, -2, 9, 4);
+  c.restore();
+  // a glint that catches the eye
+  const k = (t * 0.6 + seed) % 1;
+  if (k < 0.25) {
+    const a = Math.sin((k / 0.25) * Math.PI);
+    c.strokeStyle = `rgba(255,255,255,${a})`;
+    c.lineWidth = 1.5;
+    c.beginPath();
+    c.moveTo(-4, -16);
+    c.lineTo(-4, -8);
+    c.moveTo(-8, -12);
+    c.lineTo(0, -12);
+    c.stroke();
+  }
+}
+
+function tappedBottle(sx: number, sy: number) {
+  for (const x of bottlesHere()) {
+    const a = iso(x.cell.x + 0.5, x.cell.y + 0.5);
+    const s = scene.toScreen(a.x, a.y - 6);
+    if (Math.hypot(sx - s.x, sy - s.y) < 26 * Math.max(0.7, scene.cam.zoom)) return x;
+  }
+  return null;
+}
+
+function readLetter(b: Bottle) {
+  const got = openBottle(save.beach, b.id);
+  if (!got) return;
+  saveIsland(save);
+  addZen(BOTTLE_ZEN);
+  paintZen(true);
+  audio.success();
+  vibrate([10, 30, 10]);
+  const all = h('button', { class: 'btn ghost', type: 'button' }, T.allLetters(save.beach.letters.length, NOTES.length));
+  const close = h('button', { class: 'btn', type: 'button' }, tr({ en: 'Close', he: 'סגירה', ar: 'إغلاق' }));
+  album.replaceChildren(
+    h('div', { class: 'isl-album-card isl-letter' }, h('h2', {}, T.letterTitle), h('p', { class: 'isl-letter-text' }, NOTES[got.note]), h('p', { class: 'isl-letter-zen' }, T.letterZen), close, all),
+  );
+  album.hidden = false;
+  close.addEventListener('click', () => {
+    album.hidden = true;
+    setMode({ k: 'view' });
+  });
+  all.addEventListener('click', showLetters);
+  close.focus({ preventScroll: true });
+}
+
+function showLetters() {
+  const close = h('button', { class: 'btn', type: 'button' }, tr({ en: 'Close', he: 'סגירה', ar: 'إغلاق' }));
+  album.replaceChildren(
+    h(
+      'div',
+      { class: 'isl-album-card' },
+      h('h2', {}, T.letters),
+      h('p', { class: 'isl-note' }, T.lettersNote),
+      h('ul', { class: 'isl-letters' }, ...NOTES.map((n, i) => (save.beach.letters.includes(i) ? h('li', { class: 'here' }, n) : h('li', {}, `✉️ ${T.unread}`)))),
+      close,
+    ),
+  );
+  album.hidden = false;
+  close.addEventListener('click', () => (album.hidden = true));
+  close.focus({ preventScroll: true });
+}
+
+const train = new Train();
+
+/** Earned achievement items not on the island yet: say so once per visit. */
+function awardNews() {
+  const ready = ITEMS.find((d) => d.award && open.includes(d.isle) && AWARDS[d.award].done() && canOwnMore(save, d));
+  return ready ? T.awardReady(ready.name) : null;
+}
+
+function padOf(id: string): PadMood {
+  return id === 'garden' ? 'island' : (id as PadMood);
+}
+
 // ---------------------------------------------------------------- islands and the map
 
 function paintIsle() {
@@ -940,6 +1091,13 @@ function goIsle(id: string) {
   paintIsle();
   setMode({ k: 'view' });
   checkVisitors();
+  view.weather = reducedMotion() ? 'clear' : weatherOf(todayKey(), id, new Date().getHours());
+  if (ambience) {
+    audio.stopPad();
+    audio.stopExtras();
+    ambience = false;
+    startAmbience();
+  }
 }
 
 function lightNow() {
@@ -963,7 +1121,7 @@ function showLock(id: string) {
   lockCard.replaceChildren(
     h('h3', {}, `${m.emoji} ${m.name}`),
     h('p', {}, T.notYet),
-    h('div', { class: 'isl-way' }, h('span', { class: 'isl-way-n' }, '1'), h('span', {}, T.way1(m.gameName)), h('a', { class: 'btn warm isl-play', href: `${import.meta.env.BASE_URL}${m.game}/` }, T.playNow)),
+    h('div', { class: 'isl-way' }, h('span', { class: 'isl-way-n' }, '1'), h('span', {}, m.opens === 'story' ? T.way1Story(m.gameName) : T.way1(m.gameName)), h('a', { class: 'btn warm isl-play', href: `${import.meta.env.BASE_URL}${m.game}/` }, T.playNow)),
     h(
       'div',
       { class: 'isl-way' },
@@ -1057,8 +1215,9 @@ let ambience = false;
 function startAmbience(force = false) {
   if ((ambience && !force) || save.muted || !audio.ctx) return;
   ambience = true;
-  audio.startPad('island');
+  audio.startPad(padOf(isle));
   audio.startWaves();
+  if (view.weather === 'rain') audio.startRain();
   if (save.placed.some((p) => p.id === 'chimes')) audio.startChimes();
 }
 
@@ -1073,6 +1232,7 @@ mapBtn.addEventListener('click', () => setMode({ k: 'map' }));
 mapLink.addEventListener('click', () => setMode({ k: 'map' }));
 mapBack.addEventListener('click', () => setMode({ k: 'view' }));
 whoBtn.addEventListener('click', showAlbum);
+lettersBtn.addEventListener('click', showLetters);
 getUpBtn.addEventListener('click', getUp);
 album.addEventListener('keydown', (e) => e.key === 'Escape' && (album.hidden = true));
 undoBtn.addEventListener('click', undoLast);
@@ -1124,6 +1284,10 @@ paintClock();
 paintReal();
 paintIsle();
 spawnGuests();
+usePeskyImage(buddySVG());
+washUp(save.beach, todayKey(), open);
+saveIsland(save);
+news = awardNews();
 setMode({ k: 'view' });
 refit();
 checkVisitors();
@@ -1135,6 +1299,7 @@ const hourNow = () => {
   const d = new Date();
   return d.getHours() + d.getMinutes() / 60;
 };
+let forcedWeather: View['weather'] | null = null;
 let t = 0;
 let lastHour = new Date().getHours();
 scope.loop((dt) => {
@@ -1142,6 +1307,7 @@ scope.loop((dt) => {
   const light = daylight(save.clock === 'day' ? 12 : save.clock === 'night' ? 23 : hourNow());
   // the Lantern Forest lives at dusk
   view.daylight = isle === 'forest' && mode.k !== 'map' ? { dark: Math.max(0.45, light.dark), warm: Math.max(0.4, light.warm) } : light;
+  view.weather = forcedWeather ?? (reducedMotion() ? 'clear' : weatherOf(todayKey(), isle, new Date().getHours()));
   screen.classList.toggle('dark', view.daylight.dark > 0.5);
   const tt = reducedMotion() ? 0 : t;
   if (mode.k === 'map') {
@@ -1152,7 +1318,15 @@ scope.loop((dt) => {
   me.step(dt);
   for (const g of guests) g.update(dt, wm);
   breathe(performance.now());
-  view.actors = [me.actor(tt), ...guests.map((g) => g.actor(tt, save, isle))];
+  const hasTrain = save.placed.some((p) => p.id === 'train' && p.isle === isle);
+  if (hasTrain) train.update(dt, save, isle);
+  const trainActor = hasTrain ? train.actor(tt) : null;
+  view.actors = [
+    me.actor(tt),
+    ...guests.map((g) => g.actor(tt, save, isle)),
+    ...bottlesHere().map(({ b, cell }) => ({ gx: cell.x + 0.5, gy: cell.y + 0.5, draw: (c: CanvasRenderingContext2D) => drawBottle(c, tt, hashStr(b.id) * 10) })),
+    ...(trainActor ? [trainActor] : []),
+  ];
   scene.draw(view, tt);
   // the bell tower rings on the hour
   const hr = new Date().getHours();
@@ -1163,4 +1337,4 @@ scope.loop((dt) => {
 });
 
 // for tests and tuning
-(window as unknown as { __isl: unknown }).__isl = { save, wallet, view, scene, worldMap, setMode: (k: string) => setMode({ k } as Mode), goIsle, landBounds, me: () => me, guests: () => guests };
+(window as unknown as { __isl: unknown }).__isl = { save, wallet, view, scene, worldMap, setMode: (k: string) => setMode({ k } as Mode), goIsle, landBounds, me: () => me, guests: () => guests, weather: (w: View['weather'] | null) => (forcedWeather = w), bottles: () => bottlesHere() };

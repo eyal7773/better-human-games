@@ -35,6 +35,8 @@ interface NoiseOpts {
 
 type Stop = () => void;
 
+export type PadMood = 'home' | 'island' | 'shore' | 'hill' | 'forest' | 'lighthouse' | 'toys';
+
 export class AudioEngine {
   ctx: AudioContext | null = null;
   muted: boolean;
@@ -47,7 +49,7 @@ export class AudioEngine {
   private padTimer = 0;
   private padVoices: { g: GainNode; oscs: OscillatorNode[] }[] = [];
   private extras: Stop[] = [];
-  private pendingPad: 'home' | 'island' | null = null;
+  private pendingPad: PadMood | null = null;
 
   constructor(muted = false) {
     this.muted = muted;
@@ -397,7 +399,7 @@ export class AudioEngine {
    * Soft evolving pad. `mood` changes the chord colour:
    * home = warm major 7ths, island = open suspended voicings.
    */
-  startPad(mood: 'home' | 'island') {
+  startPad(mood: PadMood) {
     const ctx = this.ctx;
     if (!ctx) {
       this.pendingPad = mood;
@@ -416,6 +418,37 @@ export class AudioEngine {
         [46, 53, 62, 65, 72],
         [48, 55, 62, 67, 74],
         [45, 52, 60, 64, 71],
+      ],
+      // the Calm Islands, one colour each
+      shore: [
+        [53, 60, 64, 69, 76],
+        [50, 57, 62, 66, 74],
+        [48, 55, 60, 64, 72],
+        [50, 57, 62, 67, 74],
+      ],
+      hill: [
+        [55, 62, 67, 71, 79],
+        [52, 59, 64, 67, 76],
+        [53, 60, 65, 69, 77],
+        [50, 57, 62, 66, 74],
+      ],
+      forest: [
+        [45, 52, 57, 60, 67],
+        [41, 48, 57, 60, 65],
+        [43, 50, 55, 58, 67],
+        [40, 47, 52, 55, 64],
+      ],
+      lighthouse: [
+        [43, 50, 55, 62, 67],
+        [45, 52, 57, 60, 69],
+        [41, 48, 53, 60, 65],
+        [43, 50, 55, 59, 67],
+      ],
+      toys: [
+        [60, 64, 67, 72, 76],
+        [57, 62, 65, 69, 74],
+        [55, 59, 62, 67, 71],
+        [60, 65, 69, 72, 77],
       ],
     };
     const chords = progressions[mood];
@@ -514,6 +547,30 @@ export class AudioEngine {
       g.gain.setTargetAtTime(0, ctx.currentTime, 0.4);
       src.stop(ctx.currentTime + 2);
       lfo.stop(ctx.currentTime + 2);
+    });
+  }
+
+  /** Soft rain: filtered noise, a little brighter than the sea. */
+  startRain() {
+    const ctx = this.ctx;
+    if (!ctx || this.muted) return;
+    const src = ctx.createBufferSource();
+    src.buffer = this.noiseBuf;
+    src.loop = true;
+    const hp = ctx.createBiquadFilter();
+    hp.type = 'bandpass';
+    hp.frequency.value = 2400;
+    hp.Q.value = 0.4;
+    const g = ctx.createGain();
+    g.gain.value = 0;
+    g.gain.setTargetAtTime(0.035, ctx.currentTime, 1.5);
+    src.connect(hp);
+    hp.connect(g);
+    g.connect(this.music);
+    src.start();
+    this.extras.push(() => {
+      g.gain.setTargetAtTime(0, ctx.currentTime, 0.4);
+      src.stop(ctx.currentTime + 2);
     });
   }
 

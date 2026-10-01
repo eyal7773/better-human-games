@@ -49,6 +49,8 @@ export const EXPANSIONS: Record<string, number[]> = {
   shore: [300, 800],
   hill: [400, 1000],
   forest: [600, 1500],
+  lighthouse: [700, 1600],
+  toys: [800, 1800],
 };
 
 /** How many of each item an island has (placed only; the shed doesn't count). */

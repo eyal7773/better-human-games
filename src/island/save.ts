@@ -1,6 +1,7 @@
 import { load, store } from '../shared/storage';
 import { BP_KEY } from '../shared/zen';
 import { migrateOld, type IslandState, type Placed, type Rules } from './economy';
+import { sanitizeBeach, type Beach } from './bottles';
 
 export type Clock = 'auto' | 'day' | 'night';
 
@@ -16,6 +17,8 @@ export interface IslandSave extends IslandState {
   welcomed: string[];
   /** Visitors who moved in, in the order they came. */
   visitors: string[];
+  /** Bottles on the beaches and the letters read. */
+  beach: Beach;
 }
 
 const KEY = 'bhg.island.v1';
@@ -54,6 +57,7 @@ export function sanitizeIsland(raw: unknown, rules: Rules): IslandSave {
     isle: typeof r.isle === 'string' ? r.isle : 'garden',
     welcomed: strings(r.welcomed, ['garden']),
     visitors: strings(r.visitors, []),
+    beach: sanitizeBeach(r.beach),
   };
 }
 

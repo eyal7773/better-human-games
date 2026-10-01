@@ -71,6 +71,7 @@ export const T = {
   star3: tr({ en: 'A full breath without letting go', he: 'נשימה שלמה בלי לעזוב מוקדם', ar: 'نفَس كامل دون ترك مبكر' }),
   star3noBreath: tr({ en: 'Caught him without a single slip', he: 'תפסתם בלי אף החלקה', ar: 'أمسكتموه دون أي انزلاق' }),
   zen: (n: number) => tr({ en: `+${n} zen for the Calm Islands`, he: `+${n} נקודות זן לאיי השקט`, ar: `+${n} نقاط زن لجزر السكينة` }),
+  newIsle: (name: string) => tr({ en: `You opened a new island: ${name} — Pesky lives there now!`, he: `פתחתם אי חדש באיי השקט: ${name} — ציקי גר שם עכשיו!`, ar: `فتحتم جزيرة جديدة: ${name} — زِنّو يسكن هناك الآن!` }),
   island: tr({ en: 'To the Calm Islands 🏝️', he: 'לאיי השקט 🏝️', ar: 'إلى جزر السكينة 🏝️' }),
   again2: tr({ en: 'Play again', he: 'לשחק שוב', ar: 'العبوا مجددًا' }),
   nextRoom: tr({ en: 'Next room', he: 'לחדר הבא', ar: 'الغرفة التالية' }),

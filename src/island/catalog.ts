@@ -5,9 +5,13 @@ import * as S from './art/shore';
 import * as H from './art/hill';
 import * as F from './art/forest';
 import * as A from './art/creatures';
+import * as L from './art/lighthouse';
+import * as Y from './art/toys';
+import * as W from './art/awards';
+import { AWARDS, peskyHome } from './awards';
 import type { Draw } from './art/kit';
 
-export type Category = 'plants' | 'build' | 'water' | 'light';
+export type Category = 'plants' | 'build' | 'water' | 'light' | 'award';
 
 export interface ItemDef extends Rule {
   name: string;
@@ -27,6 +31,8 @@ export interface ItemDef extends Rule {
   still?: boolean;
   /** Laid by dragging a finger, many at a time (tiles and fences). */
   brush?: boolean;
+  /** Not for sale: earned in a game (see awards.ts). */
+  award?: string;
   sound: 'bell' | 'chime' | 'splash' | 'rustle' | 'wood' | 'stone' | 'melody' | 'gong' | 'note' | 'whoosh';
   /** You can sit here and breathe with the island. */
   seat?: boolean;
@@ -37,6 +43,7 @@ export const CATEGORIES: { id: Category; label: string; icon: string }[] = [
   { id: 'build', icon: '🏯', label: tr({ en: 'Buildings', he: 'מבנים', ar: 'مبانٍ' }) },
   { id: 'water', icon: '💧', label: tr({ en: 'Water & paths', he: 'מים ושבילים', ar: 'ماء وممرات' }) },
   { id: 'light', icon: '🏮', label: tr({ en: 'Light & sound', he: 'אור וצליל', ar: 'ضوء وصوت' }) },
+  { id: 'award', icon: '🏆', label: tr({ en: 'Earned', he: 'הישגים', ar: 'إنجازات' }) },
 ];
 
 type Spec = Omit<ItemDef, 'isle' | 'kind' | 'w' | 'd'> & Partial<Pick<ItemDef, 'kind' | 'w' | 'd'>>;
@@ -47,6 +54,10 @@ const garden = on('garden');
 const shore = on('shore');
 const hill = on('hill');
 const forest = on('forest');
+const lighthouse = on('lighthouse');
+const toys = on('toys');
+/** An achievement item: free, one of it, on the island of the game that earns it. */
+const award = (isle: string, id: string, d: Omit<Spec, 'id' | 'cat' | 'cost' | 'cap' | 'award'>) => on(isle)({ id, cat: 'award', cost: 0, cap: 1, award: id, ...d });
 const TILE = Infinity;
 
 export const ITEMS: ItemDef[] = [
@@ -117,6 +128,35 @@ export const ITEMS: ItemDef[] = [
   forest({ id: 'treehouse', cat: 'build', cost: 450, cap: 1, w: 2, d: 2, h: 170, light: { y: 78, r: 80 }, sound: 'wood', draw: F.treehouse, name: tr({ en: 'Treehouse', he: 'בית עץ', ar: 'بيت الشجرة' }), desc: tr({ en: 'With a rope ladder', he: 'עם סולם חבלים', ar: 'مع سلّم من الحبال' }) }),
   forest({ id: 'theater', cat: 'build', cost: 600, cap: 1, w: 2, h: 84, light: { y: 44, r: 90 }, sound: 'melody', draw: F.shadowTheater, name: tr({ en: 'Shadow theatre', he: 'תיאטרון צלליות', ar: 'مسرح الظل' }), desc: tr({ en: 'Shadows that only dance', he: 'צללים שרק רוקדים', ar: 'ظلال ترقص فقط' }) }),
   forest({ id: 'lighttree', icon: true, cat: 'plants', cost: 1300, cap: 1, w: 2, d: 2, h: 180, light: { y: 90, r: 140 }, sound: 'gong', draw: F.lightTree, name: tr({ en: 'The Tree of Light', he: 'עץ האור', ar: 'شجرة النور' }), desc: tr({ en: 'Lights drift up from its branches', he: 'אורות עולים מהענפים שלו', ar: 'أضواء تصعد من أغصانه' }) }),
+
+  // ---- Lighthouse Isle
+  lighthouse({ id: 'dock', kind: 'ground', brush: true, cat: 'water', cost: 12, cap: TILE, h: 0, sound: 'wood', name: tr({ en: 'Jetty', he: 'מזח', ar: 'رصيف' }), desc: tr({ en: 'Drag to lay planks', he: 'גוררים כדי להניח קרשים', ar: 'اسحبوا لوضع الألواح' }) }),
+  lighthouse({ id: 'ivy', cat: 'plants', cost: 10, cap: 6, h: 12, sound: 'rustle', draw: L.ivy, name: tr({ en: 'Ivy', he: 'קיסוס', ar: 'لبلاب' }), desc: tr({ en: 'Green over old stone', he: 'ירוק על אבן ישנה', ar: 'أخضر فوق حجر قديم' }) }),
+  lighthouse({ id: 'wall', still: true, brush: true, cat: 'build', cost: 15, cap: TILE, h: 22, sound: 'stone', draw: L.wall, name: tr({ en: 'Old stone wall', he: 'חומת אבן ישנה', ar: 'سور حجري قديم' }), desc: tr({ en: 'Drag to build; moss on top', he: 'גוררים כדי לבנות; טחב למעלה', ar: 'اسحبوا للبناء؛ طحلب في الأعلى' }) }),
+  lighthouse({ id: 'crate', still: true, cat: 'build', cost: 20, cap: 4, h: 18, sound: 'wood', draw: L.crate, name: tr({ en: 'Fish crate', he: 'ארגז דגים', ar: 'صندوق سمك' }), desc: tr({ en: 'Today’s catch', he: 'השלל של היום', ar: 'صيد اليوم' }) }),
+  lighthouse({ id: 'net', cat: 'build', cost: 25, cap: 3, w: 2, h: 36, sound: 'whoosh', draw: L.net, name: tr({ en: 'Fishing net', he: 'רשת דייגים', ar: 'شبكة صيد' }), desc: tr({ en: 'Hung out to dry', he: 'תלויה לייבוש', ar: 'معلّقة لتجفّ' }) }),
+  lighthouse({ id: 'buoy', cat: 'light', cost: 40, cap: 3, h: 32, sound: 'bell', draw: L.buoyBell, name: tr({ en: 'Bell buoy', he: 'מצוף פעמון', ar: 'عوّامة الجرس' }), desc: tr({ en: 'Rings when it rocks', he: 'מצלצל כשהוא מתנדנד', ar: 'يرنّ حين يتمايل' }) }),
+  lighthouse({ id: 'cannon', cat: 'plants', cost: 90, cap: 2, h: 36, sound: 'rustle', draw: L.cannonPlanter, name: tr({ en: 'Cannon planter', he: 'תותח-עציץ', ar: 'مدفع-أصيص' }), desc: tr({ en: 'The anger cannon, retired. Flowers now.', he: 'תותח הכעס יצא לפנסיה. עכשיו פרחים.', ar: 'مدفع الغضب تقاعد. الآن زهور.' }) }),
+  lighthouse({ id: 'rowboat', cat: 'water', cost: 150, cap: 2, w: 2, h: 20, sound: 'wood', draw: L.rowboat, name: tr({ en: 'Rowing boat', he: 'סירת משוטים', ar: 'قارب تجديف' }), desc: tr({ en: 'Rocks gently', he: 'מתנדנדת בעדינות', ar: 'يتأرجح بلطف' }) }),
+  lighthouse({ id: 'keeper', still: true, cat: 'build', cost: 400, cap: 1, w: 2, d: 2, h: 80, light: { y: 18, r: 80 }, sound: 'wood', draw: L.keeperHouse, name: tr({ en: 'Keeper’s cottage', he: 'בית השומר', ar: 'بيت الحارس' }), desc: tr({ en: 'Someone keeps the light here', he: 'מישהו שומר כאן על האור', ar: 'أحدٌ يحرس الضوء هنا' }) }),
+  lighthouse({ id: 'lighthouse', icon: true, seat: true, cat: 'build', cost: 1500, cap: 1, w: 2, d: 2, h: 200, light: { y: 170, r: 110 }, sound: 'gong', draw: L.lighthouse, name: tr({ en: 'The Lighthouse', he: 'המגדלור', ar: 'المنارة' }), desc: tr({ en: 'Its beam turns all night. Sit at its foot and breathe.', he: 'האלומה מסתובבת כל הלילה. אפשר לשבת למרגלותיו ולנשום.', ar: 'شعاعها يدور طوال الليل. اجلسوا عند قدمها وتنفّسوا.' }) }),
+  // ---- Toy Island
+  toys({ id: 'track', kind: 'ground', brush: true, cat: 'water', cost: 8, cap: TILE, h: 0, sound: 'wood', name: tr({ en: 'Train track', he: 'פסי רכבת', ar: 'سكة قطار' }), desc: tr({ en: 'Drag to lay track', he: 'גוררים כדי להניח פסים', ar: 'اسحبوا لمدّ السكة' }) }),
+  toys({ id: 'blocks', still: true, cat: 'build', cost: 10, cap: 6, h: 30, sound: 'wood', draw: Y.blocks, name: tr({ en: 'Wooden blocks', he: 'קוביות עץ', ar: 'مكعبات خشب' }), desc: tr({ en: 'A, B, C', he: 'א, ב, ג', ar: 'أ، ب، ت' }) }),
+  toys({ id: 'buttons', cat: 'build', cost: 30, cap: 4, h: 12, sound: 'note', draw: Y.bigButtons, name: tr({ en: 'Giant buttons', he: 'כפתורים ענקיים', ar: 'أزرار عملاقة' }), desc: tr({ en: 'Press away — they don’t mind', he: 'מותר ללחוץ — לא אכפת להם', ar: 'اضغطوا كما شئتم — لا يمانعون' }) }),
+  toys({ id: 'jackbox', cat: 'build', cost: 60, cap: 3, h: 50, sound: 'melody', draw: Y.jackBox, name: tr({ en: 'Jack-in-the-box', he: 'קופסת קפיץ', ar: 'علبة المفاجأة' }), desc: tr({ en: 'Boing!', he: 'בויינג!', ar: 'بوينغ!' }) }),
+  toys({ id: 'trampoline', cat: 'build', cost: 120, cap: 2, w: 2, d: 2, h: 50, sound: 'whoosh', draw: Y.trampoline, name: tr({ en: 'Trampoline', he: 'טרמפולינה', ar: 'ترامبولين' }), desc: tr({ en: 'A ball that never stops', he: 'כדור שלא מפסיק לקפוץ', ar: 'كرة لا تتوقف' }) }),
+  toys({ id: 'slide', still: true, cat: 'build', cost: 180, cap: 2, w: 2, h: 44, sound: 'whoosh', draw: Y.slide, name: tr({ en: 'Slide', he: 'מגלשה', ar: 'زحليقة' }), desc: tr({ en: 'Wheee', he: 'ויייי', ar: 'ويييي' }) }),
+  toys({ id: 'train', kind: 'ambient', cat: 'water', cost: 250, cap: 1, w: 0, d: 0, h: 0, sound: 'whoosh', name: tr({ en: 'Toy train', he: 'רכבת צעצוע', ar: 'قطار لعبة' }), desc: tr({ en: 'Runs along the tracks you lay', he: 'נוסעת על הפסים שהנחתם', ar: 'يسير على السكة التي مددتموها' }) }),
+  toys({ id: 'carousel', cat: 'build', cost: 450, cap: 1, w: 2, d: 2, h: 120, light: { y: 70, r: 90 }, sound: 'melody', draw: Y.carousel, name: tr({ en: 'Carousel', he: 'קרוסלה', ar: 'دوّامة الخيل' }), desc: tr({ en: 'Round and round', he: 'סביב סביב', ar: 'تدور وتدور' }) }),
+  toys({ id: 'dollhouse', icon: true, cat: 'build', cost: 1200, cap: 1, w: 2, d: 2, h: 112, light: { y: 40, r: 110 }, sound: 'melody', draw: Y.dollhouse, name: tr({ en: 'The Doll’s House', he: 'בית הבובות', ar: 'بيت الدمى' }), desc: tr({ en: 'Room after room lights up', he: 'חדר אחרי חדר נדלק', ar: 'غرفة بعد غرفة تُضاء' }) }),
+  // ---- earned in the games, never bought
+  award('garden', 'kettle', { h: 52, sound: 'bell', draw: W.kettleStatue, name: tr({ en: 'Calm kettle statue', he: 'פסל הקומקום הרגוע', ar: 'تمثال الإبريق الهادئ' }), desc: AWARDS.kettle.how }),
+  award('garden', 'realbench', { w: 2, seat: true, still: true, h: 30, sound: 'wood', draw: W.realBench, name: tr({ en: 'Real-pause bench', he: 'ספסל העצירה האמיתית', ar: 'مقعد التوقّف الحقيقي' }), desc: AWARDS.realbench.how }),
+  award('shore', 'antenna', { h: 80, sound: 'melody', draw: W.antenna, name: tr({ en: 'Six-station antenna', he: 'אנטנת שש התחנות', ar: 'هوائي المحطات الست' }), desc: AWARDS.antenna.how }),
+  award('hill', 'feather', { h: 76, sound: 'whoosh', draw: W.feather, name: tr({ en: 'Feather of words', he: 'נוצת המילים', ar: 'ريشة الكلمات' }), desc: AWARDS.feather.how }),
+  award('forest', 'shadowlamp', { h: 52, light: { y: 44, r: 60 }, sound: 'bell', draw: W.shadowLamp, name: tr({ en: 'True-size lamp', he: 'פנס הצל האמיתי', ar: 'مصباح الحجم الحقيقي' }), desc: AWARDS.shadowlamp.how }),
+  award('lighthouse', 'shield', { h: 52, sound: 'stone', draw: W.stoneShield, name: tr({ en: 'Stone shield', he: 'מגן האבן', ar: 'درع الحجر' }), desc: AWARDS.shield.how }),
 ];
 
 const BY_ID = new Map(ITEMS.map((d) => [d.id, d]));
@@ -155,5 +195,10 @@ export const VISITORS: Visitor[] = [
   { id: 'fox', isle: 'forest', emoji: '🦊', gait: 'walk', draw: A.fox, need: (n) => n('cabin') > 0 && n('fern') >= 2, name: tr({ en: 'Fox', he: 'שועל', ar: 'ثعلب' }), hint: tr({ en: 'Someone who sneaks between ferns near a warm cabin…', he: 'מישהו שמתגנב בין שרכים ליד בקתה חמימה…', ar: 'أحدٌ يتسلّل بين السرخس قرب كوخ دافئ…' }) },
   { id: 'deer', isle: 'forest', emoji: '🦌', gait: 'walk', draw: A.deer, need: (n) => n('moonpool') > 0 && n('mushrooms') >= 2, name: tr({ en: 'Deer', he: 'צבי', ar: 'غزال' }), hint: tr({ en: 'Someone who drinks moonlight by glowing mushrooms…', he: 'מישהו ששותה אור ירח ליד פטריות זוהרות…', ar: 'أحدٌ يشرب ضوء القمر قرب الفطر المضيء…' }) },
 ];
+
+VISITORS.push(
+  { id: 'seals', isle: 'lighthouse', emoji: '🦭', gait: 'walk', draw: A.seal, need: (n) => n('dock') >= 3, name: tr({ en: 'Seal', he: 'כלב ים', ar: 'فقمة' }), hint: tr({ en: 'Someone who sunbathes on a long jetty…', he: 'מישהו שמשתזף על מזח ארוך…', ar: 'أحدٌ يتشمّس على رصيف طويل…' }) },
+  { id: 'pesky', isle: 'toys', emoji: '🔴', gait: 'hop', draw: A.pesky, need: () => peskyHome(), name: tr({ en: 'Pesky', he: 'ציקי', ar: 'زِنّو' }), hint: tr({ en: 'An old friend from “Catch Me”, once the story is over…', he: 'חבר ותיק מ"תפוס אותי", כשהסיפור נגמר…', ar: 'صديق قديم من «امسكني»، حين تنتهي القصة…' }) },
+);
 
 export const visitor = (id: string) => VISITORS.find((v) => v.id === id);

@@ -73,6 +73,8 @@ const PALETTES: Record<string, Palette> = {
   garden: { grass: [[134, 192, 110], [126, 184, 104]], soil: '#5d8a3e', overhang: '#6fa64e', tuft: 'rgba(70,120,60,.55)', lit: ['#b98a64', '#7d5640'], dim: ['#8c6248', '#583a2c'] },
   shore: { grass: [[240, 220, 166], [233, 211, 154]], soil: '#d9b878', overhang: '#e6c98c', tuft: 'rgba(170,140,90,.45)', lit: ['#e0b27a', '#b98452'], dim: ['#b48452', '#7e5a38'] },
   hill: { grass: [[160, 212, 118], [150, 204, 108]], soil: '#6c9e44', overhang: '#86bb56', tuft: 'rgba(80,130,60,.55)', lit: ['#c49a72', '#8a6648'], dim: ['#9a7254', '#634632'] },
+  lighthouse: { grass: [[122, 170, 126], [114, 162, 118]], soil: '#4f7452', overhang: '#62905e', tuft: 'rgba(50,90,60,.55)', lit: ['#aeaabb', '#74708a'], dim: ['#838098', '#4c4860'] },
+  toys: { grass: [[255, 226, 150], [176, 216, 255]], soil: '#f6f0ff', overhang: '#ffffff', tuft: 'rgba(0,0,0,0)', lit: ['#ff9a8a', '#e0605a'], dim: ['#d0706a', '#a0484a'] },
   forest: { grass: [[86, 132, 90], [80, 124, 84]], soil: '#3e6640', overhang: '#4d7a4c', tuft: 'rgba(40,70,45,.6)', lit: ['#8a7464', '#5a4a40'], dim: ['#665446', '#3e322a'] },
 };
 export const paletteOf = (isle: string) => PALETTES[isle] ?? PALETTES.garden;
@@ -109,6 +111,8 @@ export interface View {
   actors?: Actor[];
   /** Breathing with the island: 0 → 1 → 0 over a breath, or undefined. */
   breath?: number;
+  /** Today's weather here. */
+  weather?: 'clear' | 'rain' | 'mist' | 'leaves';
 }
 
 export interface Actor {
@@ -263,9 +267,63 @@ export class Scene {
     if (has('bluefireflies')) this.fireflies(c, exp, t + 40, Math.max(0.6, v.daylight.dark), [150, 220, 255]);
     if (has('birds')) this.birds(c, exp, t);
     if (v.breath != null) this.breathGlow(c, exp, v.breath);
+    if (v.weather === 'leaves') this.leaves(c, exp, t);
 
     c.setTransform(dpr, 0, 0, dpr, 0, 0);
+    if (backdrop && v.weather === 'rain') this.rain(c, t);
+    if (backdrop && v.weather === 'mist') this.mist(c, t);
     if (backdrop) this.night(c, v, t, horizon);
+  }
+
+  /** Light rain: a grey veil and soft slanted streaks. */
+  private rain(c: Ctx, t: number) {
+    c.fillStyle = 'rgba(70, 90, 120, .16)';
+    c.fillRect(0, 0, this.w, this.h);
+    c.strokeStyle = 'rgba(220, 235, 255, .45)';
+    c.lineWidth = 1;
+    c.beginPath();
+    for (let i = 0; i < 90; i++) {
+      const x = (hash(i, 5) * (this.w + 80) + t * 60) % (this.w + 80) - 40;
+      const y = (hash(i, 6) * this.h + t * (380 + hash(i, 7) * 120)) % this.h;
+      c.moveTo(x, y);
+      c.lineTo(x - 5, y + 14);
+    }
+    c.stroke();
+  }
+
+  /** Morning mist drifting low over the water. */
+  private mist(c: Ctx, t: number) {
+    for (let i = 0; i < 5; i++) {
+      const y = this.h * (0.45 + i * 0.09);
+      const x = ((t * (8 + i * 3) + i * 140) % (this.w + 400)) - 200;
+      const g = c.createRadialGradient(x, y, 10, x, y, 220);
+      g.addColorStop(0, 'rgba(255,255,255,.35)');
+      g.addColorStop(1, 'rgba(255,255,255,0)');
+      c.fillStyle = g;
+      c.fillRect(x - 220, y - 60, 440, 120);
+    }
+  }
+
+  /** Autumn leaves drifting down over the forest. */
+  private leaves(c: Ctx, exp: number, t: number) {
+    const { lo, hi } = landBounds(exp);
+    for (let i = 0; i < 14; i++) {
+      const k = (t * 0.07 + hash(i, 11)) % 1;
+      const gx = lo + hash(i, 12) * (hi - lo);
+      const gy = lo + hash(i, 13) * (hi - lo);
+      const p = iso(gx, gy);
+      const y = p.y - 160 + k * 160;
+      const x = p.x + Math.sin(t * 1.5 + i) * 10;
+      c.save();
+      c.translate(x, y);
+      c.rotate(t * 2 + i);
+      c.globalAlpha = Math.min(1, (1 - k) * 4);
+      c.fillStyle = ['#d9822b', '#c4562a', '#e6b03a'][i % 3];
+      c.beginPath();
+      c.ellipse(0, 0, 4, 2, 0, 0, Math.PI * 2);
+      c.fill();
+      c.restore();
+    }
   }
 
   // ------------------------------------------------------------ backdrop
@@ -511,7 +569,32 @@ export class Scene {
           c.lineTo(corners[b].x, corners[b].y);
           c.stroke();
         }
-      } else if (id === 'pier') {
+      } else if (id === 'track') {
+        diamond(c, p.x, p.y, 1.01, 'rgba(160,130,100,.35)');
+        // sleepers and rails toward each joined neighbour (or straight across when alone)
+        const dirs = edges.filter(([joined]) => joined).map(([, a, b]) => ({ x: (corners[a].x + corners[b].x) / 2, y: (corners[a].y + corners[b].y) / 2 }));
+        if (!dirs.length) dirs.push({ x: (corners[1].x + corners[2].x) / 2, y: (corners[1].y + corners[2].y) / 2 }, { x: (corners[3].x + corners[0].x) / 2, y: (corners[3].y + corners[0].y) / 2 });
+        for (const d of dirs) {
+          const dx = d.x - p.x;
+          const dy = d.y - p.y;
+          c.strokeStyle = '#a0683c';
+          c.lineWidth = 3;
+          for (const k of [0.3, 0.75]) {
+            c.beginPath();
+            c.moveTo(p.x + dx * k - dy * 0.35, p.y + dy * k + dx * 0.35 * 0.5);
+            c.lineTo(p.x + dx * k + dy * 0.35, p.y + dy * k - dx * 0.35 * 0.5);
+            c.stroke();
+          }
+          c.strokeStyle = '#7a8090';
+          c.lineWidth = 1.6;
+          for (const sgn of [-1, 1]) {
+            c.beginPath();
+            c.moveTo(p.x + sgn * dy * 0.22, p.y - sgn * dx * 0.11);
+            c.lineTo(d.x + sgn * dy * 0.22, d.y - sgn * dx * 0.11);
+            c.stroke();
+          }
+        }
+      } else if (id === 'pier' || id === 'dock') {
         diamond(c, p.x, p.y, 1.01, '#c9935e');
         c.strokeStyle = 'rgba(110,70,40,.55)';
         c.lineWidth = 1.2;
@@ -674,7 +757,7 @@ export class Scene {
         const side = p.x + f.w === hi ? 1 : 2;
         extra = p.flip ? 3 - side : side;
       }
-      if (d.id === 'fence') extra = fenceLinks(v, p);
+      if (d.id === 'fence' || d.id === 'wall') extra = fenceLinks(v, p);
       if (d.still && !ghost && sx === 1 && sy === 1) {
         this.sprite(c, d, p, a, extra);
         continue;
@@ -898,9 +981,9 @@ function occupied(v: View) {
 const seedOf = (p: Placed) => (p.x * 7 + p.y * 13) % 17;
 
 function fenceLinks(v: View, p: Placed) {
-  const pending = v.ghost?.def.id === 'fence' ? v.ghost.cells : [];
+  const pending = v.ghost?.def.id === p.id ? v.ghost.cells : [];
   const has = (dx: number, dy: number) =>
-    v.state.placed.some((q) => q.id === 'fence' && q.isle === v.isle && q.x === p.x + dx && q.y === p.y + dy) || pending.some((q) => q.x === p.x + dx && q.y === p.y + dy);
+    v.state.placed.some((q) => q.id === p.id && q.isle === v.isle && q.x === p.x + dx && q.y === p.y + dy) || pending.some((q) => q.x === p.x + dx && q.y === p.y + dy);
   let m = (has(1, 0) ? 1 : 0) | (has(0, 1) ? 2 : 0) | (has(-1, 0) ? 4 : 0) | (has(0, -1) ? 8 : 0);
   // mirrored drawing swaps the x and y directions
   if (p.flip) m = ((m & 1) << 1) | ((m & 2) >> 1) | ((m & 4) << 1) | ((m & 8) >> 1);

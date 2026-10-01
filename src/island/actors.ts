@@ -2,6 +2,7 @@ import { avatarSVG } from '../shared/avatar';
 import { profile } from '../shared/profile';
 import type { Ctx } from './art/kit';
 import { def, visitor, type Visitor } from './catalog';
+import { train } from './art/toys';
 import { cellsOfPlaced, type IslandState, type Placed } from './economy';
 import { footprint, iso, landBounds } from './iso';
 import { findPath } from './path';
@@ -239,3 +240,74 @@ export const anchorOf = (p: Placed) => {
   const f = footprint(d, p.flip);
   return iso(p.x + f.w / 2, p.y + f.d / 2);
 };
+
+// ---------------------------------------------------------------- the toy train
+
+/** Orders track cells into one line: from an end (a cell with one neighbour), always on to an unvisited neighbour. */
+export function trackLine(cells: { x: number; y: number }[]) {
+  const key = (c: { x: number; y: number }) => c.x * 64 + c.y;
+  const set = new Map(cells.map((c) => [key(c), c]));
+  const near = (c: { x: number; y: number }) => [
+    [1, 0],
+    [-1, 0],
+    [0, 1],
+    [0, -1],
+  ]
+    .map(([dx, dy]) => set.get(key({ x: c.x + dx, y: c.y + dy })))
+    .filter((n): n is { x: number; y: number } => !!n);
+  let best: { x: number; y: number }[] = [];
+  const starts = cells.filter((c) => near(c).length <= 1);
+  for (const start of starts.length ? starts : cells.slice(0, 1)) {
+    const line = [start];
+    const seen = new Set([key(start)]);
+    for (;;) {
+      const next = near(line[line.length - 1]).find((n) => !seen.has(key(n)));
+      if (!next) break;
+      seen.add(key(next));
+      line.push(next);
+    }
+    if (line.length > best.length) best = line;
+  }
+  return best;
+}
+
+/** Runs back and forth along the longest stretch of track. */
+export class Train {
+  private pos = 0;
+  private dir = 1;
+  private line: { x: number; y: number }[] = [];
+  private sig = '';
+
+  update(dt: number, s: IslandState, isle: string) {
+    const cells = s.placed.filter((p) => p.isle === isle && p.id === 'track').map((p) => ({ x: p.x, y: p.y }));
+    const sig = cells.map((c) => `${c.x},${c.y}`).join(';');
+    if (sig !== this.sig) {
+      this.sig = sig;
+      this.line = trackLine(cells);
+      this.pos = Math.min(this.pos, Math.max(0, this.line.length - 1));
+    }
+    if (this.line.length < 2) return;
+    this.pos += this.dir * dt * 1.3;
+    if (this.pos >= this.line.length - 1) {
+      this.pos = this.line.length - 1;
+      this.dir = -1;
+    } else if (this.pos <= 0) {
+      this.pos = 0;
+      this.dir = 1;
+    }
+  }
+
+  actor(t: number): Actor | null {
+    if (!this.line.length) return null;
+    const i = Math.floor(this.pos);
+    const a = this.line[i];
+    const b = this.line[Math.min(i + 1, this.line.length - 1)];
+    const k = this.pos - i;
+    const gx = a.x + 0.5 + (b.x - a.x) * k;
+    const gy = a.y + 0.5 + (b.y - a.y) * k;
+    const dx = (b.x - a.x) * this.dir;
+    const dy = (b.y - a.y) * this.dir;
+    const left = dx - dy < 0;
+    return { gx, gy, draw: (c) => train(c, t, left) };
+  }
+}

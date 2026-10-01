@@ -270,3 +270,44 @@ export const whale: CreatureDraw = (c, t) => {
   c.ellipse(0, 1, 34 * k + 2, 6, 0, 0, Math.PI * 2);
   c.stroke();
 };
+
+export const seal: CreatureDraw = (c, t, moving) => {
+  const y = -bob(t, moving, 0.4);
+  shadow(c, 0, 0, 12, 4);
+  c.fillStyle = '#8a96a8';
+  c.beginPath();
+  c.ellipse(-2, y - 6, 12, 6, -0.15, 0, Math.PI * 2);
+  c.fill();
+  blob(c, 9, y - 12, 6, '#9aa6b8');
+  c.fillStyle = '#7a8698';
+  c.beginPath();
+  c.moveTo(-13, y - 5);
+  c.lineTo(-19, y - 9 + Math.sin(t * 3) * 2);
+  c.lineTo(-18, y - 2);
+  c.fill();
+  eye(c, 11, y - 13, 1.3);
+  blob(c, 14.5, y - 11, 1.3, '#2a1838');
+  c.strokeStyle = 'rgba(255,255,255,.7)';
+  c.lineWidth = 0.6;
+  c.beginPath();
+  c.moveTo(14, y - 10);
+  c.lineTo(19, y - 11);
+  c.moveTo(14, y - 9);
+  c.lineTo(19, y - 8);
+  c.stroke();
+};
+
+/** Pesky from "Catch Me", calm and happy now that the story is over. */
+let peskyImg: HTMLImageElement | null = null;
+export function usePeskyImage(svg: string) {
+  if (peskyImg) return;
+  peskyImg = new Image();
+  // only the calm face: the game picks faces from CSS, which a picture doesn't have
+  const calm = svg.replace('<svg ', '<svg xmlns="http://www.w3.org/2000/svg" ').replace('</defs>', '</defs><style>[data-f]{display:none}[data-f~="calm"]{display:inline}</style>');
+  peskyImg.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(calm)}`;
+}
+export const pesky: CreatureDraw = (c, t, moving) => {
+  const hop = moving ? Math.abs(Math.sin(t * 9)) * 4 : Math.abs(Math.sin(t * 1.5)) * 1;
+  shadow(c, 0, 0, 10, 4);
+  if (peskyImg?.complete) c.drawImage(peskyImg, -14, -32 - hop, 28, 31);
+};

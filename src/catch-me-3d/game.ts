@@ -2,6 +2,7 @@ import { AudioEngine } from '../shared/audio';
 import { h } from '../shared/dom';
 import { FX } from '../shared/fx';
 import { addZen, dailyBonus, islandHref } from '../shared/zen';
+import { currentlyOpen, isleMeta } from '../shared/isles';
 import { BreathOrb } from './breath';
 import { Debug } from './debug';
 import { Hud } from './hud';
@@ -142,6 +143,7 @@ export async function boot(app: HTMLElement) {
   const playLast = async () => {
     const res = await playFinale(ctx);
     if (res.exited) return;
+    const openBefore = currentlyOpen();
     const stars = starsFor(res.stats, true);
     const starZen = recordLevel(save, FINAL_LEVEL, stars);
     if (starZen) addZen(starZen);
@@ -150,6 +152,10 @@ export async function boot(app: HTMLElement) {
     const first = !save.finished;
     save.finished = true;
     persist(save);
+    // finishing the story opens Toy Island, where Pesky lives
+    const opened = currentlyOpen()
+      .filter((i) => !openBefore.includes(i))
+      .map((i) => isleMeta(i)!);
     const victims = () => h('div', { class: 'c3-art c3-victims' }, ...['📺', '🫖', '🤖', '🧙', '🐓'].map((e) => h('span', {}, e)));
     const withPesky = () =>
       h('div', { class: 'c3-art' }, h('div', { class: 'c3-buddy', 'data-face': 'calm', html: buddySVG() }), h('span', { class: 'c3-heart' }, '💛'));
@@ -159,12 +165,14 @@ export async function boot(app: HTMLElement) {
       cls: 'c3-results',
       art: withPesky(),
       title: T.friends,
-      lines: [ENDING[2], starList(stars, true), ...(zen ? [h('p', { class: 'c3-zen' }, T.zen(zen))] : []), ...(first ? [h('p', { class: 'c3-newtrick' }, `∞ ${T.endless}`)] : [])],
+      lines: [ENDING[2], starList(stars, true), ...(zen ? [h('p', { class: 'c3-zen' }, T.zen(zen))] : []), ...(first ? [h('p', { class: 'c3-newtrick' }, `∞ ${T.endless}`)] : []), ...opened.map((m) => h('p', { class: 'c3-zen' }, `${m.emoji} ${T.newIsle(m.name)}`))],
       buttons: [
-        { id: 'home', label: T.toHome, cls: 'warm' },
+        ...(opened.length ? [{ id: 'island', label: T.island, cls: 'warm' }] : []),
+        { id: 'home', label: T.toHome, cls: opened.length ? 'ghost' : 'warm' },
         { id: 'map', label: T.map, cls: 'ghost' },
       ],
     });
+    if (choice === 'island') location.assign(islandHref());
     if (choice === 'home') location.href = import.meta.env.BASE_URL;
   };
 
