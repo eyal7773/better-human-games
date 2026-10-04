@@ -48,8 +48,8 @@ body {
 .hub-help {
   grid-area: help;
   display: block;
-  width: 58px;
-  height: 58px;
+  width: 52px;
+  height: 52px;
   filter: drop-shadow(0 4px 0 rgba(140, 20, 20, 0.45));
   transition: transform 90ms ease, filter 90ms ease;
   -webkit-tap-highlight-color: transparent;

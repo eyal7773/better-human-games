@@ -264,19 +264,25 @@ async function play(level: Level | null) {
     const r = canvas.getBoundingClientRect();
     return { x: e.clientX - r.left, y: e.clientY - r.top };
   };
+  /** Cuts every word the stroke a→b crosses; a tap is a stroke of zero length. A finger gets a wider margin. */
+  const sweep = (a: { x: number; y: number }, b: { x: number; y: number }, touch: boolean) => {
+    const pad = touch ? 12 : 4;
+    for (const f of [...flyers]) {
+      if (f.kind === 'x') continue;
+      const r = { x: f.x - f.w / 2 - pad, y: f.y - f.h / 2 - pad, w: f.w + pad * 2, h: f.h + pad * 2 };
+      if (segmentHitsRect(a.x, a.y, b.x, b.y, r)) cut(f);
+    }
+  };
   scope.on<PointerEvent>(canvas, 'pointerdown', (e) => {
     canvas.setPointerCapture(e.pointerId);
     last = local(e);
+    sweep(last, last, e.pointerType !== 'mouse');
     trail.push({ ...last, age: 0 });
   });
   scope.on<PointerEvent>(canvas, 'pointermove', (e) => {
     if (!last) return;
     const p = local(e);
-    for (const f of [...flyers]) {
-      if (f.kind === 'x') continue;
-      const r = { x: f.x - f.w / 2 - 4, y: f.y - f.h / 2 - 4, w: f.w + 8, h: f.h + 8 };
-      if (segmentHitsRect(last.x, last.y, p.x, p.y, r)) cut(f);
-    }
+    sweep(last, p, e.pointerType !== 'mouse');
     last = p;
     trail.push({ ...p, age: 0 });
   });
