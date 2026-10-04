@@ -260,6 +260,17 @@ async function play(level: Level | null) {
   const trail: { x: number; y: number; age: number }[] = [];
   let tally: SentenceTally = emptyTally([]);
   let outcomes: Outcome[] = [];
+  /** One placeholder per word, laid out in sentence order before anything flies. */
+  let slots: HTMLElement[] = [];
+  /** Records how a word ended and shows it in its own place in the sentence. */
+  const settle = (idx: number, o: Outcome) => {
+    outcomes[idx] = o;
+    const el = slots[idx];
+    if (!el) return;
+    el.textContent = o.text;
+    el.className = `wf-o ${o.cls}`;
+    if (!reducedMotion()) el.animate([{ transform: 'scale(.6)', opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 220, easing: 'ease-out' });
+  };
   const local = (e: PointerEvent) => {
     const r = canvas.getBoundingClientRect();
     return { x: e.clientX - r.left, y: e.clientY - r.top };
@@ -314,14 +325,14 @@ async function play(level: Level | null) {
       conn = clampConn(conn + CUT_FEELING);
       paintMeter();
       remove(f);
-      outcomes[f.idx] = { text: f.text, cls: 'cut' };
+      settle(f.idx, { text: f.text, cls: 'cut' });
       shell.fx.floatText(s.x, s.y, T.cutFeeling, 'hot');
       shell.audio.miss();
       vibrate([15, 30, 15]);
     } else if (f.kind === 'n') {
       tally.neutralsCut++;
       remove(f);
-      outcomes[f.idx] = { text: f.text, cls: 'cut' };
+      settle(f.idx, { text: f.text, cls: 'cut' });
       shell.audio.pop();
     }
   }
@@ -335,14 +346,14 @@ async function play(level: Level | null) {
       tally.hits++;
       hitsTotal++;
       flinch = 1;
-      outcomes[f.idx] = { text: f.text, cls: 'hit' };
+      settle(f.idx, { text: f.text, cls: 'hit' });
       shell.fx.shake(faceBox, 10, 380);
       shell.audio.tone({ f: 180, to: 90, type: 'sawtooth', d: 0.22, g: 0.14, lp: 1200 });
       shell.audio.noise({ d: 0.12, g: 0.25, type: 'lowpass', f: 700 });
       vibrate(40);
     } else {
       if (f.kind !== 'n') joy = 1;
-      outcomes[f.idx] = { text: f.text, cls: f.kind === 'n' ? 'plain' : f.kind === 'f' ? 'feel' : 'fix' };
+      settle(f.idx, { text: f.text, cls: f.kind === 'n' ? 'plain' : f.kind === 'f' ? 'feel' : 'fix' });
       const r = faceBox.getBoundingClientRect();
       if (f.kind !== 'n') shell.fx.floatText(r.left + r.width / 2 + rand(-30, 30), r.bottom, '❤', 'wf-heart');
       shell.audio.tone({ f: f.kind === 'n' ? 520 : 780, d: 0.12, g: 0.06, verb: 0.2 });
@@ -355,7 +366,8 @@ async function play(level: Level | null) {
     setFace(s);
     tally = emptyTally(s.tokens);
     outcomes = [];
-    line.replaceChildren();
+    slots = s.tokens.map((tok) => h('span', { class: 'wf-o slot' }, tok.text));
+    line.replaceChildren(...slots);
     const speed = speedAt();
     const tg = target();
     const m = mouth();
@@ -504,8 +516,7 @@ async function play(level: Level | null) {
       over = true;
       break;
     }
-    // What actually landed, and how they took it.
-    line.replaceChildren(...outcomes.filter(Boolean).map((o) => h('span', { class: `wf-o ${o.cls}` }, o.text)));
+    // What actually landed is already in the line; now how they took it.
     const wasHonest = honest(tally);
     streak = nextStreak(streak, tally);
     bestStreak = Math.max(bestStreak, streak);

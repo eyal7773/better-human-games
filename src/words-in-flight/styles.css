@@ -180,6 +180,10 @@
   text-decoration: line-through;
   opacity: 0.55;
 }
+/* A word still in the air: holds its place in the sentence, unseen. */
+.wf-o.slot {
+  visibility: hidden;
+}
 .wf-streak {
   position: absolute;
   top: 45%;
