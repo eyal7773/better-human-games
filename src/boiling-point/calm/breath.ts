@@ -3,14 +3,14 @@ import { vibrate } from '../../shared/haptics';
 import type { Calm, CalmCtx } from './types';
 import { tr } from '../../shared/i18n';
 
-const IN = 4;
-const OUT = 6;
+const IN = 3;
+const OUT = 3;
 const TOTAL = IN + OUT;
 const RING = 2 * Math.PI * 46;
 
-/** Press and hold through one slow breath: 4 seconds in, 6 seconds out. */
+/** Press and hold through one slow breath: 3 seconds in, 3 seconds out. */
 export class BreathCalm implements Calm {
-  title = tr({ en: 'One long breath', he: 'נשימה אחת ארוכה', ar: 'نفَس واحد طويل' });
+  title = tr({ en: 'One deep breath', he: 'נשימה אחת עמוקה', ar: 'نفَس واحد عميق' });
   hint = tr({ en: 'Press and hold the circle, and breathe with it', he: 'לחצו והחזיקו את העיגול, ונשמו איתו', ar: 'اضغطوا مطوّلًا على الدائرة، وتنفّسوا معها' });
 
   constructor(private c: CalmCtx) {}
@@ -69,7 +69,7 @@ export class BreathCalm implements Calm {
       if (holding && now !== phase) {
         phase = now;
         audio.breath(now === 'in', now === 'in' ? IN - held : TOTAL - held);
-        this.c.say(now === 'in' ? tr({ en: 'A long breath in through the nose…', he: 'שאיפה ארוכה דרך האף…', ar: 'شهيق طويل من الأنف…' }) : tr({ en: 'And now a slow breath out, even longer…', he: 'ועכשיו נשיפה איטית, ארוכה יותר…', ar: 'والآن زفير بطيء، أطول…' }));
+        this.c.say(now === 'in' ? tr({ en: 'A slow breath in through the nose…', he: 'שאיפה איטית דרך האף…', ar: 'شهيق بطيء من الأنف…' }) : tr({ en: 'And now a slow breath out through the mouth…', he: 'ועכשיו נשיפה איטית דרך הפה…', ar: 'والآن زفير بطيء من الفم…' }));
       }
       const scale = held < IN ? 0.7 + 0.45 * (held / IN) : 1.15 - 0.45 * ((held - IN) / OUT);
       orb.style.transform = `scale(${scale.toFixed(3)})`;

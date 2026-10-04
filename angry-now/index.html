@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+    <meta name="theme-color" content="#2ec4b6" />
+    <script>
+      // Set language + direction before first paint (see src/shared/i18n.ts).
+      try {
+        var l = new URLSearchParams(location.search).get('lang') || localStorage.getItem('bhg.lang');
+        if (l === 'he' || l === 'ar') {
+          document.documentElement.lang = l;
+          document.documentElement.dir = 'rtl';
+        }
+      } catch (e) {}
+    </script>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Angry right now" />
+    <title>Angry right now</title>
+    <meta name="description" content="A minute to come down when you are angry right now: a few slow breaths, then noticing where it sits in your body." />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400;500;600;700;800&family=Fredoka:wght@400;500;600;700&family=Karantina:wght@400;700&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <div id="app"></div>
+    <noscript>This page needs JavaScript. · העמוד דורש JavaScript. · تحتاج الصفحة إلى JavaScript.</noscript>
+    <script type="module" src="/src/angry-now/main.ts"></script>
+  </body>
+</html>

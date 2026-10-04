@@ -88,6 +88,50 @@ body {
   color: #5a4a1a;
 }
 
+/* "I'm angry right now": a calm teal pill for the real moment, ahead of the games. */
+.angry-now {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: -8px 0 26px;
+  padding: 14px 20px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0) 55%), var(--lagoon);
+  color: #fff;
+  text-decoration: none;
+  box-shadow: 0 6px 0 var(--lagoon-deep), 0 16px 28px -14px rgba(10, 80, 70, 0.7);
+  transition: transform 90ms ease, box-shadow 90ms ease;
+}
+.angry-now:active {
+  transform: translateY(5px);
+  box-shadow: 0 1px 0 var(--lagoon-deep), 0 4px 10px -6px rgba(10, 80, 70, 0.7);
+}
+.angry-icon {
+  flex: none;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.9);
+  font-size: 28px;
+}
+.angry-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.angry-text b {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.45rem;
+  line-height: 1.1;
+}
+.angry-text span {
+  font-size: 0.95rem;
+  opacity: 0.92;
+}
+
 .game-card {
   display: block;
   color: inherit;

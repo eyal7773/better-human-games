@@ -10,6 +10,7 @@ import { profile } from '../shared/profile';
 import { openHomeBuilder } from './home-builder';
 import { loadSave as loadCatchMe } from '../catch-me-3d/save';
 import { mountIslandBanner } from './island-banner';
+import { angryNowLabel } from '../angry-now/label';
 
 // The page ships in English; other languages swap text in by data-i18n key.
 const TEXT: Record<string, { he: string; ar: string }> = {
@@ -92,7 +93,19 @@ document
 const meBtn = h('button', { class: 'hub-me', type: 'button', 'aria-label': tr({ en: 'My home', he: 'הבית שלי', ar: 'بيتي' }) });
 // Once the Catch Me story is finished, Pesky lives in your home, next to you.
 const peskyHome = loadCatchMe().finished;
+// "I'm angry right now": a calm-down page for the real moment, not a game.
+const angryLabel = h('b', {});
+const angryNow = h(
+  'a',
+  { class: 'angry-now', href: './angry-now/' },
+  h('span', { class: 'angry-icon', 'aria-hidden': 'true' }, '🫁'),
+  h('span', { class: 'angry-text' }, angryLabel, h('span', {}, tr({ en: 'A few slow breaths and a moment with your body.', he: 'כמה נשימות איטיות ורגע של הקשבה לגוף.', ar: 'بضعة أنفاس بطيئة ولحظة إصغاء للجسد.' }))),
+);
+document.querySelector('.hub-head')?.append(angryNow);
+const paintAngry = () => (angryLabel.textContent = angryNowLabel());
+paintAngry();
 const paintMe = () => {
+  paintAngry();
   if (profile.status === 'done') meBtn.innerHTML = avatarSVG(profile.shape, profile.color);
   else meBtn.textContent = '🏠';
   if (peskyHome) meBtn.append(h('span', { class: 'hub-pesky', html: buddySVG() }));

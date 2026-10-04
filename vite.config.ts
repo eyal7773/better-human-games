@@ -39,6 +39,7 @@ export default defineConfig(({ command }) => ({
         shadowWall: page('./shadow-wall/index.html'),
         fortress: page('./fortress/index.html'),
         island: page('./island/index.html'),
+        angryNow: page('./angry-now/index.html'),
       },
     },
   },
