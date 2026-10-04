@@ -16,12 +16,58 @@ body {
 }
 
 .hub-bar {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas: 'mark help' 'tools tools';
   align-items: center;
-  justify-content: space-between;
   gap: 10px 16px;
   margin: 0 0 20px;
+}
+.hub-bar .wordmark {
+  grid-area: mark;
+  justify-self: start;
+}
+.hub-bar .hub-tools {
+  grid-area: tools;
+  justify-self: start;
+  flex-wrap: wrap;
+}
+/* Wide enough for one row: the help sign stays at the far end of the bar. */
+@media (min-width: 600px) {
+  .hub-bar {
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas: 'mark tools help';
+  }
+  .hub-bar .hub-tools {
+    justify-self: end;
+    flex-wrap: nowrap;
+  }
+}
+
+/* "I'm angry right now": a stop sign that reads HELP — the distress button. */
+.hub-help {
+  grid-area: help;
+  display: block;
+  width: 58px;
+  height: 58px;
+  filter: drop-shadow(0 4px 0 rgba(140, 20, 20, 0.45));
+  transition: transform 90ms ease, filter 90ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.hub-help svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.hub-help text {
+  font-family: 'Fredoka', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 27px;
+  letter-spacing: 0.5px;
+}
+.hub-help:active {
+  transform: translateY(3px);
+  filter: drop-shadow(0 1px 0 rgba(140, 20, 20, 0.45));
 }
 .lang-switch {
   display: flex;
@@ -86,50 +132,6 @@ body {
   font-size: 1.08rem;
   font-weight: 500;
   color: #5a4a1a;
-}
-
-/* "I'm angry right now": a calm teal pill for the real moment, ahead of the games. */
-.angry-now {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin: -8px 0 26px;
-  padding: 14px 20px;
-  border-radius: 999px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0) 55%), var(--lagoon);
-  color: #fff;
-  text-decoration: none;
-  box-shadow: 0 6px 0 var(--lagoon-deep), 0 16px 28px -14px rgba(10, 80, 70, 0.7);
-  transition: transform 90ms ease, box-shadow 90ms ease;
-}
-.angry-now:active {
-  transform: translateY(5px);
-  box-shadow: 0 1px 0 var(--lagoon-deep), 0 4px 10px -6px rgba(10, 80, 70, 0.7);
-}
-.angry-icon {
-  flex: none;
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  background: rgba(255, 255, 255, 0.9);
-  font-size: 28px;
-}
-.angry-text {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.angry-text b {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 1.45rem;
-  line-height: 1.1;
-}
-.angry-text span {
-  font-size: 0.95rem;
-  opacity: 0.92;
 }
 
 .game-card {

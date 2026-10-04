@@ -93,17 +93,17 @@ document
 const meBtn = h('button', { class: 'hub-me', type: 'button', 'aria-label': tr({ en: 'My home', he: 'הבית שלי', ar: 'بيتي' }) });
 // Once the Catch Me story is finished, Pesky lives in your home, next to you.
 const peskyHome = loadCatchMe().finished;
-// "I'm angry right now": a calm-down page for the real moment, not a game.
-const angryLabel = h('b', {});
-const angryNow = h(
-  'a',
-  { class: 'angry-now', href: './angry-now/' },
-  h('span', { class: 'angry-icon', 'aria-hidden': 'true' }, '🫁'),
-  h('span', { class: 'angry-text' }, angryLabel, h('span', {}, tr({ en: 'A few slow breaths and a moment with your body.', he: 'כמה נשימות איטיות ורגע של הקשבה לגוף.', ar: 'بضعة أنفاس بطيئة ولحظة إصغاء للجسد.' }))),
-);
-document.querySelector('.hub-head')?.append(angryNow);
-const paintAngry = () => (angryLabel.textContent = angryNowLabel());
-paintAngry();
+// "I'm angry right now": a red stop-sign distress button at the bar's end, for the real moment.
+const helpBtn = h('a', {
+  class: 'hub-help',
+  href: './angry-now/',
+  html: `<svg viewBox="0 0 100 100" aria-hidden="true"><polygon points="29.3,0 70.7,0 100,29.3 100,70.7 70.7,100 29.3,100 0,70.7 0,29.3" fill="#fff"/><polygon points="31.4,5 68.6,5 95,31.4 95,68.6 68.6,95 31.4,95 5,68.6 5,31.4" fill="#e3262d"/><text x="50" y="51" text-anchor="middle" dominant-baseline="central" fill="#fff">HELP</text></svg>`,
+});
+const paintAngry = () => {
+  const label = angryNowLabel();
+  helpBtn.setAttribute('aria-label', label);
+  helpBtn.title = label;
+};
 const paintMe = () => {
   paintAngry();
   if (profile.status === 'done') meBtn.innerHTML = avatarSVG(profile.shape, profile.color);
@@ -113,7 +113,7 @@ const paintMe = () => {
 paintMe();
 meBtn.addEventListener('click', () => openHomeBuilder({ edit: true, onChange: paintMe }));
 const tools = h('div', { class: 'hub-tools' }, meBtn, langSwitcher());
-document.querySelector('.hub-bar')?.append(tools);
+document.querySelector('.hub-bar')?.append(tools, helpBtn);
 mountIslandBanner(document.querySelector('.game-card'), tools);
 document.documentElement.removeAttribute('data-i18n-pending');
 document
