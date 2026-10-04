@@ -7,16 +7,16 @@ import { AudioEngine } from '../shared/audio';
 import { FX } from '../shared/fx';
 import { load, store } from '../shared/storage';
 import { BreathCalm } from '../boiling-point/calm/breath';
-import { BodyCalm } from '../boiling-point/calm/body';
+import { BodyCalm, type BodyResult } from '../boiling-point/calm/body';
 import type { Calm, CalmCtx } from '../boiling-point/calm/types';
 import { angryNowLabel } from './label';
 
 /**
  * "I'm angry right now": not a game — no thermometer, no nudniks, no points.
- * A few slow breaths, then finding where the anger sits in the body.
+ * Two slow breaths, then finding where the anger sits in the body and naming it.
  */
 
-const BREATHS = 3;
+const BREATHS = 2;
 const KEY = 'bhg.angry-now.v1';
 const prefs = load<{ muted: boolean }>(KEY, { muted: false });
 
@@ -70,7 +70,6 @@ const setStep = (i: number) =>
     else el.removeAttribute('aria-current');
   });
 
-const kicker = h('p', { class: 'an-kicker' });
 const title = h('h1', { class: 'an-title' });
 const hint = h('p', { class: 'an-hint', 'aria-live': 'polite' });
 const board = h('div', { class: 'an-board' });
@@ -80,7 +79,7 @@ app.append(
     'main',
     { class: 'an' },
     h('header', { class: 'an-bar' }, closeBtn, steps, soundBtn),
-    h('div', { class: 'an-text' }, kicker, title, hint),
+    h('div', { class: 'an-text' }, title, hint),
     board,
   ),
 );
@@ -88,8 +87,11 @@ app.append(
 // ---------------------------------------------------------------- flow
 
 let scope: Scope | null = null;
+let breaths = 0;
+let felt: BodyResult | null = null;
 
-function mount(make: (c: CalmCtx) => Calm, onDone: () => void) {
+/** `onComplete` runs the moment the exercise ends; `onDone` after a short pause. */
+function mount(make: (c: CalmCtx) => Calm, onDone: () => void, onComplete?: () => void) {
   scope?.dispose();
   const s = (scope = new Scope());
   board.replaceChildren();
@@ -100,34 +102,51 @@ function mount(make: (c: CalmCtx) => Calm, onDone: () => void) {
     fx,
     heat: () => {},
     say: (t) => (hint.textContent = t),
-    done: () => s.timeout(onDone, 900),
+    done: () => {
+      onComplete?.();
+      s.timeout(onDone, 900);
+    },
   });
   title.textContent = calm.title;
   hint.textContent = calm.hint;
   calm.mount();
+  return calm;
 }
 
 function breathe(n: number, of: number, then: () => void) {
   setStep(0);
+  const dots = Array.from({ length: of }, (_, k) => h('i', { class: k < n - 1 ? 'done' : k === n - 1 ? 'on' : '' }));
   mount(
     (c) => new BreathCalm(c),
     () => (n < of ? breathe(n + 1, of, then) : then()),
+    () => {
+      breaths++;
+      dots[n - 1].className = 'done';
+    },
   );
-  kicker.textContent = of > 1 ? tr({ en: `Breath ${n} of ${of}`, he: `נשימה ${n} מתוך ${of}`, ar: `نفَس ${n} من ${of}` }) : '';
+  if (of > 1)
+    board.append(
+      h('div', { class: 'an-dots', role: 'img', 'aria-label': tr({ en: `Breath ${n} of ${of}`, he: `נשימה ${n} מתוך ${of}`, ar: `نفَس ${n} من ${of}` }) }, ...dots),
+    );
 }
 
 function body() {
   setStep(1);
-  kicker.textContent = '';
-  mount((c) => new BodyCalm(c), finish);
+  const calm = mount((c) => new BodyCalm(c), finish, () => (felt = calm.result)) as BodyCalm;
 }
+
+const breathCount = (n: number) =>
+  tr({
+    en: n === 1 ? 'One breath' : `${n} breaths`,
+    he: n === 1 ? 'נשימה אחת' : n === 2 ? 'שתי נשימות' : `${n} נשימות`,
+    ar: n === 1 ? 'نفَس واحد' : n === 2 ? 'نفَسان' : `${n} أنفاس`,
+  });
 
 function finish() {
   scope?.dispose();
   scope = null;
   setStep(2);
   audio.success();
-  kicker.textContent = '';
   title.textContent = tr({ en: 'You paused', he: 'עצרתם רגע', ar: 'توقّفتم لحظة' });
   hint.textContent = '';
   const again = h('button', { class: 'btn ghost', type: 'button' }, tr({ en: 'One more breath', he: 'עוד נשימה', ar: 'نفَس آخر' }));
@@ -137,6 +156,13 @@ function finish() {
       'div',
       { class: 'an-done' },
       h('div', { class: 'an-leaf', 'aria-hidden': 'true' }, '🌿'),
+      h(
+        'ul',
+        { class: 'an-recap' },
+        h('li', {}, h('span', { 'aria-hidden': 'true' }, '🫁'), breathCount(breaths)),
+        felt && h('li', {}, h('span', { 'aria-hidden': 'true' }, '📍'), felt.places.join(' · ')),
+        felt && h('li', {}, h('span', { 'aria-hidden': 'true' }, felt.icon), felt.feeling),
+      ),
       h(
         'p',
         {},

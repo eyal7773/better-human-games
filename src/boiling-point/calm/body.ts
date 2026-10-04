@@ -4,12 +4,29 @@ import { tr } from '../../shared/i18n';
 import type { Calm, CalmCtx } from './types';
 
 /**
- * "Where do you feel it?" — touch the place in the body where the anger sits,
- * then name the feeling that blooms out of it. Noticing cools a little and
- * naming cools more; there is no wrong place and no wrong feeling.
+ * "Where do you feel it?" — touch up to two places in the body where the anger
+ * sits, name the feeling family that blooms out of them, then sharpen it to
+ * the closest word. Noticing cools a little and naming cools more; there is no
+ * wrong place and no wrong feeling.
  */
 
-type EmotionId = 'frustration' | 'anger' | 'tension' | 'hurt' | 'fear' | 'shame' | 'surprise' | 'boredom' | 'confusion';
+type EmotionId =
+  | 'frustration'
+  | 'anger'
+  | 'tension'
+  | 'hurt'
+  | 'fear'
+  | 'shame'
+  | 'surprise'
+  | 'boredom'
+  | 'confusion'
+  | 'power'
+  | 'longing'
+  | 'love'
+  | 'calm'
+  | 'desire'
+  | 'joy'
+  | 'satisfaction';
 type RegionId = 'head' | 'jaw' | 'throat' | 'shoulders' | 'chest' | 'belly' | 'hands';
 
 interface Emotion {
@@ -24,11 +41,21 @@ interface Emotion {
   feel: string;
   /** What the feeling is — a definition, never advice. */
   def: string;
+  /** "From the … family.", shown under a sharper word. */
+  fam: string;
+  /** Sharper words in this family, to pick the closest one. */
+  subs: string[];
 }
 
 const EMOTIONS: Emotion[] = [
   {
     id: 'frustration',
+    fam: tr({ en: 'From the frustration family.', he: 'ממשפחת התסכול.', ar: 'من عائلة الإحباط.' }),
+    subs: tr({
+      en: ['Helplessness', 'Dejection', 'Bitterness', 'Despair', 'Depression'],
+      he: ['חוסר אונים', 'דכדוך', 'מרמור', 'יאוש', 'דיכאון'],
+      ar: ['عجز', 'غمّ', 'مرارة', 'يأس', 'اكتئاب'],
+    }),
     icon: '😤',
     color: '#ff9f45',
     name: tr({ en: 'Frustration', he: 'תסכול', ar: 'إحباط' }),
@@ -42,6 +69,12 @@ const EMOTIONS: Emotion[] = [
   },
   {
     id: 'anger',
+    fam: tr({ en: 'From the anger family.', he: 'ממשפחת הכעס.', ar: 'من عائلة الغضب.' }),
+    subs: tr({
+      en: ['Resentment', 'Hatred', 'Gloating', 'Disapproval', 'Contempt', 'Rejection', 'Hostility', 'Disgust', 'Loathing'],
+      he: ['טינה', 'שנאה', 'שמחה לאיד', 'הסתייגות', 'בוז', 'דחייה', 'עוינות', 'גועל', 'תיעוב'],
+      ar: ['ضغينة', 'كراهية', 'شماتة', 'تحفّظ', 'احتقار', 'نفور', 'عداء', 'قرف', 'مقت'],
+    }),
     icon: '😠',
     color: '#e5383b',
     name: tr({ en: 'Anger', he: 'כעס', ar: 'غضب' }),
@@ -55,6 +88,12 @@ const EMOTIONS: Emotion[] = [
   },
   {
     id: 'tension',
+    fam: tr({ en: 'From the tension family.', he: 'ממשפחת המתח.', ar: 'من عائلة التوتر.' }),
+    subs: tr({
+      en: ['Discomfort', 'Pressure', 'Distress', 'Irritability', 'Impatience', 'A heavy heart', 'Feeling bothered', 'Withdrawal', 'Sensitivity'],
+      he: ['אי-נוחות', 'לחץ', 'מצוקה', 'עצבנות', 'חוסר סבלנות', 'מועקה', 'מוטרדות', 'היסגרות', 'רגישות'],
+      ar: ['انزعاج', 'ضغط', 'ضيق', 'عصبية', 'نفاد صبر', 'غصّة', 'انشغال بال', 'انغلاق', 'حساسية'],
+    }),
     icon: '😬',
     color: '#ffd447',
     name: tr({ en: 'Tension', he: 'מתח', ar: 'توتر' }),
@@ -68,6 +107,12 @@ const EMOTIONS: Emotion[] = [
   },
   {
     id: 'hurt',
+    fam: tr({ en: 'From the hurt family.', he: 'ממשפחת הכאב.', ar: 'من عائلة الألم.' }),
+    subs: tr({
+      en: ['Feeling insulted', 'Feeling wounded', 'Disappointment', 'Sorrow', 'Suffering', 'Sadness', 'Loneliness', 'Jealousy'],
+      he: ['עלבון', 'פגיעה', 'אכזבה', 'צער', 'סבל', 'עצב', 'בדידות', 'קנאה'],
+      ar: ['إهانة', 'جرح', 'خيبة أمل', 'أسى', 'معاناة', 'حزن', 'وحدة', 'غيرة'],
+    }),
     icon: '💔',
     color: '#ff5fa2',
     name: tr({ en: 'Hurt', he: 'כאב', ar: 'ألم' }),
@@ -81,6 +126,12 @@ const EMOTIONS: Emotion[] = [
   },
   {
     id: 'fear',
+    fam: tr({ en: 'From the fear family.', he: 'ממשפחת הפחד.', ar: 'من عائلة الخوف.' }),
+    subs: tr({
+      en: ['Worry', 'Apprehension', 'Panic', 'Feeling frozen', 'Terror', 'Anxiety'],
+      he: ['דאגה', 'חשש', 'בהלה', 'שיתוק', 'אימה', 'חרדה'],
+      ar: ['همّ', 'توجّس', 'ذعر', 'تجمّد', 'رعب', 'قلق'],
+    }),
     icon: '😨',
     color: '#b983ff',
     name: tr({ en: 'Fear', he: 'פחד', ar: 'خوف' }),
@@ -94,6 +145,12 @@ const EMOTIONS: Emotion[] = [
   },
   {
     id: 'shame',
+    fam: tr({ en: 'From the shame family.', he: 'ממשפחת הבושה.', ar: 'من عائلة الخجل.' }),
+    subs: tr({
+      en: ['Guilt', 'Embarrassment', 'Regret', 'A guilty conscience', 'Feeling inferior'],
+      he: ['אשמה', 'מבוכה', 'חרטה', 'נקיפות מצפון', 'רגשי נחיתות'],
+      ar: ['ذنب', 'إحراج', 'ندم', 'تأنيب ضمير', 'شعور بالنقص'],
+    }),
     icon: '😳',
     color: '#ff8a6b',
     name: tr({ en: 'Shame', he: 'בושה', ar: 'خجل' }),
@@ -107,6 +164,12 @@ const EMOTIONS: Emotion[] = [
   },
   {
     id: 'surprise',
+    fam: tr({ en: 'From the surprise family.', he: 'ממשפחת ההפתעה.', ar: 'من عائلة المفاجأة.' }),
+    subs: tr({
+      en: ['Puzzlement', 'Shock', 'Feeling shaken'],
+      he: ['תמיהה', 'הלם', 'זעזוע'],
+      ar: ['استغراب', 'صدمة', 'هزّة'],
+    }),
     icon: '😲',
     color: '#4d96ff',
     name: tr({ en: 'Surprise', he: 'הפתעה', ar: 'مفاجأة' }),
@@ -120,6 +183,12 @@ const EMOTIONS: Emotion[] = [
   },
   {
     id: 'boredom',
+    fam: tr({ en: 'From the boredom family.', he: 'ממשפחת השעמום.', ar: 'من عائلة الملل.' }),
+    subs: tr({
+      en: ['Emptiness', 'Indifference', 'Tiredness', 'Heaviness'],
+      he: ['ריקנות', 'אדישות', 'עייפות', 'כבדות'],
+      ar: ['فراغ', 'لامبالاة', 'تعب', 'ثِقل'],
+    }),
     icon: '🥱',
     color: '#8d99ae',
     name: tr({ en: 'Boredom', he: 'שעמום', ar: 'ملل' }),
@@ -133,6 +202,12 @@ const EMOTIONS: Emotion[] = [
   },
   {
     id: 'confusion',
+    fam: tr({ en: 'From the confusion family.', he: 'ממשפחת הבלבול.', ar: 'من عائلة الارتباك.' }),
+    subs: tr({
+      en: ['Hesitation', 'Doubt', 'Uncertainty', 'Mixed feelings', 'Feeling unsettled', 'Scattered', 'Emotional turmoil'],
+      he: ['היסוס', 'ספק', 'אי-ודאות', 'אמביוולנטיות', 'ערעור', 'פיזור', 'סערת-רגשות'],
+      ar: ['تردّد', 'شكّ', 'عدم يقين', 'مشاعر متضاربة', 'تزعزع', 'تشتّت', 'عاصفة مشاعر'],
+    }),
     icon: '😵',
     color: '#3ecf8e',
     name: tr({ en: 'Confusion', he: 'בלבול', ar: 'ارتباك' }),
@@ -144,14 +219,140 @@ const EMOTIONS: Emotion[] = [
       ar: 'يحدث الكثير، وليس واضحًا ما العمل.',
     }),
   },
+  {
+    id: 'power',
+    fam: tr({ en: 'From the strength family.', he: 'ממשפחת העוצמה.', ar: 'من عائلة القوة.' }),
+    subs: tr({
+      en: ['A sense of strength', 'Vitality', 'Determination', 'Courage'],
+      he: ['תחושת כוח', 'חיוניות', 'נחישות', 'אומץ'],
+      ar: ['إحساس بالقوة', 'حيوية', 'عزيمة', 'شجاعة'],
+    }),
+    icon: '💪',
+    color: '#e76f51',
+    name: tr({ en: 'Strength', he: 'עוצמה', ar: 'قوة' }),
+    line: tr({ en: 'Right now, I feel strong.', he: 'עכשיו יש בי עוצמה.', ar: 'الآن أشعر بالقوة.' }),
+    feel: tr({ en: 'I feel strong', he: 'יש בי עוצמה', ar: 'أشعر بالقوة' }),
+    def: tr({
+      en: 'A surge of energy and strength in the body.',
+      he: 'גל של אנרגיה וכוח בגוף.',
+      ar: 'اندفاع من الطاقة والقوة في الجسد.',
+    }),
+  },
+  {
+    id: 'longing',
+    fam: tr({ en: 'From the longing family.', he: 'ממשפחת הגעגוע.', ar: 'من عائلة الحنين.' }),
+    subs: tr({
+      en: ['Anticipation', 'Yearning'],
+      he: ['ציפיה', 'כמיהה'],
+      ar: ['ترقّب', 'توق'],
+    }),
+    icon: '💭',
+    color: '#8fa8ff',
+    name: tr({ en: 'Longing', he: 'געגוע', ar: 'حنين' }),
+    line: tr({ en: 'Right now, I feel a longing.', he: 'עכשיו יש בי געגוע.', ar: 'الآن أشعر بالحنين.' }),
+    feel: tr({ en: 'I feel a longing', he: 'יש בי געגוע', ar: 'أشعر بالحنين' }),
+    def: tr({
+      en: 'Missing someone or something that isn’t here.',
+      he: 'חסר מישהו או משהו שלא נמצא כאן.',
+      ar: 'افتقاد شخص أو شيء ليس هنا.',
+    }),
+  },
+  {
+    id: 'love',
+    fam: tr({ en: 'From the love family.', he: 'ממשפחת האהבה.', ar: 'من عائلة الحب.' }),
+    subs: tr({
+      en: ['Affection', 'Closeness', 'Tolerance', 'Relating to them', 'Empathy', 'Compassion'],
+      he: ['חיבה', 'קרבה', 'סובלנות', 'הזדהות', 'אמפתיה', 'חמלה'],
+      ar: ['مودّة', 'قُرب', 'تسامح', 'تماهٍ', 'تعاطف', 'رحمة'],
+    }),
+    icon: '🥰',
+    color: '#ff6f91',
+    name: tr({ en: 'Love', he: 'אהבה', ar: 'حب' }),
+    line: tr({ en: 'Right now, I feel love.', he: 'עכשיו יש בי אהבה.', ar: 'الآن أشعر بالحب.' }),
+    feel: tr({ en: 'I feel love', he: 'יש בי אהבה', ar: 'أشعر بالحب' }),
+    def: tr({
+      en: 'Warmth and closeness toward someone.',
+      he: 'חום וקרבה כלפי מישהו.',
+      ar: 'دفء وقرب تجاه شخص ما.',
+    }),
+  },
+  {
+    id: 'calm',
+    fam: tr({ en: 'From the calm family.', he: 'ממשפחת הרוגע.', ar: 'من عائلة الهدوء.' }),
+    subs: tr({
+      en: ['Relief', 'Security', 'Hope', 'Serenity', 'Pleasantness', 'Peace of mind', 'Gratitude'],
+      he: ['הקלה', 'ביטחון', 'תקווה', 'שלווה', 'נעימות', 'נחת רוח', 'הכרת תודה'],
+      ar: ['ارتياح', 'أمان', 'أمل', 'سكينة', 'انشراح', 'راحة بال', 'امتنان'],
+    }),
+    icon: '😌',
+    color: '#4fc3b5',
+    name: tr({ en: 'Calm', he: 'רוגע', ar: 'هدوء' }),
+    line: tr({ en: 'Right now, I feel calm.', he: 'עכשיו יש בי רוגע.', ar: 'الآن أشعر بالهدوء.' }),
+    feel: tr({ en: 'I feel calm', he: 'יש בי רוגע', ar: 'أشعر بالهدوء' }),
+    def: tr({
+      en: 'The body slows down, and things feel manageable.',
+      he: 'הגוף מאט, והדברים מרגישים אפשריים.',
+      ar: 'يتباطأ الجسد، وتبدو الأمور ممكنة.',
+    }),
+  },
+  {
+    id: 'desire',
+    fam: tr({ en: 'From the desire family.', he: 'ממשפחת התשוקה.', ar: 'من عائلة الرغبة.' }),
+    subs: tr({
+      en: ['Wanting', 'Urge', 'Pleasure', 'Craving', 'Lust'],
+      he: ['חשק', 'דחף', 'עונג', 'השתוקקות', 'תאווה'],
+      ar: ['اشتهاء', 'اندفاع', 'متعة', 'تلهّف', 'شهوة'],
+    }),
+    icon: '🔥',
+    color: '#d65db1',
+    name: tr({ en: 'Desire', he: 'תשוקה', ar: 'رغبة' }),
+    line: tr({ en: 'Right now, I feel desire.', he: 'עכשיו יש בי תשוקה.', ar: 'الآن أشعر بالرغبة.' }),
+    feel: tr({ en: 'I feel desire', he: 'יש בי תשוקה', ar: 'أشعر بالرغبة' }),
+    def: tr({
+      en: 'A strong pull toward something you want.',
+      he: 'משיכה חזקה אל משהו שרוצים.',
+      ar: 'انجذاب قوي نحو شيء تريدونه.',
+    }),
+  },
+  {
+    id: 'joy',
+    fam: tr({ en: 'From the joy family.', he: 'ממשפחת השמחה.', ar: 'من عائلة الفرح.' }),
+    subs: tr({
+      en: ['Happiness', 'Enjoyment', 'Excitement', 'Enthusiasm', 'Optimism', 'Quiet joy', 'Pride'],
+      he: ['אושר', 'הנאה', 'התרגשות', 'התלהבות', 'אופטימיות', 'נחת', 'גאווה'],
+      ar: ['سعادة', 'استمتاع', 'تأثّر', 'حماسة', 'تفاؤل', 'سرور', 'فخر'],
+    }),
+    icon: '😄',
+    color: '#ffc93c',
+    name: tr({ en: 'Joy', he: 'שמחה', ar: 'فرح' }),
+    line: tr({ en: 'Right now, I feel joy.', he: 'עכשיו יש בי שמחה.', ar: 'الآن أشعر بالفرح.' }),
+    feel: tr({ en: 'I feel joy', he: 'יש בי שמחה', ar: 'أشعر بالفرح' }),
+    def: tr({
+      en: 'Something good is happening, and the body feels light.',
+      he: 'קורה משהו טוב, והגוף מרגיש קל.',
+      ar: 'يحدث شيء جيد، والجسد يشعر بالخفة.',
+    }),
+  },
+  {
+    id: 'satisfaction',
+    fam: tr({ en: 'From the satisfaction family.', he: 'ממשפחת הסיפוק.', ar: 'من عائلة الرضا.' }),
+    subs: tr({
+      en: ['Contentment'],
+      he: ['שביעות רצון'],
+      ar: ['قناعة'],
+    }),
+    icon: '😊',
+    color: '#8ac926',
+    name: tr({ en: 'Satisfaction', he: 'סיפוק', ar: 'رضا' }),
+    line: tr({ en: 'Right now, I feel satisfied.', he: 'עכשיו יש בי סיפוק.', ar: 'الآن أشعر بالرضا.' }),
+    feel: tr({ en: 'I feel satisfied', he: 'יש בי סיפוק', ar: 'أشعر بالرضا' }),
+    def: tr({
+      en: 'Something got done or worked out, and that feels good.',
+      he: 'משהו הושלם או הסתדר, וזה מרגיש טוב.',
+      ar: 'شيء ما اكتمل أو نجح، وهذا شعور جيد.',
+    }),
+  },
 ];
-
-const FINE = tr({ en: 'Actually, I’m fine', he: 'דווקא הכל בסדר', ar: 'بالعكس، كل شيء تمام' });
-const FINE_LINES = tr({
-  en: ['Okay. Just keep an eye on yourself.', 'Good. Keep listening to your body.', 'Great. Keep an eye on the heat.'],
-  he: ['בסדר. רק שימו לב לעצמכם.', 'יופי. תמשיכו להקשיב לגוף.', 'מצוין. שימו עין על החום.'],
-  ar: ['حسنًا. فقط انتبهوا لأنفسكم.', 'جميل. استمرّوا بالإصغاء إلى أجسادكم.', 'ممتاز. راقبوا الحرارة.'],
-});
 
 /** Reminders to put the feeling into words. {feel} and {name} are filled in. */
 const REMINDERS = tr({
@@ -262,6 +463,17 @@ function silhouette() {
 </svg>`;
 }
 
+export interface BodyResult {
+  /** The places touched, as labels. */
+  places: string[];
+  /** The word chosen: a family's name or a sharper word in it. */
+  feeling: string;
+  icon: string;
+}
+
+/** Anger usually sits in more than one place; two keeps it quick. */
+const MAX_PLACES = 2;
+
 export class BodyCalm implements Calm {
   title = tr({ en: 'Where do you feel it?', he: 'איפה אתם מרגישים את זה?', ar: 'أين تشعرون بذلك؟' });
   hint = tr({
@@ -271,6 +483,8 @@ export class BodyCalm implements Calm {
   });
   /** Naming a feeling needs a little quiet: fewer interruptions than the other calms. */
   mischiefScale = 1.7;
+  /** Filled in once a feeling is named. */
+  result: BodyResult | null = null;
 
   constructor(private c: CalmCtx) {}
 
@@ -284,9 +498,19 @@ export class BodyCalm implements Calm {
 
     const svg = stage.querySelector('svg')!;
     const regionEls = [...svg.querySelectorAll<SVGElement>('.bc-region')];
-    let region: Region | null = null;
+    const picked: Region[] = [];
+    let family: Emotion | null = null;
     let chosen = false;
     let noticed = false;
+
+    const HINT_PICK = tr({ en: 'What is it? Pick the closest one', he: 'מה זה? בחרו את מה שהכי קרוב', ar: 'ما هو؟ اختاروا الأقرب' });
+    const HINT_MORE = tr({
+      en: 'What is it? Pick the closest one. You can mark one more place',
+      he: 'מה זה? בחרו את מה שהכי קרוב. אפשר לסמן עוד מקום אחד',
+      ar: 'ما هو؟ اختاروا الأقرب. يمكنكم تحديد مكان آخر',
+    });
+    const HINT_SHARPEN = tr({ en: 'Which word fits best?', he: 'איזו מילה מתאימה הכי הרבה?', ar: 'أيّ كلمة تناسب أكثر؟' });
+    const pickHint = () => (picked.length < MAX_PLACES ? HINT_MORE : HINT_PICK);
 
     /** A region's anchor in viewport pixels (the layout moves as chips come and go). */
     const anchorOf = (r: Region) => {
@@ -294,52 +518,96 @@ export class BodyCalm implements Calm {
       return { x: pt.x, y: pt.y };
     };
 
-    const ordered = (r: Region) => [...r.near.map((id) => EMOTIONS.find((e) => e.id === id)!), ...EMOTIONS.filter((e) => !r.near.includes(e.id))];
-
-    const bloom = (r: Region) => {
-      chips.replaceChildren();
-      const list = ordered(r);
-      const buttons = list.map((e) =>
-        h(
-          'button',
-          { class: 'bc-chip', type: 'button', style: `--c: ${e.color}` },
-          h('span', { class: 'bc-chip-icon', 'aria-hidden': 'true' }, e.icon),
-          h('span', {}, e.name),
-        ),
-      );
-      const fine = h('button', { class: 'bc-chip bc-fine', type: 'button' }, h('span', { class: 'bc-chip-icon', 'aria-hidden': 'true' }, '🙂'), h('span', {}, FINE));
-      chips.append(...buttons, fine);
-      const from = anchorOf(r); // measured after the chips take their space
-      [...buttons, fine].forEach((b, i) => {
-        const br = b.getBoundingClientRect();
-        const dx = from.x - (br.left + br.width / 2);
-        const dy = from.y - (br.top + br.height / 2);
-        b.animate(
-          [
-            { transform: `translate(${dx}px, ${dy}px) scale(0.2)`, opacity: 0 },
-            { transform: 'none', opacity: 1 },
-          ],
-          { duration: 460, delay: i * 38, easing: 'cubic-bezier(0.34, 1.35, 0.64, 1)', fill: 'backwards' },
-        );
-      });
-      buttons.forEach((b, i) => b.addEventListener('click', () => choose(list[i], b)));
-      fine.addEventListener('click', () => choose(null, fine));
+    /** Families felt in the touched places come first. */
+    const ordered = () => {
+      const near = [...new Set(picked.flatMap((r) => r.near))];
+      return [...near.map((id) => EMOTIONS.find((e) => e.id === id)!), ...EMOTIONS.filter((e) => !near.includes(e.id))];
     };
 
+    const chip = (icon: string | null, text: string, color: string, cls = '') =>
+      h(
+        'button',
+        { class: `bc-chip ${cls}`, type: 'button', style: `--c: ${color}` },
+        icon && h('span', { class: 'bc-chip-icon', 'aria-hidden': 'true' }, icon),
+        h('span', {}, text),
+      );
+
+    /** Chips fly out of the point they came from. */
+    const popIn = (buttons: HTMLElement[], from: { x: number; y: number }) =>
+      buttons.forEach((b, i) => {
+        const br = b.getBoundingClientRect();
+        b.animate(
+          [
+            { transform: `translate(${from.x - (br.left + br.width / 2)}px, ${from.y - (br.top + br.height / 2)}px) scale(0.2)`, opacity: 0 },
+            { transform: 'none', opacity: 1 },
+          ],
+          { duration: 460, delay: i * 30, easing: 'cubic-bezier(0.34, 1.35, 0.64, 1)', fill: 'backwards' },
+        );
+      });
+
+    const showFamilies = (from: { x: number; y: number }) => {
+      family = null;
+      chips.classList.remove('bc-sharpen');
+      const list = ordered();
+      const buttons = list.map((e) => chip(e.icon, e.name, e.color));
+      chips.replaceChildren(...buttons);
+      popIn(buttons, from); // measured after the chips take their space
+      buttons.forEach((b, i) => b.addEventListener('click', () => sharpen(list[i], b)));
+    };
+
+    /** The family's own name stays a choice; the sharper words sit beside it. */
+    const sharpen = (e: Emotion, from: HTMLElement) => {
+      if (chosen) return;
+      family = e;
+      const fr = from.getBoundingClientRect();
+      audio.pluck(4);
+      vibrate(10);
+      this.c.say(HINT_SHARPEN);
+      const back = h('button', { class: 'bc-chip bc-back', type: 'button', 'aria-label': tr({ en: 'Back to all feelings', he: 'חזרה לכל הרגשות', ar: 'العودة إلى كل المشاعر' }) }, '↩');
+      const head = chip(e.icon, e.name, e.color, 'bc-head');
+      const subs = e.subs.map((w) => chip(null, w, e.color));
+      chips.classList.add('bc-sharpen');
+      chips.replaceChildren(back, head, ...subs);
+      popIn([head, ...subs], { x: fr.left + fr.width / 2, y: fr.top + fr.height / 2 });
+      back.addEventListener('click', () => {
+        this.c.say(pickHint());
+        showFamilies(anchorOf(picked[0]));
+      });
+      head.addEventListener('click', () => choose(e, null, head));
+      subs.forEach((b, i) => b.addEventListener('click', () => choose(e, e.subs[i], b)));
+    };
+
+    /** Touching a place marks it (the oldest gives way past two); touching it again lets it go. */
     const touch = (id: RegionId) => {
       if (chosen) return;
-      region = REGIONS.find((r) => r.id === id)!;
-      regionEls.forEach((el) => el.classList.toggle('sel', el.dataset.region === id));
+      const r = REGIONS.find((x) => x.id === id)!;
+      const at = picked.indexOf(r);
+      if (at >= 0) picked.splice(at, 1);
+      else {
+        picked.push(r);
+        if (picked.length > MAX_PLACES) picked.shift();
+      }
+      regionEls.forEach((el) => el.classList.toggle('sel', picked.some((p) => p.id === el.dataset.region)));
       audio.pluck(3);
       vibrate(12);
-      this.c.say(tr({ en: 'What is it? Pick the closest one', he: 'מה זה? בחרו את מה שהכי קרוב', ar: 'ما هو؟ اختاروا الأقرب' }));
-      bloom(region);
-      if (!noticed) {
-        noticed = true;
-        const a = anchorOf(region);
-        this.c.heat(-NOTICE_COOL);
-        this.c.fx.ring(a.x, a.y, '#2ec4b6', 44);
+      if (!picked.length) {
+        family = null;
+        chips.replaceChildren();
+        this.c.say(this.hint);
+        return;
       }
+      if (at < 0) {
+        const a = anchorOf(r);
+        this.c.fx.ring(a.x, a.y, '#2ec4b6', 44);
+        if (!noticed) {
+          noticed = true;
+          this.c.heat(-NOTICE_COOL);
+        }
+      }
+      // Already sharpening a feeling: the places change, the words stay.
+      if (family) return;
+      this.c.say(pickHint());
+      showFamilies(anchorOf(at < 0 ? r : picked[0]));
     };
 
     regionEls.forEach((el) => {
@@ -361,10 +629,10 @@ export class BodyCalm implements Calm {
     svg.setAttribute('role', 'group');
     svg.setAttribute('aria-label', this.title);
 
-    const choose = (e: Emotion | null, btn: HTMLElement) => {
-      if (chosen || !region) return;
+    const choose = (e: Emotion, word: string | null, btn: HTMLElement) => {
+      if (chosen || !picked.length) return;
       chosen = true;
-      const r = region;
+      const r = picked[0];
       const a = anchorOf(r);
       const br = btn.getBoundingClientRect();
       for (const other of chips.children) {
@@ -377,16 +645,19 @@ export class BodyCalm implements Calm {
         ],
         { duration: 420, easing: 'ease-in', fill: 'forwards' },
       );
-      audio.bell(e ? 2 : 4, 0.6);
+      this.result = { places: picked.map((p) => p.label), feeling: word ?? e.name, icon: e.icon };
+      audio.bell(2, 0.6);
       vibrate([15, 40, 15]);
       scope.timeout(() => {
         svg.classList.add('cooled');
         this.c.say('');
-        showLines(e); // first, so the body settles into its final size
-        placeTag(r, e ? `${e.icon} ${e.name}` : '🙂');
+        showLines(e, word); // first, so the body settles into its final size
+        placeTag(r, `${e.icon} ${word ?? e.name}`);
         this.c.heat(-NAME_COOL);
-        const now = anchorOf(r);
-        this.c.fx.ring(now.x, now.y, '#2ec4b6', 60);
+        for (const p of picked) {
+          const now = anchorOf(p);
+          this.c.fx.ring(now.x, now.y, '#2ec4b6', 60);
+        }
       }, 380);
     };
 
@@ -416,12 +687,17 @@ export class BodyCalm implements Calm {
       rect.setAttribute('rx', String(hh / 2));
     };
 
-    const showLines = (e: Emotion | null) => {
+    /** A family's own line and definition; a sharper word gets its family instead. */
+    const showLines = (e: Emotion, word: string | null) => {
       chips.hidden = true;
-      const texts = e
-        ? [e.line, e.def, pick(REMINDERS).replace('{feel}', e.feel).replace('{name}', e.name.toLowerCase())]
-        : [pick(FINE_LINES)];
-      const classes = e ? ['bc-name', 'bc-def', 'bc-remind'] : ['bc-name'];
+      const texts = word
+        ? [
+            tr({ en: `What I feel right now: ${word.toLowerCase()}.`, he: `עכשיו יש בי ${word}.`, ar: `ما أشعر به الآن: ${word}.` }),
+            e.fam,
+            pick(REMINDERS.filter((t) => !t.includes('{feel}'))).replace('{name}', word.toLowerCase()),
+          ]
+        : [e.line, e.def, pick(REMINDERS).replace('{feel}', e.feel).replace('{name}', e.name.toLowerCase())];
+      const classes = ['bc-name', 'bc-def', 'bc-remind'];
       texts.forEach((t, i) => {
         const p = h('p', { class: classes[i] }, t);
         lines.append(p);

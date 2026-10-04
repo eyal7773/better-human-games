@@ -111,13 +111,6 @@ body {
   padding: 14px 20px 10px;
   text-align: center;
 }
-.an-kicker {
-  margin: 0 0 2px;
-  min-height: 1.3em;
-  color: var(--lagoon-deep);
-  font-weight: 700;
-  font-size: 0.95rem;
-}
 .an-title {
   margin: 0;
   font-family: var(--font-display);
@@ -145,6 +138,48 @@ body {
   box-shadow: 0 8px 0 rgba(10, 128, 111, 0.16);
   overflow: hidden;
   touch-action: none;
+}
+
+/* Which breath: the finished ones filled, the current one ringed. */
+.an-dots {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 18px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  pointer-events: none;
+}
+.an-dots i {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: rgba(29, 43, 79, 0.12);
+  transition: background 300ms, box-shadow 300ms;
+}
+.an-dots i.on {
+  background: #fff;
+  box-shadow: 0 0 0 3px var(--lagoon);
+}
+.an-dots i.done {
+  background: var(--lagoon);
+}
+
+/* What you just did, plainly: no score. */
+.an-recap {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.an-recap li {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
 }
 
 .an-done {
