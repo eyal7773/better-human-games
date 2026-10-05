@@ -39,8 +39,6 @@ export interface Scene extends Meta {
   right: Exclude<Response, 'roar'>;
   /** Something real is here: the monster never fully goes away. */
   real: boolean;
-  /** Where the true-size frame sits, relative to the puppet (wall widths). */
-  frameDx: number;
   anchor: string;
 }
 
@@ -53,7 +51,6 @@ const S = (o: Omit<Meta, 'id'> & {
   losses: LL;
   threat: number;
   right: 'let' | 'boundary';
-  frameDx: number;
   anchor: L;
 }): Scene => ({
   with: o.with,
@@ -72,7 +69,6 @@ const S = (o: Omit<Meta, 'id'> & {
   threat: o.threat,
   right: o.right,
   real: o.right === 'boundary',
-  frameDx: o.frameDx,
   anchor: agree(tr(o.anchor)),
 });
 
@@ -91,7 +87,6 @@ export const SCENES: Scene[] = [
     losses: { en: ['10 minutes of cleaning', 'a wet cushion'], he: ['10 דקות ניקיון', 'כרית רטובה'], ar: ['10 دقائق تنظيف', 'وسادة مبللة'] },
     threat: 2,
     right: 'let',
-    frameDx: -0.05,
     anchor: { en: 'What was really taken from me? Ten minutes.', he: 'מה באמת לקחו לי? עשר דקות.', ar: 'ما الذي أُخذ مني حقًا؟ عشر دقائق.' },
   }),
   S({
@@ -108,7 +103,6 @@ export const SCENES: Scene[] = [
     losses: { en: ['a magic sponge', 'a bit of paint'], he: ['ספוג קסם', 'קצת צבע'], ar: ['إسفنجة سحرية', 'قليل من الطلاء'] },
     threat: 1,
     right: 'let',
-    frameDx: 0.06,
     anchor: {
       en: 'A sponge. And maybe a photo of the sun first.',
       he: 'ספוג. ואולי קודם תמונה של השמש.',
@@ -129,7 +123,6 @@ export const SCENES: Scene[] = [
     losses: { en: ['20 minutes', 'a lukewarm dinner'], he: ['20 דקות', 'אוכל פושר'], ar: ['20 دقيقة', 'عشاء فاتر'] },
     threat: 3,
     right: 'let',
-    frameDx: -0.07,
     anchor: {
       en: 'Twenty minutes and a microwave. We can talk about the “again” calmly, later.',
       he: 'עשרים דקות ומיקרוגל. על ה"שוב" אפשר לדבר ברוגע, אחר כך.',
@@ -150,7 +143,6 @@ export const SCENES: Scene[] = [
     losses: { en: ['privacy', 'trust'], he: ['פרטיות', 'אמון'], ar: ['الخصوصية', 'الثقة'] },
     threat: 22,
     right: 'boundary',
-    frameDx: 0.04,
     anchor: {
       en: '“My phone is private. I’m upset, and we’ll talk about trust after dinner.”',
       he: '"הטלפון שלי פרטי. אני {כועס|כועסת}, ונדבר על אמון אחרי ארוחת הערב."',
@@ -171,7 +163,6 @@ export const SCENES: Scene[] = [
     losses: { en: ['15 minutes', 'an awkward “good morning”'], he: ['רבע שעה', '"בוקר טוב" מביך'], ar: ['ربع ساعة', '«صباح الخير» محرجة'] },
     threat: 4,
     right: 'let',
-    frameDx: 0.08,
     anchor: {
       en: 'Fifteen minutes. A message to the boss, and some music.',
       he: 'רבע שעה. הודעה לבוס, וקצת מוזיקה.',
@@ -192,7 +183,6 @@ export const SCENES: Scene[] = [
     losses: { en: ['a mug', '(the memory stays)'], he: ['ספל', '(הזיכרון נשאר)'], ar: ['كوب', '(الذكرى باقية)'] },
     threat: 0,
     right: 'let',
-    frameDx: -0.03,
     anchor: {
       en: 'It’s okay to be sad about it. The memory wasn’t in the clay.',
       he: 'מותר להצטער על זה. הזיכרון לא היה בחרסינה.',
@@ -217,7 +207,6 @@ export const SCENES: Scene[] = [
     },
     threat: 25,
     right: 'boundary',
-    frameDx: -0.06,
     anchor: {
       en: '“That’s not okay to say about him. We don’t joke like that in our family.”',
       he: '"זה לא בסדר להגיד עליו. אצלנו לא צוחקים ככה."',
@@ -242,7 +231,6 @@ export const SCENES: Scene[] = [
     },
     threat: 8,
     right: 'let',
-    frameDx: 0.05,
     anchor: {
       en: 'Tomorrow’s conversation happens tomorrow. Tonight is mine.',
       he: 'השיחה של מחר קורית מחר. הערב שלי.',
@@ -265,7 +253,6 @@ export const SCENES: Scene[] = [
     losses: { en: ['three minutes of circling'], he: ['שלוש דקות של סיבובים'], ar: ['ثلاث دقائق من الدوران'] },
     threat: 1,
     right: 'let',
-    frameDx: 0.07,
     anchor: { en: 'Three minutes. There’s another spot around the corner.', he: 'שלוש דקות. יש עוד חניה מעבר לפינה.', ar: 'ثلاث دقائق. هناك موقف آخر خلف الزاوية.' },
   }),
   S({
@@ -282,7 +269,6 @@ export const SCENES: Scene[] = [
     losses: { en: ['two minutes'], he: ['שתי דקות'], ar: ['دقيقتان'] },
     threat: 1,
     right: 'let',
-    frameDx: -0.06,
     anchor: { en: 'Two minutes — and one calm sentence if I want.', he: 'שתי דקות, ומשפט רגוע אחד אם בא לי.', ar: 'دقيقتان — وجملة هادئة واحدة إن أردت.' },
   }),
   S({
@@ -299,7 +285,6 @@ export const SCENES: Scene[] = [
     losses: { en: ['a phone call', 'a few days of waiting'], he: ['שיחת טלפון', 'כמה ימי המתנה'], ar: ['مكالمة هاتفية', 'بضعة أيام انتظار'] },
     threat: 3,
     right: 'let',
-    frameDx: 0.05,
     anchor: { en: 'A claim with a photo. The package or the money comes back.', he: 'תלונה עם תמונה. החבילה, או הכסף, יחזרו.', ar: 'شكوى مع صورة. الطرد أو المال سيعود.' },
   }),
   S({
@@ -316,7 +301,6 @@ export const SCENES: Scene[] = [
     losses: { en: ['an hour of sleep'], he: ['שעת שינה'], ar: ['ساعة نوم'] },
     threat: 2,
     right: 'let',
-    frameDx: 0.04,
     anchor: { en: 'An hour of sleep, and a friendly word about next Saturday.', he: 'שעת שינה, ומילה נעימה על השבת הבאה.', ar: 'ساعة نوم، وكلمة لطيفة بشأن السبت القادم.' },
   }),
   S({
@@ -333,7 +317,6 @@ export const SCENES: Scene[] = [
     losses: { en: ['an hour — the second time is faster'], he: ['שעה, ובפעם השנייה זה מהר יותר'], ar: ['ساعة — والمرة الثانية أسرع'] },
     threat: 4,
     right: 'let',
-    frameDx: -0.05,
     anchor: { en: 'An hour. I know the way now; the second time is quicker.', he: 'שעה. אני כבר {יודע|יודעת} את הדרך, ובפעם השנייה זה מהיר יותר.', ar: 'ساعة. أعرف الطريق الآن؛ المرة الثانية أسرع.' },
   }),
   S({
@@ -350,7 +333,6 @@ export const SCENES: Scene[] = [
     losses: { en: ['an evening I was looking forward to'], he: ['ערב {שחיכיתי|שחיכיתי} לו'], ar: ['أمسية كنت أنتظرها'] },
     threat: 3,
     right: 'let',
-    frameDx: 0.06,
     anchor: { en: 'An evening. And a question worth asking: “Is something going on?”', he: 'ערב. ושאלה ששווה לשאול: "קורה משהו?"', ar: 'أمسية. وسؤال يستحق: «هل يحدث شيء؟»' },
   }),
   S({
@@ -367,7 +349,6 @@ export const SCENES: Scene[] = [
     losses: { en: ['some sleep', 'a fresh morning'], he: ['קצת שינה', 'בוקר רענן'], ar: ['بعض النوم', 'صباح منتعش'] },
     threat: 3,
     right: 'let',
-    frameDx: -0.07,
     anchor: { en: 'One knock and a kind request usually does it.', he: 'דפיקה אחת ובקשה נעימה בדרך כלל מספיקות.', ar: 'طرقة واحدة وطلب لطيف يكفيان عادةً.' },
   }),
   S({
@@ -384,7 +365,6 @@ export const SCENES: Scene[] = [
     losses: { en: ['a message I was hoping for'], he: ['הודעה {שקיוויתי|שקיוויתי} לה'], ar: ['رسالة كنت أتمنّاها'] },
     threat: 4,
     right: 'let',
-    frameDx: 0.03,
     anchor: { en: 'It’s okay to be sad. And okay to call and say: “I wanted to hear from you.”', he: 'מותר להיות עצוב. ומותר להתקשר ולהגיד: "רציתי לשמוע ממך."', ar: 'لا بأس بالحزن. ولا بأس بالاتصال والقول: «أردت أن أسمع منك.»' },
   }),
   S({
@@ -401,7 +381,6 @@ export const SCENES: Scene[] = [
     losses: { en: ['a pleasant meal', 'a little pride'], he: ['ארוחה נעימה', 'קצת גאווה'], ar: ['وجبة لطيفة', 'قليل من الكبرياء'] },
     threat: 8,
     right: 'let',
-    frameDx: -0.04,
     anchor: { en: 'It stings — and it says more about her worry than about me. We can talk later.', he: 'זה עוקץ, וזה אומר יותר על הדאגה שלה מאשר עליי. אפשר לדבר אחר כך.', ar: 'هذا يلسع — ويقول عن قلقها أكثر مما يقول عني. يمكننا التحدث لاحقًا.' },
   }),
   S({
@@ -418,7 +397,6 @@ export const SCENES: Scene[] = [
     losses: { en: ['credit for my work', 'a fair shot at promotion'], he: ['קרדיט על העבודה שלי', 'סיכוי הוגן לקידום'], ar: ['الفضل في عملي', 'فرصة عادلة للترقية'] },
     threat: 20,
     right: 'boundary',
-    frameDx: 0.05,
     anchor: { en: '“That was my idea. From now on, we present together.”', he: '"זה היה הרעיון שלי. מעכשיו מציגים ביחד."', ar: '«كانت تلك فكرتي. من الآن نعرض معًا.»' },
   }),
   S({
@@ -435,7 +413,6 @@ export const SCENES: Scene[] = [
     losses: { en: ['dignity at work', 'feeling safe there'], he: ['כבוד בעבודה', 'תחושת ביטחון שם'], ar: ['الكرامة في العمل', 'الإحساس بالأمان هناك'] },
     threat: 28,
     right: 'boundary',
-    frameDx: -0.06,
     anchor: { en: '“I won’t be spoken to like that. Let’s talk privately, with the facts.”', he: '"אני לא {מסכים|מסכימה} שידברו אליי ככה. בוא נדבר ביחידות, עם העובדות."', ar: '«لا أقبل أن يُكلَّم معي هكذا. لنتحدث على انفراد، بالوقائع.»' },
   }),
   S({
@@ -452,7 +429,6 @@ export const SCENES: Scene[] = [
     losses: { en: ['money I need for rent', 'trust'], he: ['כסף שאני {צריך|צריכה} לשכירות', 'אמון'], ar: ['مال أحتاجه للإيجار', 'الثقة'] },
     threat: 22,
     right: 'boundary',
-    frameDx: 0.04,
     anchor: { en: '“I need the money back by the first. Let’s set it now.”', he: '"אני {צריך|צריכה} את הכסף בחזרה עד הראשון לחודש. בוא נקבע עכשיו."', ar: '«أحتاج المال حتى أول الشهر. لنحدد ذلك الآن.»' },
   }),
   S({
@@ -469,7 +445,6 @@ export const SCENES: Scene[] = [
     losses: { en: ['respect in my group', 'enjoying the evenings'], he: ['כבוד בחבורה', 'ההנאה מהערבים'], ar: ['الاحترام في المجموعة', 'الاستمتاع بالأمسيات'] },
     threat: 16,
     right: 'boundary',
-    frameDx: -0.03,
     anchor: { en: '“I don’t find it funny anymore. Please stop.”', he: '"זה כבר לא מצחיק אותי. בבקשה תפסיק."', ar: '«لم يعد هذا مضحكًا لي. من فضلك توقّف.»' },
   }),
   // ---------------------------------------------------------------- particular homes
@@ -487,7 +462,6 @@ export const SCENES: Scene[] = [
     losses: { en: ['a clean sink — for now'], he: ['כיור נקי, לבינתיים'], ar: ['مغسلة نظيفة — مؤقتًا'] },
     threat: 2,
     right: 'let',
-    frameDx: 0.06,
     anchor: { en: 'A rule we agree on together beats a war of notes.', he: 'כלל שמסכימים עליו ביחד עדיף על מלחמת פתקים.', ar: 'قاعدة نتفق عليها معًا أفضل من حرب الأوراق.' },
   }),
   S({
@@ -504,7 +478,6 @@ export const SCENES: Scene[] = [
     losses: { en: ['money I can’t spare', 'feeling safe at home'], he: ['כסף שאין לי', 'ביטחון בבית'], ar: ['مال لا أملكه', 'الأمان في البيت'] },
     threat: 24,
     right: 'boundary',
-    frameDx: -0.05,
     anchor: { en: '“I can’t cover your share again. What can you pay by tomorrow?”', he: '"אני לא {יכול|יכולה} לכסות את החלק שלך שוב. כמה תוכל לשלם עד מחר?"', ar: '«لا أستطيع تغطية حصتك مرة أخرى. كم تستطيع أن تدفع حتى الغد؟»' },
   }),
   S({
@@ -521,7 +494,6 @@ export const SCENES: Scene[] = [
     losses: { en: ['a dry pillow'], he: ['כרית יבשה'], ar: ['وسادة جافة'] },
     threat: 1,
     right: 'let',
-    frameDx: 0.08,
     anchor: { en: 'A towel. A hook. One small request.', he: 'מגבת. וו. בקשה קטנה אחת.', ar: 'منشفة. علّاقة. طلب صغير واحد.' },
   }),
   S({
@@ -538,7 +510,6 @@ export const SCENES: Scene[] = [
     losses: { en: ['his safety — and others’'], he: ['הביטחון שלו, ושל אחרים'], ar: ['سلامته — وسلامة الآخرين'] },
     threat: 30,
     right: 'boundary',
-    frameDx: 0.03,
     anchor: { en: '“I love you, and I’m scared. Let’s get your driving checked together.”', he: '"אני {אוהב|אוהבת} אותך, ואני {מפחד|מפחדת}. בוא נבדוק את הנהיגה שלך ביחד."', ar: '«أحبك، وأنا خائف. لنفحص قيادتك معًا.»' },
   }),
   S({
@@ -555,7 +526,6 @@ export const SCENES: Scene[] = [
     losses: { en: ['forty minutes of fear', 'knowing he’s safe'], he: ['ארבעים דקות של פחד', 'לדעת שהוא בטוח'], ar: ['أربعون دقيقة من الخوف', 'معرفة أنه بأمان'] },
     threat: 15,
     right: 'boundary',
-    frameDx: -0.08,
     anchor: { en: '“I’m relieved you’re home. Next time, a message. We’ll talk tomorrow.”', he: '"הוקל לי שאתה בבית. בפעם הבאה, הודעה. נדבר מחר."', ar: '«ارتحت لأنك في البيت. في المرة القادمة، رسالة. سنتحدث غدًا.»' },
   }),
   S({
@@ -572,7 +542,6 @@ export const SCENES: Scene[] = [
     losses: { en: ['an afternoon with them — this week'], he: ['אחר צהריים איתם, השבוע'], ar: ['عصر معهم — هذا الأسبوع'] },
     threat: 3,
     right: 'let',
-    frameDx: 0.05,
     anchor: { en: 'The cake freezes. A new date, set now.', he: 'העוגה נכנסת למקפיא. תאריך חדש, עכשיו.', ar: 'الكعكة تُجمَّد. موعد جديد، الآن.' },
   }),
 ];

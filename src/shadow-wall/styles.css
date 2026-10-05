@@ -137,47 +137,109 @@
   animation: sh-pop 260ms ease-out;
 }
 .sw-lenses {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   gap: 8px;
 }
+.sw-torch {
+  font-size: 1.8rem;
+}
+/* A coloured filter for the flashlight: it pulses until you've looked through it. */
 .sw-lens {
   appearance: none;
-  min-height: 52px;
-  padding: 8px 10px;
-  border-radius: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 48px;
+  padding: 6px 12px 6px 6px;
+  border-radius: 999px;
   border: 3px solid transparent;
+  font: inherit;
   font-weight: 700;
   font-size: 0.9rem;
-  line-height: 1.25;
   cursor: pointer;
+}
+.sw-lens i {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 3px solid rgba(29, 43, 79, 0.35);
 }
 .sw-lens.a {
   background: #ffe2b3;
   color: #7a3d00;
 }
+.sw-lens.a i {
+  background: #ff9f1c;
+}
 .sw-lens.b {
   background: #d6e9ff;
   color: #134a8c;
 }
+.sw-lens.b i {
+  background: #58a6ff;
+}
+.sw-lens[aria-pressed='false'] i {
+  animation: sw-filter 1.4s ease-in-out infinite;
+}
 .sw-lens[aria-pressed='true'] {
   border-color: currentColor;
 }
-.sw-extra p,
-.sw-look {
+@keyframes sw-filter {
+  50% {
+    transform: scale(1.18);
+    box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.6);
+  }
+}
+.sw-extra p {
   margin: 8px 0 4px;
   font-weight: 600;
   font-size: 0.9rem;
   color: var(--ink-soft);
 }
 .sw-answers {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 8px;
+  margin-top: 10px;
+  animation: sw-answers 300ms ease-out;
+}
+.sw-answers[hidden] {
+  display: none;
+}
+@keyframes sw-answers {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
 }
 .sw-answer {
-  min-height: 48px;
-  font-size: 1rem;
+  min-height: 56px;
+  padding: 6px;
+  border: 0;
+  border-radius: 16px;
+  font: inherit;
+  font-weight: 700;
+  font-size: 0.95rem;
+  background: var(--sun);
+  color: var(--ink);
+  box-shadow: 0 4px 0 rgba(196, 122, 0, 0.45);
+  cursor: pointer;
+}
+.sw-answer.roar {
+  background: #eef1f7;
+  box-shadow: 0 4px 0 rgba(29, 43, 79, 0.18);
+}
+.sw-answer:active {
+  transform: translateY(3px);
+  box-shadow: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sw-lens[aria-pressed='false'] i,
+  .sw-answers {
+    animation: none;
+  }
 }
 .sw-chips {
   display: flex;

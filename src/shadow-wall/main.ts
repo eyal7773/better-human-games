@@ -1,14 +1,15 @@
 // The shell first, so each game's styles come after (and win over) the shared ones.
 import { Shell } from '../shared/shell';
 import './styles.css';
-import { h, clamp, lerp, ltr, rand, reducedMotion, Scope } from '../shared/dom';
+import { h, clamp, lerp, ltr, reducedMotion, Scope } from '../shared/dom';
 import { tr } from '../shared/i18n';
 import { vibrate } from '../shared/haptics';
 import { ANCHOR } from '../shared/anchors';
 import { discover } from '../shared/progress';
 import { eligible, markSeen, query } from '../shared/library';
 import {
-  FRAME_HOLD,
+  BREATH_PERIOD,
+  BREATH_SWAY,
   TRUE_M,
   depthAt,
   inFrame,
@@ -20,6 +21,8 @@ import {
   type Response,
   LEVELS,
   migrateLevels,
+  place,
+  tremble,
 } from './logic';
 import { LEVEL_ICONS, LEVEL_NAMES, MY_LOSSES, SCENES, type Scene } from './content';
 import { PUPPET_COLOR, monsterHoles, monsterPath, puppetPath, realThorns } from './puppets';
@@ -45,6 +48,8 @@ const T = {
   mineLocked: tr({ en: 'Opens after level 3', he: 'נפתח אחרי שלב 3', ar: 'تُفتح بعد المرحلة 3' }),
   start: tr({ en: 'Pick up the flashlight', he: 'להרים את הפנס', ar: 'التقطوا المصباح' }),
   hintMove: tr({ en: 'Drag the flashlight. Far from the puppet, the shadow shrinks.', he: 'גררו את הפנס. רחוק מהבובה, הצל מתכווץ.', ar: 'اسحبوا المصباح. بعيدًا عن الدمية، يتقلّص الظل.' }),
+  steady: tr({ en: 'Slowly. A calm hand, a calm shadow.', he: 'לאט. יד רגועה, צל רגוע.', ar: 'ببطء. يد هادئة، ظل هادئ.' }),
+  breathe: tr({ en: 'The shadow is breathing. Breathe with it, and catch it.', he: 'הצל נושם. נשמו איתו, ותפסו אותו.', ar: 'الظل يتنفّس. تنفّسوا معه، والتقطوه.' }),
   hintFrame: tr({
     en: 'Now fit it in the dashed frame. The shadow moves opposite to the light.',
     he: 'עכשיו הכניסו אותו למסגרת המקווקוות. הצל זז הפוך לאור.',
@@ -66,7 +71,13 @@ const T = {
     he: 'לא מאיים על הקיום — אבל נחצה פה גבול.',
     ar: 'ليس تهديدًا لوجودكم — لكن حدًّا قد تُجووز.',
   }),
-  look: tr({ en: 'Look through both lenses, then choose:', he: 'הסתכלו דרך שתי העדשות, ואז בחרו:', ar: 'انظروا عبر العدستين، ثم اختاروا:' }),
+  lensShortTaken: tr({ en: 'What was taken?', he: 'מה נלקח?', ar: 'ما الذي أُخذ؟' }),
+  lensShortThreat: tr({ en: 'A real threat?', he: 'איום אמיתי?', ar: 'تهديد حقيقي؟' }),
+  respShort: {
+    let: tr({ en: '🍃 Let go', he: '🍃 לשחרר', ar: '🍃 دعوه يمرّ' }),
+    boundary: tr({ en: '🗣️ Calm boundary', he: '🗣️ גבול בנחת', ar: '🗣️ حدّ بهدوء' }),
+    roar: tr({ en: '🦖 Roar', he: '🦖 לשאוג', ar: '🦖 ازأروا' }),
+  } as Record<Response, string>,
   resp: {
     let: tr({ en: '🍃 Let it go / fix the small thing', he: '🍃 לשחרר / לתקן את הדבר הקטן', ar: '🍃 دعوه يمرّ / أصلحوا الشيء الصغير' }),
     boundary: tr({ en: '🗣️ Say a boundary, calmly', he: '🗣️ לומר גבול, בנחת', ar: '🗣️ قولوا حدًّا، بهدوء' }),
@@ -200,7 +211,6 @@ async function startMine() {
       threat: 0,
       right: 'let',
       real: false,
-      frameDx: rand(-0.06, 0.06),
       anchor: T.mineEnd,
     },
     true,
@@ -286,7 +296,15 @@ async function play(scene: Scene, mine = false, level = 0) {
   const wallX = (u: number) => geo.wx + u * geo.ww;
 
   // --- state
-  const light = { u: 0.54, k: 0.08 }; // u: across the wall (0…1), k: depth along the floor (0 = near)
+  const lv = LEVELS[mine ? 0 : level];
+  // Where the puppet stands, where the frame hangs, where the flashlight starts: new every time.
+  const spot = place(lv);
+  const light = { u: spot.lightU, k: spot.lightK }; // u: across the wall (0…1), k: depth along the floor (0 = near)
+  /** Steady hand: how fast the finger moves the light, and how much it trembles now. */
+  let speed = 0;
+  let shake = 0;
+  let toldSteady = false;
+  let toldBreath = false;
   let framedFor = 0;
   let framed = false;
   let lens: 'taken' | 'threat' | null = null;
@@ -299,15 +317,23 @@ async function play(scene: Scene, mine = false, level = 0) {
   let t = 0;
   /** 0 → 1 once the frame locks: the shadow turns into the thing itself. */
   let reveal = 0;
-  const frameU = 0.5 + scene.frameDx;
+  const frameU = spot.frameX;
   hint.textContent = T.hintMove;
 
   // --- dragging the flashlight
   let dragging = -1;
+  let lastMove = 0;
   const moveLight = (x: number, y: number) => {
     if (framed) return;
-    light.u = clamp((x - geo.wx) / geo.ww, 0.02, 0.98);
-    light.k = clamp((y - geo.floorTop) / geo.floorH, 0, 1);
+    const u = clamp((x - geo.wx) / geo.ww, 0.02, 0.98);
+    const k = clamp((y - geo.floorTop) / geo.floorH, 0, 1);
+    // How hurried the hand is: distance over time, smoothed.
+    const now = performance.now();
+    const dt = Math.max(0.016, (now - lastMove) / 1000);
+    if (lastMove) speed = lerp(speed, Math.hypot(u - light.u, (k - light.k) * 0.5) / dt, 0.35);
+    lastMove = now;
+    light.u = u;
+    light.k = k;
   };
   const local = (e: PointerEvent) => {
     const r = canvas.getBoundingClientRect();
@@ -325,7 +351,10 @@ async function play(scene: Scene, mine = false, level = 0) {
     const p = local(e);
     moveLight(p.x, p.y);
   });
-  scope.on(canvas, 'pointerup', () => (dragging = -1));
+  scope.on(canvas, 'pointerup', () => {
+    dragging = -1;
+    lastMove = 0;
+  });
   scope.on(canvas, 'pointercancel', () => (dragging = -1));
   scope.on<KeyboardEvent>(lightBtn, 'keydown', (e) => {
     if (framed) return;
@@ -338,7 +367,9 @@ async function play(scene: Scene, mine = false, level = 0) {
 
   const physics = () => {
     const m = magnification(depthAt(light.k));
-    const sx = project(0.5, light.u, m);
+    // The shadow breathes in later levels, and trembles when the hand is hurried.
+    const sway = lv.breathe && !framed && !reducedMotion() ? Math.sin((t / BREATH_PERIOD) * Math.PI * 2) * BREATH_SWAY : 0;
+    const sx = project(spot.objX, light.u, m) + sway + (shake ? Math.sin(t * 37) * shake : 0);
     // The drawn monster always melts away at true size; the growl stays a little when something real is here.
     return { m, sx, monster: monsterness(m), growl: monsterness(m, scene.real ? 0.4 : 0) };
   };
@@ -353,9 +384,20 @@ async function play(scene: Scene, mine = false, level = 0) {
         hintedFrame = true;
         hint.textContent = T.hintFrame;
       }
-      if (inFrame(sx, m, frameU)) {
+      // Steady hand: a hurried light shakes, and a shaking shadow can't settle in the frame.
+      speed = Math.max(0, speed - dt * 2.5);
+      shake = reducedMotion() ? 0 : lerp(shake, tremble(lv.jitter, speed), Math.min(1, dt * 8));
+      if (shake > 0.01 && !toldSteady) {
+        toldSteady = true;
+        hint.textContent = T.steady;
+      }
+      if (lv.breathe && !toldBreath && m < TRUE_M + 0.6) {
+        toldBreath = true;
+        hint.textContent = T.breathe;
+      }
+      if (inFrame(sx, m, frameU, lv.tol) && shake < lv.tol * 0.4) {
         framedFor += dt;
-        if (framedFor >= FRAME_HOLD) onFramed();
+        if (framedFor >= lv.hold) onFramed();
       } else framedFor = Math.max(0, framedFor - dt * 2);
     }
     roar.update(m, twoMonsters > 0 ? 1 : growl);
@@ -486,7 +528,7 @@ async function play(scene: Scene, mine = false, level = 0) {
       ctx.closePath();
       ctx.fill();
     }
-    const px = wallX(0.5);
+    const px = wallX(spot.objX);
     // The flashlight where your finger is.
     {
       const fx2 = wallX(light.u);
@@ -552,20 +594,29 @@ async function play(scene: Scene, mine = false, level = 0) {
   const myLosses = new Set<string>();
   let myThreat = 30;
 
+  /**
+   * Two coloured filters on either side of the flashlight — they pulse until
+   * used — and three short answers that appear after the first look.
+   */
   function buildPanel() {
-    lensA = h('button', { class: 'sw-lens a', type: 'button', 'aria-pressed': 'false' }, T.lensTaken);
-    lensB = h('button', { class: 'sw-lens b', type: 'button', 'aria-pressed': 'false' }, T.lensThreat);
-    const lensRow = h('div', { class: 'sw-lenses' }, lensA, lensB);
+    lensA = h('button', { class: 'sw-lens a', type: 'button', 'aria-pressed': 'false', 'aria-label': T.lensTaken }, h('i', { 'aria-hidden': 'true' }), T.lensShortTaken);
+    lensB = h('button', { class: 'sw-lens b', type: 'button', 'aria-pressed': 'false', 'aria-label': T.lensThreat }, h('i', { 'aria-hidden': 'true' }), T.lensShortThreat);
+    const lensRow = h('div', { class: 'sw-lenses' }, lensA, h('span', { class: 'sw-torch', 'aria-hidden': 'true' }, '🔦'), lensB);
     const extra = h('div', { class: 'sw-extra' });
     const answers = (['let', 'boundary', 'roar'] as Response[]).map((r) => {
-      const b = h('button', { class: `btn ${r === 'roar' ? 'ghost' : 'warm'} sw-answer`, type: 'button' }, T.resp[r]);
+      const b = h('button', { class: `sw-answer ${r}`, type: 'button', 'aria-label': T.resp[r] }, T.respShort[r]);
       scope.on(b, 'click', () => void answer(r));
       return b;
     });
-    panel.append(lensRow, extra, h('p', { class: 'sw-look' }, T.look), h('div', { class: 'sw-answers' }, ...answers));
+    const answerRow = h('div', { class: 'sw-answers', hidden: true }, ...answers);
+    panel.append(lensRow, extra, answerRow);
     panel.hidden = false;
-    scope.on(lensA, 'click', () => useLens('taken', extra));
-    scope.on(lensB, 'click', () => useLens('threat', extra));
+    const look = (which: 'taken' | 'threat') => {
+      void useLens(which, extra);
+      answerRow.hidden = false;
+    };
+    scope.on(lensA, 'click', () => look('taken'));
+    scope.on(lensB, 'click', () => look('threat'));
   }
 
   async function useLens(which: 'taken' | 'threat', extra: HTMLElement) {

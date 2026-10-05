@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { FRAME_TOL, LEVELS, TRUE_M, ZL_MAX, ZL_MIN, depthAt, inFrame, lightFor, magnification, migrateLevels, monsterness, project, starsFor } from './logic';
+import { FRAME_TOL, LEVELS, TRUE_M, ZL_MAX, ZL_MIN, depthAt, inFrame, lightFor, magnification, migrateLevels, monsterness, place, project, starsFor, tremble } from './logic';
 import { SCENES } from './content';
 
 describe('shadow physics', () => {
@@ -32,16 +32,38 @@ describe('shadow physics', () => {
     expect(inFrame(0.5, 2, 0.5)).toBe(false);
   });
 
-  it('can frame every scene with the light on the floor', () => {
-    for (const s of SCENES) {
-      const target = 0.5 + s.frameDx;
-      for (const m of [magnification(ZL_MAX), TRUE_M - 0.01]) {
-        const u = lightFor(0.5, target, m);
-        expect(u, s.id).toBeGreaterThan(0.02);
-        expect(u, s.id).toBeLessThan(0.98);
-        expect(project(0.5, u, m)).toBeCloseTo(target);
+  it('lays out every level so the frame can always be reached, within its ranges', () => {
+    let seed = 7;
+    const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+    for (const l of LEVELS)
+      for (let i = 0; i < 300; i++) {
+        const p = place(l, rnd);
+        for (const m of [magnification(ZL_MAX), TRUE_M - 0.01]) {
+          const u = lightFor(p.objX, p.frameX, m);
+          expect(u, l.id).toBeGreaterThan(0.02);
+          expect(u, l.id).toBeLessThan(0.98);
+          expect(project(p.objX, u, m)).toBeCloseTo(p.frameX);
+        }
+        if (l.puppet !== 'edge') expect(Math.abs(p.objX - 0.5), l.id).toBeLessThanOrEqual(l.puppet + 1e-9);
+        expect(Math.abs(p.frameX - p.objX), l.id).toBeLessThanOrEqual(l.offset + 1e-9);
+        // The flashlight starts close, so the shadow starts as a monster.
+        expect(magnification(depthAt(p.lightK)), l.id).toBeGreaterThan(3);
       }
+  });
+
+  it('gets harder as it goes: tighter frames, longer holds, a steadier hand', () => {
+    for (let i = 1; i < LEVELS.length; i++) {
+      expect(LEVELS[i].tol).toBeLessThanOrEqual(LEVELS[i - 1].tol);
+      expect(LEVELS[i].hold).toBeGreaterThanOrEqual(LEVELS[i - 1].hold);
+      expect(LEVELS[i].jitter).toBeGreaterThanOrEqual(LEVELS[i - 1].jitter);
     }
+  });
+
+  it('only shakes a hurried hand', () => {
+    expect(tremble(0, 5)).toBe(0);
+    expect(tremble(2, 0.3)).toBe(0);
+    expect(tremble(2, 3)).toBeGreaterThan(tremble(1, 3));
+    expect(tremble(3, 1.5)).toBeGreaterThan(0);
   });
 
   it('stars: real size, both lenses, a fitting first answer', () => {
