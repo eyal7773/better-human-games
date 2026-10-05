@@ -6,7 +6,27 @@ import { agree } from '../shared/profile';
 type L = { en: string; he: string; ar: string };
 type LL = { en: string[]; he: string[]; ar: string[] };
 
-export type Puppet = 'cup' | 'marker' | 'clock' | 'phone' | 'car' | 'mug' | 'mouth' | 'envelope' | 'blob';
+export type Puppet =
+  | 'cup'
+  | 'marker'
+  | 'clock'
+  | 'phone'
+  | 'car'
+  | 'mug'
+  | 'mouth'
+  | 'envelope'
+  | 'blob'
+  | 'cart'
+  | 'drill'
+  | 'speaker'
+  | 'towel'
+  | 'cake'
+  | 'bulb'
+  | 'megaphone'
+  | 'wallet'
+  | 'key'
+  | 'laptop'
+  | 'sign';
 
 export interface Scene extends Meta {
   name: string;
@@ -240,7 +260,7 @@ export const SCENES: Scene[] = [
       he: 'חיכיתם עם איתות. מישהו נכנס לחניה בזריזות מהצד השני.',
       ar: 'انتظرتم والإشارة مضاءة. أحدهم دخل الموقف بسرعة من الجهة الأخرى.',
     },
-    puppet: 'car',
+    puppet: 'sign',
     emoji: '🅿️',
     losses: { en: ['three minutes of circling'], he: ['שלוש דקות של סיבובים'], ar: ['ثلاث دقائق من الدوران'] },
     threat: 1,
@@ -257,7 +277,7 @@ export const SCENES: Scene[] = [
       he: 'מישהו הולך ישר לראש התור בסופר, כאילו אתם לא שם.',
       ar: 'أحدهم يذهب مباشرة إلى مقدمة طابور السوبرماركت، كأنكم غير موجودين.',
     },
-    puppet: 'blob',
+    puppet: 'cart',
     emoji: '🛒',
     losses: { en: ['two minutes'], he: ['שתי דקות'], ar: ['دقيقتان'] },
     threat: 1,
@@ -291,7 +311,7 @@ export const SCENES: Scene[] = [
       he: 'שבת, שמונה בבוקר, הבוקר היחיד לישון בו. השכן מתחיל לקדוח.',
       ar: 'السبت، الثامنة صباحًا — الصباح الوحيد للنوم. الجار يبدأ بالحفر.',
     },
-    puppet: 'blob',
+    puppet: 'drill',
     emoji: '🔩',
     losses: { en: ['an hour of sleep'], he: ['שעת שינה'], ar: ['ساعة نوم'] },
     threat: 2,
@@ -308,7 +328,7 @@ export const SCENES: Scene[] = [
       he: 'המחשב קופא ונכבה. שעה של עבודה לא שמורה נעלמה.',
       ar: 'الحاسوب يتجمّد ويُعيد التشغيل. ساعة عمل غير محفوظة ضاعت.',
     },
-    puppet: 'phone',
+    puppet: 'laptop',
     emoji: '💻',
     losses: { en: ['an hour — the second time is faster'], he: ['שעה, ובפעם השנייה זה מהר יותר'], ar: ['ساعة — والمرة الثانية أسرع'] },
     threat: 4,
@@ -342,7 +362,7 @@ export const SCENES: Scene[] = [
       he: 'אחת בלילה, באמצע השבוע, והשכנים מלמעלה עושים מסיבה רועשת.',
       ar: 'الواحدة ليلًا في منتصف الأسبوع، والجيران في الأعلى يقيمون حفلة صاخبة.',
     },
-    puppet: 'blob',
+    puppet: 'speaker',
     emoji: '🎶',
     losses: { en: ['some sleep', 'a fresh morning'], he: ['קצת שינה', 'בוקר רענן'], ar: ['بعض النوم', 'صباح منتعش'] },
     threat: 3,
@@ -359,7 +379,7 @@ export const SCENES: Scene[] = [
       he: 'ערב. החבר הכי טוב שלכם לא זכר את יום ההולדת שלכם.',
       ar: 'المساء. صديقكم المقرّب لم يتذكّر عيد ميلادكم.',
     },
-    puppet: 'phone',
+    puppet: 'cake',
     emoji: '🎂',
     losses: { en: ['a message I was hoping for'], he: ['הודעה {שקיוויתי|שקיוויתי} לה'], ar: ['رسالة كنت أتمنّاها'] },
     threat: 4,
@@ -393,7 +413,7 @@ export const SCENES: Scene[] = [
       he: 'בישיבה, עמית מציג את הרעיון שלכם כאילו הוא שלו. פעם שלישית ברבעון.',
       ar: 'في الاجتماع، يعرض زميل فكرتكم كأنها فكرته. للمرة الثالثة هذا الربع.',
     },
-    puppet: 'mouth',
+    puppet: 'bulb',
     emoji: '💡',
     losses: { en: ['credit for my work', 'a fair shot at promotion'], he: ['קרדיט על העבודה שלי', 'סיכוי הוגן לקידום'], ar: ['الفضل في عملي', 'فرصة عادلة للترقية'] },
     threat: 20,
@@ -410,7 +430,7 @@ export const SCENES: Scene[] = [
       he: 'הבוס צועק עליכם מול כל הצוות, על טעות שבכלל לא הייתה שלכם.',
       ar: 'المدير يصرخ عليكم أمام الفريق كله، بسبب خطأ لم يكن خطأكم.',
     },
-    puppet: 'mouth',
+    puppet: 'megaphone',
     emoji: '📢',
     losses: { en: ['dignity at work', 'feeling safe there'], he: ['כבוד בעבודה', 'תחושת ביטחון שם'], ar: ['الكرامة في العمل', 'الإحساس بالأمان هناك'] },
     threat: 28,
@@ -427,7 +447,7 @@ export const SCENES: Scene[] = [
       he: 'חבר עדיין לא החזיר כסף שאתם צריכים לשכירות. היום הוא העלה תמונות מחופשה.',
       ar: 'صديق لم يُرجع بعد مالًا تحتاجونه للإيجار. اليوم نشر صور عطلة.',
     },
-    puppet: 'envelope',
+    puppet: 'wallet',
     emoji: '💸',
     losses: { en: ['money I need for rent', 'trust'], he: ['כסף שאני {צריך|צריכה} לשכירות', 'אמון'], ar: ['مال أحتاجه للإيجار', 'الثقة'] },
     threat: 22,
@@ -479,7 +499,7 @@ export const SCENES: Scene[] = [
       he: 'מחר משלמים שכירות. זה החודש השלישי שהשותף לא משלם את החלק שלו.',
       ar: 'الإيجار مستحق غدًا. للشهر الثالث، شريك السكن لم يدفع حصته.',
     },
-    puppet: 'envelope',
+    puppet: 'key',
     emoji: '🏠',
     losses: { en: ['money I can’t spare', 'feeling safe at home'], he: ['כסף שאין לי', 'ביטחון בבית'], ar: ['مال لا أملكه', 'الأمان في البيت'] },
     threat: 24,
@@ -496,7 +516,7 @@ export const SCENES: Scene[] = [
       he: 'מגבת רטובה בצד שלכם של המיטה. שוב.',
       ar: 'منشفة مبللة على جهتكم من السرير. مرة أخرى.',
     },
-    puppet: 'blob',
+    puppet: 'towel',
     emoji: '🛏️',
     losses: { en: ['a dry pillow'], he: ['כרית יבשה'], ar: ['وسادة جافة'] },
     threat: 1,
@@ -547,7 +567,7 @@ export const SCENES: Scene[] = [
       he: 'הבת שלכם מבטלת את הביקור של הנכדים ברגע האחרון. וכבר אפיתם.',
       ar: 'ابنتكم تلغي زيارة الأحفاد في اللحظة الأخيرة. وكنتم قد خبزتم.',
     },
-    puppet: 'clock',
+    puppet: 'cake',
     emoji: '🍰',
     losses: { en: ['an afternoon with them — this week'], he: ['אחר צהריים איתם, השבוע'], ar: ['عصر معهم — هذا الأسبوع'] },
     threat: 3,

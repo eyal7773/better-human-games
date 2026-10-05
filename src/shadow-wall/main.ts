@@ -297,6 +297,8 @@ async function play(scene: Scene, mine = false, level = 0) {
   let twoMonsters = 0;
   let solved = false;
   let t = 0;
+  /** 0 → 1 once the frame locks: the shadow turns into the thing itself. */
+  let reveal = 0;
   const frameU = 0.5 + scene.frameDx;
   hint.textContent = T.hintMove;
 
@@ -358,6 +360,7 @@ async function play(scene: Scene, mine = false, level = 0) {
     }
     roar.update(m, twoMonsters > 0 ? 1 : growl);
     twoMonsters = Math.max(0, twoMonsters - dt);
+    if (framed) reveal = Math.min(1, reveal + dt * (reducedMotion() ? 10 : 1.2));
     draw(m, sx, monster);
   });
 
@@ -405,14 +408,16 @@ async function play(scene: Scene, mine = false, level = 0) {
     const size = P * Math.min(m, 9);
     sctx.setTransform(1, 0, 0, 1, 0, 0);
     sctx.clearRect(0, 0, shadowLayer.width, shadowLayer.height);
-    sctx.setTransform(size, 0, 0, size, wallX(sx), cy);
+    // The monster grows out of the object itself, a little puffed up while it's big.
+    const puff = 1 + 0.12 * monster;
+    sctx.setTransform(size * puff, 0, 0, size * puff, wallX(sx), cy);
     sctx.fillStyle = '#1e1226';
     puppetPath(sctx, scene.puppet);
     sctx.fill();
-    if (monsterPath(sctx, monster)) sctx.fill();
-    // Light through the eye and mouth holes.
+    if (monsterPath(sctx, monster, scene.puppet)) sctx.fill();
+    // Light through the eye and mouth holes; heavy scenes get a frown, not fangs.
     sctx.globalCompositeOperation = 'destination-out';
-    if (monsterHoles(sctx, monster)) sctx.fill();
+    if (monsterHoles(sctx, monster, scene.puppet, !scene.heavy)) sctx.fill();
     sctx.globalCompositeOperation = 'source-over';
     // Your own shadow roaring back.
     if (twoMonsters > 0) {
@@ -420,22 +425,42 @@ async function play(scene: Scene, mine = false, level = 0) {
       sctx.setTransform(s2, 0, 0, s2, wx + ww * (sx < 0.5 ? 0.78 : 0.22), cy + wh * 0.1);
       puppetPath(sctx, 'blob');
       sctx.fill();
-      if (monsterPath(sctx, 1)) sctx.fill();
+      if (monsterPath(sctx, 1, 'blob')) sctx.fill();
       sctx.globalCompositeOperation = 'destination-out';
-      if (monsterHoles(sctx, 1)) sctx.fill();
+      if (monsterHoles(sctx, 1, 'blob')) sctx.fill();
       sctx.globalCompositeOperation = 'source-over';
     }
     ctx.save();
     ctx.globalAlpha = 0.82;
     ctx.filter = `blur(${Math.min(8, penumbra(m) * ww).toFixed(1)}px)`;
+    ctx.globalAlpha = 0.82 * (1 - reveal);
     ctx.drawImage(shadowLayer, wx, wy, ww, wh, wx, wy, ww, wh);
     ctx.restore();
+    // The "oh, it's just a mug" moment: at true size the shadow turns into the thing itself.
+    if (reveal > 0) {
+      ctx.save();
+      ctx.translate(wallX(sx), cy);
+      ctx.globalAlpha = reveal;
+      const glow = ctx.createRadialGradient(0, 0, size * 0.2, 0, 0, size * 1.1);
+      glow.addColorStop(0, 'rgba(255,246,220,.9)');
+      glow.addColorStop(1, 'rgba(255,246,220,0)');
+      ctx.fillStyle = glow;
+      ctx.fillRect(-size * 1.2, -size * 1.2, size * 2.4, size * 2.4);
+      ctx.scale(size, size);
+      puppetPath(ctx, scene.puppet);
+      ctx.fillStyle = PUPPET_COLOR[scene.puppet];
+      ctx.fill();
+      ctx.lineWidth = 3 / size;
+      ctx.strokeStyle = '#1d2b4f';
+      ctx.stroke();
+      ctx.restore();
+    }
     // Something real: the thorns that stay glow red.
     if (scene.real && m < 2) {
       ctx.save();
       ctx.translate(wallX(sx), cy);
       ctx.scale(size, size);
-      realThorns(ctx);
+      realThorns(ctx, scene.puppet);
       ctx.fillStyle = `rgba(240,67,58,${(0.6 + Math.sin(t * 4) * 0.25).toFixed(3)})`;
       ctx.fill();
       ctx.restore();
@@ -461,22 +486,7 @@ async function play(scene: Scene, mine = false, level = 0) {
       ctx.closePath();
       ctx.fill();
     }
-    // The puppet on its stick, just in front of the wall.
     const px = wallX(0.5);
-    const py = floorTop + 6;
-    ctx.fillStyle = '#5a3a24';
-    ctx.fillRect(px - 3, py, 6, 34);
-    ctx.fillRect(px - 16, py + 30, 32, 8);
-    ctx.save();
-    ctx.translate(px, py - P * 0.36);
-    ctx.scale(P * 0.7, P * 0.7);
-    puppetPath(ctx, scene.puppet);
-    ctx.fillStyle = PUPPET_COLOR[scene.puppet];
-    ctx.fill();
-    ctx.lineWidth = 3 / (P * 0.7);
-    ctx.strokeStyle = '#1d2b4f';
-    ctx.stroke();
-    ctx.restore();
     // The flashlight where your finger is.
     {
       const fx2 = wallX(light.u);
@@ -509,6 +519,21 @@ async function play(scene: Scene, mine = false, level = 0) {
       ctx.stroke();
       ctx.restore();
     }
+    // The puppet on its stick, just in front of the wall — drawn last, so the flashlight never hides it.
+    const py = floorTop + 6;
+    ctx.fillStyle = '#5a3a24';
+    ctx.fillRect(px - 3, py, 6, 34);
+    ctx.fillRect(px - 16, py + 30, 32, 8);
+    ctx.save();
+    ctx.translate(px, py - P * 0.36);
+    ctx.scale(P * 0.7, P * 0.7);
+    puppetPath(ctx, scene.puppet);
+    ctx.fillStyle = PUPPET_COLOR[scene.puppet];
+    ctx.fill();
+    ctx.lineWidth = 3 / (P * 0.7);
+    ctx.strokeStyle = '#1d2b4f';
+    ctx.stroke();
+    ctx.restore();
   }
 
   // --- found the real size: lenses and answers
@@ -516,7 +541,8 @@ async function play(scene: Scene, mine = false, level = 0) {
     framed = true;
     shell.audio.bell(2, 0.9);
     vibrate(25);
-    hint.textContent = scene.real ? `${T.framed} ${T.real}` : T.framed;
+    // Name the thing as it appears: the shadow was only this.
+    hint.textContent = mine ? T.framed : `${scene.emoji} ${scene.name} · ${scene.real ? T.real : T.framed}`;
     shell.announce(hint.textContent);
     buildPanel();
   }

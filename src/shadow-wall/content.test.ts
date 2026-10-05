@@ -19,6 +19,11 @@ describe('shadow scenes', () => {
     expect(checkPool(items)).toEqual([]);
   });
 
+  it('each have their own object, never the shapeless blob', async () => {
+    const SCENES = await scenesIn('en');
+    expect(SCENES.filter((s) => s.puppet === 'blob').map((s) => s.id)).toEqual([]);
+  });
+
   it('fill all twelve levels without a repeat, for every kind of home', async () => {
     const SCENES = await scenesIn('en');
     const short: string[] = [];
