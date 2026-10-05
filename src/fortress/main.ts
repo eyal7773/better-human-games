@@ -9,6 +9,7 @@ import { bump } from '../shared/progress';
 import {
   CANNON_COST,
   LEVELS,
+  SCARY_SHARE,
   PILLARS,
   SHIELD_COST,
   endlessWave,
@@ -28,6 +29,7 @@ import {
   type Wave,
 } from './logic';
 import { BUBBLES, LEVEL_NAMES, PILLAR_INFO, THREATS } from './content';
+import { eligible, markSeen, query } from '../shared/library';
 
 /**
  * The Fortress: a reverse tower defence. Everyday hassles drift in; most are
@@ -69,6 +71,16 @@ const T = {
     en: 'Spiky ones are real threats. Tap one and raise a 🛡️ boundary.',
     he: 'הקוצניות הן איומים אמיתיים. הקישו על אחת והרימו 🛡️ גבול.',
     ar: 'الشائكة تهديدات حقيقية. اضغطوا على واحدة وارفعوا 🛡️ حدًّا.',
+  }),
+  hintPairs: tr({
+    en: 'Two real threats can come at once. Save energy for both.',
+    he: 'שני איומים אמיתיים יכולים להגיע ביחד. שמרו אנרגיה לשניהם.',
+    ar: 'قد يأتي تهديدان حقيقيان معًا. وفّروا الطاقة لكليهما.',
+  }),
+  hintLookalike: tr({
+    en: 'Some bubbles look scary from far away. Tap to look closer before you raise a shield.',
+    he: 'יש בועות שנראות מפחידות מרחוק. הקישו כדי להסתכל מקרוב לפני שמרימים מגן.',
+    ar: 'بعض الفقاعات تبدو مخيفة من بعيد. اضغطوا لتنظروا عن قرب قبل رفع الدرع.',
   }),
   hint4: tr({
     en: 'Careful: some threats look like bubbles until they get close.',
@@ -315,6 +327,17 @@ async function play(level: Level | null) {
   // --- waves
   let finishedWaves = false;
   let waveNo = 0;
+  // Only hassles that fit the player's home fly; threats come fresh-first, without repeats in a run.
+  const bubblePool = BUBBLES.map((_, i) => i).filter((i) => eligible(BUBBLES[i]));
+  const threatOrder = query(THREATS, { count: THREATS.length, gentle: lvlN > 0 && lvlN <= 2 }).map((t) => THREATS.indexOf(t));
+  let threatNext = 0;
+  const nextThreat = () => {
+    const i = threatOrder[threatNext++ % threatOrder.length];
+    markSeen([THREATS[i].id]);
+    return i;
+  };
+  const lookalike = !!level?.lookalike;
+
   const runWave = async (w: Wave, speed: number, disguise: boolean) => {
     const plan = schedule(w);
     let clock = 0;
@@ -325,7 +348,7 @@ async function play(level: Level | null) {
       while (next < plan.length && plan[next].at <= clock) {
         const kind: Kind = plan[next].kind;
         // A threat comes at the pillar it endangers; a bubble drifts at any of them.
-        const item = Math.floor(Math.random() * (kind === 'threat' ? THREATS.length : BUBBLES.length));
+        const item = kind === 'threat' ? nextThreat() : pick(bubblePool);
         const pillar = kind === 'threat' ? THREATS[item].pillar : pick(PILLARS);
         spawn(s, {
           kind,
@@ -334,6 +357,7 @@ async function play(level: Level | null) {
           angle: PILLAR_ANGLE[pillar] + rand(-0.75, 0.75),
           speed: speed * rand(0.9, 1.1),
           disguised: disguise && kind === 'threat',
+          scary: lookalike && kind === 'bubble' && Math.random() < SCARY_SHARE,
         });
         next++;
       }
@@ -495,8 +519,8 @@ async function play(level: Level | null) {
       ctx.font = '20px sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      // A disguised threat wears a random bubble's face until it's revealed.
-      const face = threat || x.kind === 'bubble' ? info : BUBBLES[x.id % BUBBLES.length];
+      // In disguise until revealed: a threat wears a bubble's face, a scary bubble a threat's.
+      const face = threat === (x.kind === 'threat') ? info : threat ? THREATS[threatOrder[x.id % threatOrder.length]] : BUBBLES[bubblePool[x.id % bubblePool.length]];
       ctx.fillText(face.emoji, p.x, p.y + 1);
       // A short label under it, so you can judge without tapping.
       ctx.font = `600 11px ${labelFont}`;
@@ -511,7 +535,7 @@ async function play(level: Level | null) {
   }
 
   // --- the day
-  hint.textContent = lvlN === 1 ? T.hint1 : lvlN === 2 ? T.hint2 : lvlN === 4 ? T.hint4 : '';
+  hint.textContent = { 1: T.hint1, 2: T.hint2, 4: T.hint4, 6: T.hintPairs, 7: T.hintLookalike }[lvlN] ?? '';
   scope.timeout(() => (hint.textContent = ''), 9000);
   const waves = level ? level.waves : null;
   while (scope.alive && standing(s)) {

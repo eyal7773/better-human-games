@@ -39,6 +39,8 @@ export interface Hassle {
   dist: number;
   speed: number;
   disguised: boolean;
+  /** A bubble dressed as a threat (it looks scary until you look closer). */
+  scary?: boolean;
   inspected: boolean;
   fate: Fate;
 }
@@ -53,6 +55,8 @@ export interface Level {
   waves: Wave[];
   speed: number;
   disguise: boolean;
+  /** Some bubbles look like threats from afar. */
+  lookalike?: boolean;
   /** Cannon shots allowed for the "calm hand" star. */
   shots: number;
 }
@@ -63,7 +67,13 @@ export const LEVELS: Level[] = [
   { id: 'evening', waves: [{ n: 6, threats: 1 }, { n: 6, threats: 0 }, { n: 6, threats: 1 }], speed: 1.2, disguise: false, shots: 1 },
   { id: 'family', waves: [{ n: 6, threats: 0 }, { n: 7, threats: 1 }, { n: 7, threats: 1 }], speed: 1.25, disguise: true, shots: 1 },
   { id: 'bigday', waves: [{ n: 6, threats: 1 }, { n: 7, threats: 0 }, { n: 7, threats: 1 }, { n: 6, threats: 1 }], speed: 1.35, disguise: true, shots: 1 },
+  { id: 'pairs', waves: [{ n: 6, threats: 2 }, { n: 7, threats: 1 }, { n: 7, threats: 2 }], speed: 1.35, disguise: true, shots: 1 },
+  { id: 'lookalike', waves: [{ n: 6, threats: 1 }, { n: 7, threats: 1 }, { n: 7, threats: 1 }], speed: 1.35, disguise: false, lookalike: true, shots: 1 },
+  { id: 'week', waves: [{ n: 6, threats: 1 }, { n: 7, threats: 2 }, { n: 7, threats: 1 }, { n: 7, threats: 2 }], speed: 1.45, disguise: true, lookalike: true, shots: 1 },
 ];
+
+/** Share of bubbles that look like threats, in lookalike levels. */
+export const SCARY_SHARE = 0.25;
 
 /** Endless: every wave a little bigger and faster, about one threat in eight. */
 export function endlessWave(i: number): { wave: Wave; speed: number; disguise: boolean } {
@@ -127,7 +137,8 @@ export function spawn(s: State, h: Omit<Hassle, 'id' | 'dist' | 'fate' | 'inspec
 }
 
 /** A threat shows as one once inspected or close enough — disguised ones look like bubbles until then. */
-export const looksThreat = (h: Hassle) => h.kind === 'threat' && (!h.disguised || h.inspected || h.dist < REVEAL_AT);
+export const looksThreat = (h: Hassle) =>
+  h.kind === 'threat' ? !h.disguised || h.inspected || h.dist < REVEAL_AT : !!h.scary && !h.inspected && h.dist >= REVEAL_AT;
 
 /** Advances time. Returns the hassles that reached the wall this step. */
 export function step(s: State, dt: number): Hassle[] {

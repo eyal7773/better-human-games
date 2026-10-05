@@ -3,6 +3,7 @@ import { load } from '../shared/storage';
 import { wallet } from '../shared/zen';
 import { LEVELS as WORDS_LEVELS } from '../words-in-flight/logic';
 import { LEVELS as SHADOW_LEVELS } from '../shadow-wall/logic';
+import { LEVELS as FORTRESS_LEVELS } from '../fortress/logic';
 
 /**
  * Achievement items: never bought, earned in the games. Each one reads a
@@ -40,7 +41,7 @@ export const AWARDS: Record<string, Award> = {
   },
   shield: {
     how: tr({ en: 'Finish every level of The Fortress', he: 'לסיים את כל השלבים של המבצר', ar: 'أنهوا كل مراحل «الحصن»' }),
-    done: () => len(read('fortress').done) >= 5,
+    done: () => len(read('fortress').done) >= FORTRESS_LEVELS.length,
   },
   realbench: {
     how: tr({ en: 'Tap “I paused at home today too” on 7 different days', he: 'ללחוץ על "עצרתי גם בבית היום" ב־7 ימים שונים', ar: 'اضغطوا «توقفت في البيت اليوم أيضًا» في 7 أيام مختلفة' }),
