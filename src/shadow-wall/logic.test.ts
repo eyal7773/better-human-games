@@ -22,6 +22,8 @@ describe('shadow physics', () => {
     expect(monsterness(6)).toBe(1);
     expect(monsterness(1.3)).toBe(0);
     expect(monsterness(1.3, 0.4)).toBe(0.4);
+    expect(monsterness(TRUE_M)).toBe(0);
+    expect(monsterness(TRUE_M - 0.001)).toBe(0);
   });
 
   it('only counts true size inside the frame', () => {

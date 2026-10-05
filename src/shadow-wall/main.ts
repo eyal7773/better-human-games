@@ -309,14 +309,15 @@ async function play(scene: Scene, mine = false, level = 0) {
   const physics = () => {
     const m = magnification(depthAt(light.k));
     const sx = project(0.5, light.u, m);
-    return { m, sx, monster: monsterness(m, scene.real ? 0.4 : 0) };
+    // The drawn monster always melts away at true size; the growl stays a little when something real is here.
+    return { m, sx, monster: monsterness(m), growl: monsterness(m, scene.real ? 0.4 : 0) };
   };
 
   // --- the frame loop
   let hintedFrame = false;
   scope.loop((dt) => {
     t += dt;
-    const { m, sx, monster } = physics();
+    const { m, sx, monster, growl } = physics();
     if (!framed) {
       if (m < TRUE_M + 0.3 && !hintedFrame) {
         hintedFrame = true;
@@ -327,7 +328,7 @@ async function play(scene: Scene, mine = false, level = 0) {
         if (framedFor >= FRAME_HOLD) onFramed();
       } else framedFor = Math.max(0, framedFor - dt * 2);
     }
-    roar.update(m, twoMonsters > 0 ? 1 : monster);
+    roar.update(m, twoMonsters > 0 ? 1 : growl);
     twoMonsters = Math.max(0, twoMonsters - dt);
     draw(m, sx, monster);
   });

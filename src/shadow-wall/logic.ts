@@ -31,7 +31,8 @@ export const depthAt = (k: number) => ZL_MIN + Math.max(0, Math.min(1, k)) * (ZL
 
 /** How much of the monster is left: 1 at full scare, down to `floor` near true size. */
 export function monsterness(m: number, floor = 0) {
-  return Math.max(floor, Math.min(1, (m - 1.4) / 2.6));
+  // Exactly zero at true size: the frame locks there, and nothing of the monster may hide the object.
+  return Math.max(floor, Math.min(1, (m - TRUE_M) / (4 - TRUE_M)));
 }
 
 /** Blur of the shadow's edge, in wall widths: the flashlight is not a point. */
