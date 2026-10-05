@@ -58,3 +58,55 @@ export interface ShadowResult {
 export function starsFor(r: ShadowResult): Stars {
   return [r.framed, r.framed && r.looked, r.framed && r.firstChoice === r.right];
 }
+
+// ---------------------------------------------------------------- levels
+
+export interface ShadowLevel {
+  id: string;
+  /** Something real is there: the right answer is a calm boundary. */
+  real: boolean;
+  /** Which scenes can come up (their difficulty). */
+  diff: [number, number];
+}
+
+/**
+ * Twelve levels. Each draws a scene that fits the player's home (content
+ * library); three of them always hold something real.
+ */
+export const LEVELS: ShadowLevel[] = [
+  { id: 'l1', real: false, diff: [1, 1] },
+  { id: 'l2', real: false, diff: [1, 2] },
+  { id: 'l3', real: false, diff: [1, 2] },
+  { id: 'l4', real: true, diff: [1, 4] },
+  { id: 'l5', real: false, diff: [1, 3] },
+  { id: 'l6', real: false, diff: [2, 3] },
+  { id: 'l7', real: false, diff: [1, 3] },
+  { id: 'l8', real: true, diff: [1, 4] },
+  { id: 'l9', real: false, diff: [2, 4] },
+  { id: 'l10', real: false, diff: [1, 4] },
+  { id: 'l11', real: true, diff: [1, 4] },
+  { id: 'l12', real: false, diff: [2, 4] },
+];
+
+/** Levels used to be the eight scenes themselves; their progress moves to the level in the same place. */
+const OLD_IDS = ['juice', 'marker', 'late', 'phone', 'traffic', 'mug', 'joke', 'email'];
+
+/** Moves old scene-keyed progress to level ids, once. True when something changed. */
+export function migrateLevels(p: { done: string[]; stars: Record<string, Stars>; rewarded: Record<string, Stars> }) {
+  let changed = false;
+  OLD_IDS.forEach((old, i) => {
+    const id = LEVELS[i].id;
+    if (p.done.includes(old)) {
+      p.done = p.done.filter((x) => x !== old);
+      if (!p.done.includes(id)) p.done.push(id);
+      changed = true;
+    }
+    for (const rec of [p.stars, p.rewarded])
+      if (rec[old]) {
+        rec[id] = rec[old];
+        delete rec[old];
+        changed = true;
+      }
+  });
+  return changed;
+}

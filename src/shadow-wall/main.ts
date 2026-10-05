@@ -6,6 +6,7 @@ import { tr } from '../shared/i18n';
 import { vibrate } from '../shared/haptics';
 import { ANCHOR } from '../shared/anchors';
 import { discover } from '../shared/progress';
+import { eligible, markSeen, query } from '../shared/library';
 import {
   FRAME_HOLD,
   TRUE_M,
@@ -17,8 +18,10 @@ import {
   project,
   starsFor,
   type Response,
+  LEVELS,
+  migrateLevels,
 } from './logic';
-import { MY_LOSSES, SCENES, type Scene } from './content';
+import { LEVEL_NAMES, MY_LOSSES, SCENES, type Scene } from './content';
 import { PUPPET_COLOR, monsterHoles, monsterPath, puppetPath, realThorns } from './puppets';
 import { Roar } from './sound';
 
@@ -115,6 +118,7 @@ const T = {
 
 const KEY = 'bhg.shadow-wall.v1';
 const shell = new Shell(KEY, T.title, 'sw-theme');
+if (migrateLevels(shell.progress)) shell.persist();
 const roar = new Roar(shell.audio);
 
 const art = () =>
@@ -133,19 +137,30 @@ function showMenu() {
   shell.menu({
     lede: T.lede,
     art: art(),
-    levels: SCENES.map((s) => ({ id: s.id, name: s.name })),
+    levels: LEVELS.map((l, i) => ({ id: l.id, name: LEVEL_NAMES[i] })),
     extras: [
       { label: T.gallery, onClick: showGallery },
-      { label: T.mine, locked: !shell.progress.done.includes(SCENES[2].id), lockedHint: T.mineLocked, onClick: () => void startMine() },
+      { label: T.mine, locked: !shell.progress.done.includes(LEVELS[2].id), lockedHint: T.mineLocked, onClick: () => void startMine() },
     ],
-    onPlay: (id) => void play(SCENES.find((s) => s.id === id)!),
+    onPlay: (id) => void playLevel(LEVELS.findIndex((l) => l.id === id)),
   });
 }
 
+/** A level draws a scene that fits the player's home: fresh ones first; something real when the level asks for it. */
+function playLevel(i: number) {
+  const l = LEVELS[i];
+  const pool = SCENES.filter((s) => s.real === l.real);
+  const [scene] = query(pool, { count: 1, diff: l.diff, gentle: i < 2 }).concat(query(pool, { count: 1 }));
+  markSeen([scene.id]);
+  void play(scene, false, i);
+}
+
 async function showGallery() {
-  const found = SCENES.filter((s) => shell.progress.album.includes(s.id));
+  // Only shadows this home can meet count, so the gallery can be filled.
+  const mine = SCENES.filter((s) => eligible(s));
+  const found = mine.filter((s) => shell.progress.album.includes(s.id));
   await shell.sheet(
-    T.gallery,
+    `${T.gallery} · ${found.length}/${mine.length}`,
     found.length
       ? [h('div', { class: 'sw-gallery' }, ...found.map((s) => h('div', { class: 'sw-frame-card' }, h('span', { class: 'sw-frame-emoji' }, s.emoji), h('b', {}, s.name), h('span', {}, s.losses.join(' · ')))))]
       : [h('p', {}, T.galleryEmpty)],
@@ -167,6 +182,10 @@ async function startMine() {
   void play(
     {
       id: 'mine',
+      with: ['none'],
+      topics: ['household'],
+      setting: 'home',
+      diff: 1,
       name: text,
       event: text,
       puppet: 'blob',
@@ -184,7 +203,7 @@ async function startMine() {
 
 // ------------------------------------------------------------------ play
 
-async function play(scene: Scene, mine = false) {
+async function play(scene: Scene, mine = false, level = 0) {
   const scope = new Scope();
   roar.stop();
   shell.clearStage();
@@ -640,19 +659,18 @@ async function play(scene: Scene, mine = false) {
       return;
     }
     const stars = starsFor({ framed: true, looked: firstLooked, firstChoice, right: scene.right });
-    const zen = shell.finishLevel(scene.id, stars);
-    const idx = SCENES.indexOf(scene);
+    const zen = shell.finishLevel(LEVELS[level].id, stars);
     const c = await shell.end({
       title: T.doneTitle,
       stars: stars.map((on, i) => ({ on, label: T.stars[i] })),
       zen,
       lines: [h('p', { class: 'sw-losses' }, `${scene.emoji} ${scene.losses.join(' · ')}`)],
       anchor: scene.real ? ANCHOR.boundary : `${ANCHOR.taken} ${ANCHOR.threat}`,
-      hasNext: idx < SCENES.length - 1,
+      hasNext: level < LEVELS.length - 1,
     });
     scope.dispose();
-    if (c === 'next') void play(SCENES[idx + 1]);
-    else if (c === 'again') void play(scene);
+    if (c === 'next') playLevel(level + 1);
+    else if (c === 'again') void play(scene, false, level);
     else showMenu();
   }
 

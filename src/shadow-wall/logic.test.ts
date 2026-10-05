@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { FRAME_TOL, TRUE_M, ZL_MAX, ZL_MIN, depthAt, inFrame, lightFor, magnification, monsterness, project, starsFor } from './logic';
+import { FRAME_TOL, LEVELS, TRUE_M, ZL_MAX, ZL_MIN, depthAt, inFrame, lightFor, magnification, migrateLevels, monsterness, project, starsFor } from './logic';
 import { SCENES } from './content';
 
 describe('shadow physics', () => {
@@ -50,8 +50,19 @@ describe('shadow physics', () => {
 
   it('has real boundaries in the mix, but mostly small things', () => {
     const real = SCENES.filter((s) => s.real);
-    expect(real.length).toBe(2);
+    expect(real.length).toBeGreaterThanOrEqual(LEVELS.filter((l) => l.real).length);
     expect(real.every((s) => s.right === 'boundary' && s.threat > 10)).toBe(true);
     expect(SCENES.filter((s) => !s.real).every((s) => s.threat < 10)).toBe(true);
+  });
+});
+
+describe('levels', () => {
+  it('moves old scene-keyed progress to the level in the same place', () => {
+    const p = { done: ['juice', 'phone', 'l9'], stars: { juice: [true, true, false] as [boolean, boolean, boolean] }, rewarded: { phone: [true, false, false] as [boolean, boolean, boolean] } };
+    expect(migrateLevels(p)).toBe(true);
+    expect(p.done.sort()).toEqual(['l1', 'l4', 'l9']);
+    expect(p.stars).toEqual({ l1: [true, true, false] });
+    expect(p.rewarded).toEqual({ l4: [true, false, false] });
+    expect(migrateLevels(p)).toBe(false);
   });
 });

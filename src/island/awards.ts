@@ -2,6 +2,7 @@ import { tr } from '../shared/i18n';
 import { load } from '../shared/storage';
 import { wallet } from '../shared/zen';
 import { LEVELS as WORDS_LEVELS } from '../words-in-flight/logic';
+import { LEVELS as SHADOW_LEVELS } from '../shadow-wall/logic';
 
 /**
  * Achievement items: never bought, earned in the games. Each one reads a
@@ -34,8 +35,8 @@ export const AWARDS: Record<string, Award> = {
     done: () => threeStarLevels(read('words-in-flight').stars) >= WORDS_LEVELS.length,
   },
   shadowlamp: {
-    how: tr({ en: 'Fill the whole shadow gallery in Shadow on the Wall', he: 'למלא את כל גלריית הצללים בצל על הקיר', ar: 'املؤوا معرض الظلال كله في «ظلّ على الحائط»' }),
-    done: () => len(read('shadow-wall').album) >= 8,
+    how: tr({ en: `Collect ${SHADOW_LEVELS.length} shadows in the gallery of Shadow on the Wall`, he: `לאסוף ${SHADOW_LEVELS.length} צללים בגלריה של צל על הקיר`, ar: `اجمعوا ${SHADOW_LEVELS.length} ظلًّا في معرض «ظلّ على الحائط»` }),
+    done: () => len(read('shadow-wall').album) >= SHADOW_LEVELS.length,
   },
   shield: {
     how: tr({ en: 'Finish every level of The Fortress', he: 'לסיים את כל השלבים של המבצר', ar: 'أنهوا كل مراحل «الحصن»' }),
