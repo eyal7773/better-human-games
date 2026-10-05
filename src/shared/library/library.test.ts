@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { agree, sanitize, type Profile } from '../profile';
-import { eligible, markSeen, query, spread, type Meta, type Seen } from './index';
+import { eligible, kidsAround, markSeen, query, spread, type Meta, type Seen } from './index';
 import { checkEntry, PERSONAS } from './classify';
 
 const p = (o: Partial<Profile> = {}): Profile => sanitize({ status: 'done', address: 'x', ...o });
@@ -38,6 +38,16 @@ describe('eligible', () => {
   });
   it('everything (but gender) without a described home', () => {
     expect(eligible(m('t', { with: ['teen'] }), PERSONAS['no profile'])).toBe(true);
+  });
+});
+
+describe('kidsAround', () => {
+  it('is true with kids or grandkids, or before the home is described', () => {
+    expect(kidsAround(PERSONAS['parent of a teen'])).toBe(true);
+    expect(kidsAround(PERSONAS.grandparent)).toBe(true);
+    expect(kidsAround(PERSONAS['no profile'])).toBe(true);
+    expect(kidsAround(PERSONAS['lives alone'])).toBe(false);
+    expect(kidsAround(PERSONAS['couple, no kids'])).toBe(false);
   });
 });
 

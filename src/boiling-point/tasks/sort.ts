@@ -2,8 +2,12 @@ import { h, clamp, pick, shuffle, rand } from '../../shared/dom';
 import { vibrate } from '../../shared/haptics';
 import { type Task, type TaskCtx, toClient } from './types';
 import { tr } from '../../shared/i18n';
+import { kidsAround } from '../../shared/library';
 
 const TOYS = ['🧸', '🚗', '🧩', '🪀', '⚽', '🦖', '🪁', '🎲'];
+/** Without kids around, the other pile is dishes left in the living room. */
+const KITCHEN = ['🍽️', '☕', '🥄', '🍴', '🥣', '🫖', '🍷', '🧂'];
+const KIDS = kidsAround();
 const CLOTHES = ['🧦', '👕', '👖', '🩳', '🧢', '👗', '🧤', '🧣'];
 
 type Kind = 'toy' | 'clothes';
@@ -23,7 +27,9 @@ interface Item {
 /** Drag toys into the toy box and clothes into the laundry basket. */
 export class SortTask implements Task {
   title = tr({ en: 'Clear the mess from the living room', he: 'לאסוף את הבלגן מהסלון', ar: 'اجمعوا الفوضى من غرفة الجلوس' });
-  hint = tr({ en: 'Drag toys to the toy box, and clothes to the laundry basket', he: 'גררו צעצועים לארגז, ובגדים לסל הכביסה', ar: 'اسحبوا الألعاب إلى الصندوق، والملابس إلى سلة الغسيل' });
+  hint = KIDS
+    ? tr({ en: 'Drag toys to the toy box, and clothes to the laundry basket', he: 'גררו צעצועים לארגז, ובגדים לסל הכביסה', ar: 'اسحبوا الألعاب إلى الصندوق، والملابس إلى سلة الغسيل' })
+    : tr({ en: 'Drag dishes to the kitchen, and clothes to the laundry basket', he: 'גררו כלים למטבח, ובגדים לסל הכביסה', ar: 'اسحبوا الأطباق إلى المطبخ، والملابس إلى سلة الغسيل' });
   private items: Item[] = [];
   private bins!: Record<Kind, { el: HTMLElement; stack: HTMLElement }>;
   private size = 64;
@@ -52,11 +58,14 @@ export class SortTask implements Task {
       board.append(el);
       return { el, stack };
     };
-    this.bins = { toy: mkBin('toy', tr({ en: 'Toys', he: 'צעצועים', ar: 'ألعاب' }), '🧸'), clothes: mkBin('clothes', tr({ en: 'Laundry', he: 'כביסה', ar: 'غسيل' }), '🧺') };
+    this.bins = {
+      toy: KIDS ? mkBin('toy', tr({ en: 'Toys', he: 'צעצועים', ar: 'ألعاب' }), '🧸') : mkBin('toy', tr({ en: 'Kitchen', he: 'מטבח', ar: 'المطبخ' }), '🍽️'),
+      clothes: mkBin('clothes', tr({ en: 'Laundry', he: 'כביסה', ar: 'غسيل' }), '🧺'),
+    };
 
     const n = 4 + (this.c.level >= 2 ? 1 : 0);
     const pool: { kind: Kind; emoji: string }[] = [
-      ...shuffle([...TOYS]).slice(0, n).map((emoji) => ({ kind: 'toy' as Kind, emoji })),
+      ...shuffle([...(KIDS ? TOYS : KITCHEN)]).slice(0, n).map((emoji) => ({ kind: 'toy' as Kind, emoji })),
       ...shuffle([...CLOTHES]).slice(0, n).map((emoji) => ({ kind: 'clothes' as Kind, emoji })),
     ];
     shuffle(pool);

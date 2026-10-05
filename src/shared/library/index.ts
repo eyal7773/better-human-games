@@ -81,6 +81,10 @@ const ADDRESS_GENDER: Record<Address, GenderTag | null> = { f: 'women', m: 'men'
 /** The home is described: from here on, content must fit it. */
 export const described = (p: Profile) => p.status === 'done' && p.household.length > 0;
 
+/** Kids (or grandkids) around — or a home not described yet, which gets everything. */
+export const kidsAround = (p: Profile = currentProfile) =>
+  !described(p) || p.household.some((t) => KIDS.includes(t) || t === 'grandparent');
+
 /** Can this player get this item at all? */
 export function eligible(m: Meta, p: Profile = currentProfile): boolean {
   if (m.gender && ADDRESS_GENDER[p.address] !== m.gender) return false;

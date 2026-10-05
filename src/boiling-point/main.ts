@@ -9,7 +9,7 @@ import { FX } from '../shared/fx';
 import { HUD } from './hud';
 import { save, persist } from './save';
 import { DILEMMAS } from './content';
-import { markSeen, query } from '../shared/library';
+import { kidsAround, markSeen, query } from '../shared/library';
 import { playRound, type PlayView, type RoundResult, type TaskKind } from './round';
 import { showSummary } from './summary';
 import { addZen, islandHref, wallet } from '../shared/zen';
@@ -406,7 +406,11 @@ function eveningEnd(results: RoundResult[], opened: string[]) {
     { class: 'screen night' },
     h('div', { class: 'night-sky', 'aria-hidden': 'true' }, ...Array.from({ length: 28 }, (_, i) => h('i', { style: { left: `${(i * 37) % 100}%`, top: `${(i * 53) % 60}%`, animationDelay: `${(i % 7) * 0.4}s` } }))),
     h('div', { class: 'night-clock' }, '20:30'),
-    h('p', { class: 'night-kicker' }, tr({ en: 'The kids are asleep', he: 'הילדים ישנים', ar: 'الأولاد نائمون' })),
+    h(
+      'p',
+      { class: 'night-kicker' },
+      kidsAround() ? tr({ en: 'The kids are asleep', he: 'הילדים ישנים', ar: 'الأولاد نائمون' }) : tr({ en: 'The house is quiet', he: 'הבית שקט', ar: 'البيت هادئ' }),
+    ),
     h('h1', { class: 'night-title' }, headline),
     h(
       'ol',

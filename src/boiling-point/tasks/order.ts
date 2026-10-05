@@ -2,11 +2,20 @@ import { h, clamp, pick, shuffle, rand, ease } from '../../shared/dom';
 import { vibrate } from '../../shared/haptics';
 import { type Task, type TaskCtx, toClient } from './types';
 import { tr } from '../../shared/i18n';
+import { kidsAround } from '../../shared/library';
 
-const RECIPES = [
+/** Daycare chores only in homes with kids; everyone else gets the chores of their own evening. */
+const KID_RECIPES = [
   { title: tr({ en: 'Make a sandwich for daycare', he: 'להכין כריך לגן', ar: 'تحضير سندويشة للروضة' }), items: ['🍞', '🧈', '🧀', '🥬', '🍅', '🥒'] },
-  { title: tr({ en: 'Set the table for dinner', he: 'לערוך שולחן לארוחת ערב', ar: 'تجهيز الطاولة للعشاء' }), items: ['🍽️', '🍴', '🥄', '🥛', '🍝', '🧂'] },
   { title: tr({ en: 'Pack the daycare bag', he: 'לארוז תיק לגן', ar: 'تجهيز حقيبة الروضة' }), items: ['🎒', '🥪', '💧', '🍎', '🧢', '🧥'] },
+];
+const ADULT_RECIPES = [
+  { title: tr({ en: 'Pack your bag for work', he: 'לארוז תיק לעבודה', ar: 'تجهيز حقيبة العمل' }), items: ['💼', '💻', '🔌', '🔑', '🥪', '💧'] },
+  { title: tr({ en: 'Make a salad', he: 'להכין סלט', ar: 'تحضير سلطة' }), items: ['🥬', '🍅', '🥒', '🫒', '🍋', '🧂'] },
+];
+const RECIPES = [
+  { title: tr({ en: 'Set the table for dinner', he: 'לערוך שולחן לארוחת ערב', ar: 'تجهيز الطاولة للعشاء' }), items: ['🍽️', '🍴', '🥄', '🥛', '🍝', '🧂'] },
+  ...(kidsAround() ? KID_RECIPES : ADULT_RECIPES),
 ];
 const DISTRACTORS = ['🍩', '🧃', '🍫', '🍭'];
 
