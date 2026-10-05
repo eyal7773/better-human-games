@@ -8,7 +8,7 @@ import { faceSVG, setFaceMood } from '../shared/face';
 import { avatarSVG } from '../shared/avatar';
 import { profile } from '../shared/profile';
 import { ANCHOR } from '../shared/anchors';
-import { bump } from '../shared/progress';
+import { bump, discover } from '../shared/progress';
 import {
   CUT_FEELING,
   LAND,
@@ -49,11 +49,12 @@ const T = {
   breathe: tr({ en: 'Breathe — slow time down', he: 'לנשום — להאט את הזמן', ar: 'تنفّسوا — أبطئوا الوقت' }),
   connection: tr({ en: 'Connection', he: 'חיבור', ar: 'التواصل' }),
   hint1: tr({ en: 'Swipe across the red words before they land.', he: 'החליקו על המילים האדומות לפני שהן נוחתות.', ar: 'اسحبوا عبر الكلمات الحمراء قبل أن تصل.' }),
-  hintBreath: tr({
-    en: 'Too fast? Tap 🌬️ to breathe — time slows down.',
-    he: 'מהר מדי? הקישו 🌬️ כדי לנשום — הזמן מאט.',
-    ar: 'سريع جدًا؟ اضغطوا 🌬️ لتتنفّسوا — يتباطأ الوقت.',
+  coach: tr({
+    en: 'Words flying too fast? Tap here to breathe — time slows down.',
+    he: 'המילים עפות מהר מדי? הקישו כאן כדי לנשום — הזמן מאט.',
+    ar: 'الكلمات تطير بسرعة؟ اضغطوا هنا لتتنفّسوا — يتباطأ الوقت.',
   }),
+  nudge: tr({ en: 'Too fast? Breathe', he: 'מהר מדי? נשמו', ar: 'سريع جدًا؟ تنفّسوا' }),
   hint2: tr({
     en: 'Green words are your feelings. Let them land!',
     he: 'המילים הירוקות הן הרגשות שלכם. תנו להן לנחות!',
@@ -183,7 +184,10 @@ async function play(level: Level | null) {
   const breathBtn = h('button', { class: 'wf-breath', type: 'button', 'aria-label': T.breathe }, breathRing, h('span', { 'aria-hidden': 'true' }, '🌬️'));
   const hint = h('p', { class: 'sh-hint wf-hint' });
   const streakEl = h('div', { class: 'wf-streak', 'aria-hidden': 'true' });
-  const root = h('div', { class: 'wf-play' }, canvas, meter, faceBox, reply, line, streakEl, me, breathBtn, hint);
+  // Teaching the breath: a one-time guided tap, then a nudge when a word hurts.
+  const coach = h('div', { class: 'wf-coach', hidden: true }, h('p', { class: 'wf-coach-tip' }, T.coach), h('span', { class: 'wf-coach-hand', 'aria-hidden': 'true' }, '👇'));
+  const nudge = h('div', { class: 'wf-nudge', 'aria-hidden': 'true' }, T.nudge);
+  const root = h('div', { class: 'wf-play' }, canvas, meter, faceBox, reply, line, streakEl, me, coach, nudge, breathBtn, hint);
   shell.stage.append(root);
 
   let W = 0;
@@ -211,6 +215,13 @@ async function play(level: Level | null) {
   let slowFor = 0;
   let cooldown = 0;
   const COOLDOWN = 9;
+  /** Learned the breath in some earlier game: no guided tap any more. */
+  const learned = shell.progress.album.includes('breath');
+  let coached = false;
+  /** Time stands still while the guided tap waits for the player. */
+  let frozen = false;
+  let breathed = false;
+  let nudgedAt = -Infinity;
   let over = false;
   let flyers: Flyer[] = [];
   let faceSvg: Element | null = null;
@@ -248,6 +259,14 @@ async function play(level: Level | null) {
   // --- the breath: slow motion, then a cooldown
   scope.on(breathBtn, 'click', () => {
     if (cooldown > 0 || over) return;
+    if (frozen) {
+      frozen = false;
+      coach.hidden = true;
+      root.classList.remove('coaching');
+    }
+    breathed = true;
+    nudge.classList.remove('show');
+    if (discover(shell.progress, 'breath')) shell.persist();
     slowFor = 3;
     cooldown = COOLDOWN;
     shell.audio.breath(false, 3);
@@ -348,6 +367,7 @@ async function play(level: Level | null) {
       flinch = 1;
       settle(f.idx, { text: f.text, cls: 'hit' });
       shell.fx.shake(faceBox, 10, 380);
+      nudgeBreath();
       shell.audio.tone({ f: 180, to: 90, type: 'sawtooth', d: 0.22, g: 0.14, lp: 1200 });
       shell.audio.noise({ d: 0.12, g: 0.25, type: 'lowpass', f: 700 });
       vibrate(40);
@@ -358,6 +378,29 @@ async function play(level: Level | null) {
       if (f.kind !== 'n') shell.fx.floatText(r.left + r.width / 2 + rand(-30, 30), r.bottom, '❤', 'wf-heart');
       shell.audio.tone({ f: f.kind === 'n' ? 520 : 780, d: 0.12, g: 0.06, verb: 0.2 });
     }
+  }
+
+  scope.on(nudge, 'animationend', () => nudge.classList.remove('show'));
+  /** A hurtful word just landed and the breath sat unused: point at it, right now. */
+  function nudgeBreath() {
+    const now = performance.now() / 1000;
+    if (breathed || cooldown > 0 || slowFor > 0 || now - nudgedAt < 6) return;
+    nudgedAt = now;
+    nudge.classList.remove('show');
+    void nudge.offsetWidth;
+    nudge.classList.add('show');
+    if (!reducedMotion()) breathBtn.animate([{ scale: '1' }, { scale: '1.25' }, { scale: '0.95' }, { scale: '1.1' }, { scale: '1' }], { duration: 700, easing: 'ease-out' });
+  }
+  /** The first red word of level 1 freezes mid-air until the player breathes once. */
+  function startCoach() {
+    coached = true;
+    frozen = true;
+    coach.style.setProperty('--cx', isRTL ? '52px' : 'calc(100% - 52px)');
+    coach.hidden = false;
+    root.classList.add('coaching');
+    last = null;
+    shell.announce(T.coach);
+    shell.audio.tone({ f: 660, d: 0.18, g: 0.06, verb: 0.3 });
   }
 
   // --- one sentence at a time
@@ -407,21 +450,22 @@ async function play(level: Level | null) {
     let left = sec;
     while (left > 0 && scope.alive) {
       await scope.sleep(50);
-      left -= 0.05 * (slowFor > 0 ? 0.35 : 1);
+      if (!frozen) left -= 0.05 * (slowFor > 0 ? 0.35 : 1);
     }
   };
 
   // --- frame loop
   scope.loop((dt) => {
-    const scale = slowFor > 0 ? 0.35 : 1;
-    if (slowFor > 0) {
+    const scale = frozen ? 0 : slowFor > 0 ? 0.35 : 1;
+    if (slowFor > 0 && !frozen) {
       slowFor -= dt;
       if (slowFor <= 0) root.classList.remove('slow');
     }
-    cooldown = Math.max(0, cooldown - dt);
+    if (!frozen) cooldown = Math.max(0, cooldown - dt);
     breathRing.style.setProperty('--p', String(1 - cooldown / COOLDOWN));
     breathBtn.classList.toggle('ready', cooldown === 0);
     const gdt = dt * scale;
+    if (lvlN === 1 && !learned && !coached && flyers.some((f) => f.kind === 't' && f.t >= 0.4)) startCoach();
     for (const f of [...flyers]) {
       f.t += gdt / f.dur;
       const e = f.t;
@@ -535,8 +579,7 @@ async function play(level: Level | null) {
       }
     } else if (tally.hits) say(pick(REPLY.hurt), 'bad');
     else say(pick(REPLY.muddled), '');
-    if (lvlN === 1 && sentenceIndex === 0) hint.textContent = T.hintBreath;
-    else if (sentenceIndex >= 1) hint.textContent = '';
+    if (sentenceIndex >= 1) hint.textContent = '';
     sentenceIndex++;
     await scope.sleep(1500);
   }
