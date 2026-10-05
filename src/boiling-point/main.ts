@@ -8,8 +8,8 @@ import { kettleSVG } from '../shared/kettle';
 import { FX } from '../shared/fx';
 import { HUD } from './hud';
 import { save, persist } from './save';
-import { DILEMMAS, type Dilemma } from './content';
-import { allowed, fits, weight, weightedShuffle } from '../shared/profile';
+import { DILEMMAS } from './content';
+import { markSeen, query } from '../shared/library';
 import { playRound, type PlayView, type RoundResult, type TaskKind } from './round';
 import { showSummary } from './summary';
 import { addZen, islandHref, wallet } from '../shared/zen';
@@ -268,22 +268,10 @@ function island() {
 
 const CLOCKS = ['18:30', '19:15', '20:00'];
 
-/**
- * Prefer fresh dilemmas that fit the player's home (hot topics weighted up),
- * then fitting ones seen lately, then any that are allowed at all.
- */
+/** Dilemmas that fit the player's home, fresh ones first (see the content library). */
 function pickDilemmas(n: number) {
-  const recent = (d: Dilemma) => save.recentDilemmas.includes(d.id);
-  const allowedAll = DILEMMAS.filter((d) => allowed(d.tags));
-  const fitting = allowedAll.filter((d) => fits(d.tags));
-  const w = (d: Dilemma) => weight(d.tags);
-  const tiers = [
-    fitting.filter((d) => !recent(d)),
-    fitting.filter(recent),
-    allowedAll.filter((d) => !fitting.includes(d)),
-  ];
-  const chosen = tiers.flatMap((tier) => weightedShuffle(tier, w)).slice(0, n);
-  save.recentDilemmas = [...save.recentDilemmas, ...chosen.map((d) => d.id)].slice(-8);
+  const chosen = query(DILEMMAS, { count: n });
+  markSeen(chosen.map((d) => d.id));
   return chosen;
 }
 

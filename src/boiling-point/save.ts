@@ -10,7 +10,6 @@ export interface Save {
   muted: boolean;
   choiceSeconds: number;
   seenHowTo: boolean;
-  recentDilemmas: string[];
 }
 
 // The zen wallet, growth, real pauses and the old island's items used to be
@@ -27,7 +26,6 @@ const DEFAULTS: Save = {
   muted: false,
   choiceSeconds: 15,
   seenHowTo: false,
-  recentDilemmas: [],
 };
 
 export const save: Save = load(KEY, DEFAULTS);

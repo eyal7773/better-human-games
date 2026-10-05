@@ -2,20 +2,16 @@ import { describe, expect, it } from 'vitest';
 import { en } from './content/en';
 import { he } from './content/he';
 import { ar } from './content/ar';
-import { GENDER_TAGS, HOUSEHOLD_TAGS } from '../shared/tags';
+import { DILEMMA_META } from './content/meta';
+import { checkPool, PERSONAS } from '../shared/library/classify';
+import { eligible } from '../shared/library';
 
 const langs = { en, he, ar };
 
 describe('dilemmas', () => {
-  it('have the same ids and tags in every language', () => {
-    const shape = (c: typeof en) => c.dilemmas.map((d) => ({ id: d.id, tags: d.tags }));
-    expect(shape(he)).toEqual(shape(en));
-    expect(shape(ar)).toEqual(shape(en));
-  });
-
-  it('have unique ids', () => {
-    const ids = en.dilemmas.map((d) => d.id);
-    expect(new Set(ids).size).toBe(ids.length);
+  it('have the same ids, in the same order, in every language and in the meta', () => {
+    const ids = DILEMMA_META.map((m) => m.id);
+    for (const c of Object.values(langs)) expect(c.dilemmas.map((d) => d.id)).toEqual(ids);
   });
 
   for (const [lang, content] of Object.entries(langs)) {
@@ -27,11 +23,24 @@ describe('dilemmas', () => {
     });
   }
 
-  it('each have an audience or a gender, and a topic', () => {
-    const audience = [...HOUSEHOLD_TAGS, ...GENDER_TAGS] as string[];
-    for (const d of en.dilemmas) {
-      expect(d.tags.some((t) => audience.includes(t)), d.id).toBe(true);
-      expect(d.tags.some((t) => !audience.includes(t)), d.id).toBe(true);
+  it('are classified so they only reach the homes they belong to', () => {
+    const texts = (id: string) =>
+      Object.values(langs).flatMap((c) => {
+        const d = c.dilemmas.find((x) => x.id === id)!;
+        return [d.situation, d.why, ...d.options.map((o) => o.text)];
+      });
+    expect(checkPool(DILEMMA_META.map((meta) => ({ meta, texts: texts(meta.id) })))).toEqual([]);
+  });
+
+  it('has enough for every home: three evenings without a repeat', () => {
+    const short: string[] = [];
+    for (const [name, p] of Object.entries(PERSONAS)) {
+      const n = DILEMMA_META.filter((m) => eligible(m, p)).length;
+      if (n < MIN_PER_HOME) short.push(`${name}: ${n}`);
     }
+    expect(short).toEqual([]);
   });
 });
+
+/** Three rounds an evening; enough that a home sees fresh ones for a while (spec 6). */
+const MIN_PER_HOME = 25;

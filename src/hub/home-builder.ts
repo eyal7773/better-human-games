@@ -29,8 +29,13 @@ const HOUSEHOLD: { tag: HouseholdTag; icon: string; label: string; sub?: string 
   { tag: 'adult-child', icon: '👵', label: tr({ en: 'An ageing parent I look after', he: 'הורה מבוגר שבטיפולי', ar: 'والد مسنّ أعتني به' }) },
   { tag: 'grandparent', icon: '🧸', label: tr({ en: 'Grandkids', he: 'נכדים', ar: 'أحفاد' }) },
   { tag: 'no-kids', icon: '🌿', label: tr({ en: 'No kids', he: 'בלי ילדים', ar: 'بلا أطفال' }) },
+  { tag: 'roommates', icon: '🛋️', label: tr({ en: 'Roommates', he: 'שותפים לדירה', ar: 'شركاء في السكن' }) },
+  { tag: 'lives-alone', icon: '🏠', label: tr({ en: 'I live alone', he: 'אני גר/ה לבד', ar: 'أعيش وحدي' }) },
 ];
 const KID_TAGS: HouseholdTag[] = ['parent-young-child', 'parent-school-age', 'parent-teen', 'single-parent'];
+const KID_TOPICS: TopicTag[] = ['bedtime', 'morning-rush', 'homework', 'siblings'];
+/** Living alone rules out everyone who'd live with you. */
+const LIVE_WITH: HouseholdTag[] = [...KID_TAGS, 'partner', 'roommates'];
 
 const HOT: { tag: TopicTag; icon: string; label: string }[] = [
   { tag: 'mess', icon: '🧦', label: tr({ en: 'Mess', he: 'בלגן', ar: 'فوضى' }) },
@@ -45,6 +50,9 @@ const HOT: { tag: TopicTag; icon: string; label: string }[] = [
   { tag: 'siblings', icon: '🤼', label: tr({ en: 'Sibling fights', he: 'ריבים בין אחים', ar: 'شجار الإخوة' }) },
   { tag: 'in-laws', icon: '🏡', label: tr({ en: 'Extended family', he: 'המשפחה המורחבת', ar: 'العائلة الكبيرة' }) },
   { tag: 'work-life', icon: '💼', label: tr({ en: 'Work vs. home', he: 'עבודה מול בית', ar: 'العمل والبيت' }) },
+  { tag: 'work', icon: '🧑‍💼', label: tr({ en: 'Work', he: 'עבודה', ar: 'العمل' }) },
+  { tag: 'road', icon: '🚗', label: tr({ en: 'The road', he: 'כביש', ar: 'الطريق' }) },
+  { tag: 'neighbors', icon: '🏢', label: tr({ en: 'Neighbors', he: 'שכנים', ar: 'الجيران' }) },
 ];
 
 const COLOR_NAMES = [
@@ -262,7 +270,7 @@ export function openHomeBuilder(opts: { edit?: boolean; onChange?: () => void } 
     if (loadCatchMe().finished) residents.append(h('span', { class: 'hb-pesky', title: tr({ en: 'Pesky', he: 'ציקי', ar: 'زِنّو' }), html: buddySVG() }));
     for (const t of draft.household) {
       const item = HOUSEHOLD.find((x) => x.tag === t);
-      if (item && t !== 'no-kids' && t !== 'single-parent') residents.append(h('span', { class: 'hb-res', 'data-tag': t }, item.icon));
+      if (item && t !== 'no-kids' && t !== 'single-parent' && t !== 'lives-alone') residents.append(h('span', { class: 'hb-res', 'data-tag': t }, item.icon));
     }
     return h('div', { class: 'hb-house', 'aria-hidden': 'true' }, h('div', { class: 'hb-roof' }), residents);
   }
@@ -293,6 +301,8 @@ export function openHomeBuilder(opts: { edit?: boolean; onChange?: () => void } 
             // "No kids" and the kid tiles can't both be true.
             if (item.tag === 'no-kids') set = set.filter((t) => !KID_TAGS.includes(t));
             if (KID_TAGS.includes(item.tag)) set = set.filter((t) => t !== 'no-kids');
+            if (item.tag === 'lives-alone') set = set.filter((t) => !LIVE_WITH.includes(t));
+            if (LIVE_WITH.includes(item.tag)) set = set.filter((t) => t !== 'lives-alone');
             set.push(item.tag);
           }
           draft.household = set;
@@ -316,6 +326,10 @@ export function openHomeBuilder(opts: { edit?: boolean; onChange?: () => void } 
 
   // ---------------------------------------------------------------- 3 hot buttons
   function hotButtons() {
+    // Kid topics only for homes with kids or grandkids (or not described yet).
+    const kidsAround = !draft.household.length || draft.household.some((t) => KID_TAGS.includes(t) || t === 'grandparent');
+    const offered = HOT.filter((item) => kidsAround || !KID_TOPICS.includes(item.tag));
+    draft.hot = draft.hot.filter((t) => offered.some((x) => x.tag === t));
     const door = h('div', { class: 'hb-door', 'aria-hidden': 'true' });
     const count = h('p', { class: 'hb-count', 'aria-live': 'polite' });
     const paintDoor = (added?: TopicTag) => {
@@ -328,7 +342,7 @@ export function openHomeBuilder(opts: { edit?: boolean; onChange?: () => void } 
     const chips = h(
       'div',
       { class: 'hb-chips', role: 'group', 'aria-labelledby': 'hb-title' },
-      ...HOT.map((item) => {
+      ...offered.map((item) => {
         const b = h('button', { class: 'hb-chip', type: 'button', 'aria-pressed': String(draft.hot.includes(item.tag)) }, h('span', {}, item.icon), item.label);
         b.addEventListener('click', () => {
           tap();

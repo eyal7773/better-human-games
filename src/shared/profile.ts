@@ -1,5 +1,5 @@
 import { load, store } from './storage';
-import { GENDER_TAGS, HOUSEHOLD_TAGS, type GenderTag, type HouseholdTag, type Tag, type TopicTag } from './tags';
+import { HOUSEHOLD_TAGS, type HouseholdTag, type TopicTag } from './tags';
 
 /**
  * Who the player is, site-wide. Set in the "My home" character builder on the
@@ -62,6 +62,21 @@ export function heSelf(m: string, f: string, p: Profile = profile) {
   return p.address === 'f' ? f : p.address === 'm' ? m : `${m}/ה`;
 }
 
+/**
+ * Resolves the player's grammatical gender in content text: "{m|f}" or
+ * "{m|f|x}". Without a choice it's the slash form ("מרגיש/ה"), unless an
+ * explicit neutral form is given.
+ */
+export function agree(text: string, p: Profile = profile) {
+  return text.replace(/\{([^{}|]*)\|([^{}|]*)(?:\|([^{}|]*))?\}/g, (_, m: string, f: string, x?: string) => {
+    if (m === f) return m;
+    if (p.address === 'm') return m;
+    if (p.address === 'f') return f;
+    if (x !== undefined) return x;
+    return f === `${m}ה` ? `${m}/ה` : `${m}/${f}`;
+  });
+}
+
 export function saveProfile() {
   store(KEY, profile);
 }
@@ -70,37 +85,6 @@ export function saveProfile() {
 export function resetProfile() {
   Object.assign(profile, structuredClone(DEFAULTS), { status: 'skipped', rewarded: profile.rewarded });
   saveProfile();
-}
-
-const ADDRESS_GENDER: Record<Address, GenderTag | null> = { f: 'women', m: 'men', x: null };
-
-const isGender = (t: Tag): t is GenderTag => GENDER_TAGS.includes(t as GenderTag);
-const isHousehold = (t: Tag): t is HouseholdTag => HOUSEHOLD_TAGS.includes(t as HouseholdTag);
-
-/**
- * Gender-specific content only goes to players who chose that form of
- * address — with or without a profile. It is never an acceptable fallback.
- */
-export function allowed(tags: readonly Tag[], p: Profile = profile): boolean {
-  const gender = tags.filter(isGender);
-  const mine = ADDRESS_GENDER[p.address];
-  return !gender.length || (mine !== null && gender.includes(mine));
-}
-
-/**
- * Whether content suits the player's home: it shares an audience with it, has
- * no audience at all, or the player hasn't described their home.
- */
-export function fits(tags: readonly Tag[], p: Profile = profile): boolean {
-  if (!allowed(tags, p)) return false;
-  if (p.status !== 'done' || !p.household.length) return true;
-  const audience = tags.filter(isHousehold);
-  return !audience.length || audience.some((t) => p.household.includes(t));
-}
-
-/** Hot-button topics come up twice as often. */
-export function weight(tags: readonly Tag[], p: Profile = profile): number {
-  return tags.some((t) => p.hot.includes(t as TopicTag)) ? 2 : 1;
 }
 
 /** Random order where heavier items tend to come first (weighted sampling). */

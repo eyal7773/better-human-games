@@ -4,7 +4,6 @@ export const en: Content = {
   dilemmas: [
     {
       id: 'juice',
-      tags: ['parent-young-child', 'parent-school-age', 'mess'],
       situation: 'Grape juice just spilled all over the couch you cleaned this morning.',
       options: [
         { text: 'Oops, it happens. Let’s grab a towel and clean it up together.', v: 'best' },
@@ -16,7 +15,6 @@ export const en: Content = {
     },
     {
       id: 'remote',
-      tags: ['parent-young-child', 'parent-school-age', 'siblings', 'work-life', 'noise'],
       situation: 'The kids have been fighting over the remote for ten minutes, and you’re in the middle of an important call.',
       options: [
         { text: 'Finish the call, then help them agree on turns.', v: 'best' },
@@ -28,7 +26,6 @@ export const en: Content = {
     },
     {
       id: 'milk',
-      tags: ['partner', 'household', 'no-kids'],
       situation: 'Your partner forgot to buy milk again, and there’s nothing for breakfast tomorrow.',
       options: [
         { text: '“This frustrates me. Let’s find a way so it doesn’t happen again.”', v: 'best' },
@@ -40,7 +37,6 @@ export const en: Content = {
     },
     {
       id: 'dressing',
-      tags: ['parent-young-child', 'morning-rush'],
       situation: 'Your little one refuses to get dressed, and you’re already late for daycare.',
       options: [
         { text: '“Do you want the red shirt or the blue one?”', v: 'best' },
@@ -52,7 +48,6 @@ export const en: Content = {
     },
     {
       id: 'drum',
-      tags: ['parent-young-child', 'siblings', 'noise', 'bedtime'],
       situation: 'The baby just fell asleep, and the big one starts drumming on a pot.',
       options: [
         { text: 'Crouch to his level and whisper: “Let’s drum outside.”', v: 'best' },
@@ -64,7 +59,6 @@ export const en: Content = {
     },
     {
       id: 'room',
-      tags: ['parent-school-age', 'parent-teen', 'chores', 'mess'],
       situation: 'You’ve asked three times for the room to be tidied. Nothing happened.',
       options: [
         { text: '“Let’s tidy together for five minutes. I’m setting a timer.”', v: 'best' },
@@ -76,7 +70,6 @@ export const en: Content = {
     },
     {
       id: 'dinner',
-      tags: ['parent-young-child', 'parent-school-age', 'mealtime'],
       situation: 'You cooked for an hour. The first thing said at the table: “Yuck, I’m not eating that.”',
       options: [
         { text: '“You don’t have to like it. One bite to taste, and there’s bread if you’re hungry.”', v: 'best' },
@@ -88,7 +81,6 @@ export const en: Content = {
     },
     {
       id: 'homework',
-      tags: ['parent-school-age', 'homework'],
       situation: 'Half an hour on one math sheet, and he “doesn’t get any of it”.',
       options: [
         { text: '“Let’s take a five-minute break and come back to one problem.”', v: 'best' },
@@ -100,7 +92,6 @@ export const en: Content = {
     },
     {
       id: 'shoes',
-      tags: ['parent-school-age', 'parent-teen', 'partner', 'household', 'mess'],
       situation: 'Someone left shoes in the doorway. You tripped over them. Again.',
       options: [
         { text: '“Ouch. Let’s find the shoes a permanent spot.”', v: 'best' },
@@ -112,7 +103,6 @@ export const en: Content = {
     },
     {
       id: 'fight',
-      tags: ['parent-young-child', 'parent-school-age', 'siblings', 'noise'],
       situation: '“He hit me!” — “She started it!” — both shouting at once.',
       options: [
         { text: '“I hear that you’re both angry. Each of you tells it in turn.”', v: 'best' },
@@ -124,7 +114,6 @@ export const en: Content = {
     },
     {
       id: 'phone',
-      tags: ['parent-young-child', 'parent-school-age', 'parent-teen', 'partner', 'work-life', 'mealtime'],
       situation: 'The phone rings for the fifth time in the middle of dinner. Work, again.',
       options: [
         { text: 'Silence it, say “This is our time now,” and get back to it later.', v: 'best' },
@@ -136,7 +125,6 @@ export const en: Content = {
     },
     {
       id: 'bedtime',
-      tags: ['parent-young-child', 'bedtime'],
       situation: '“I’m thirsty.” “I need to pee.” “One more story!” — the seventh time after lights out.',
       options: [
         { text: '“I love you. Now it’s sleep time. I’ll check on you in five minutes.”', v: 'best' },
@@ -148,7 +136,6 @@ export const en: Content = {
     },
     {
       id: 'eyeroll',
-      tags: ['parent-teen', 'chores', 'respect'],
       situation: 'You ask for help unloading the dishwasher. An eye roll: “Whatever.”',
       options: [
         { text: '“I saw that. It still needs doing — now or after dinner?”', v: 'best' },
@@ -160,7 +147,6 @@ export const en: Content = {
     },
     {
       id: 'curfew',
-      tags: ['parent-teen', 'independence'],
       situation: 'Forty minutes past curfew. Your teen isn’t answering. Then the door opens.',
       options: [
         { text: '“I was scared. I’m glad you’re home. We’ll talk tomorrow.”', v: 'best' },
@@ -172,7 +158,6 @@ export const en: Content = {
     },
     {
       id: 'latephone',
-      tags: ['parent-teen', 'screens', 'bedtime'],
       situation: '1 a.m., school tomorrow, and the glow of a phone under the blanket.',
       options: [
         { text: '“The phone sleeps in the kitchen tonight. Tomorrow we set a time together.”', v: 'best' },
@@ -184,7 +169,6 @@ export const en: Content = {
     },
     {
       id: 'slam',
-      tags: ['parent-teen', 'respect', 'connection'],
       situation: '“How was your day?” — “Fine.” The bedroom door slams.',
       options: [
         { text: 'Let it go for now, and knock later with a snack.', v: 'best' },
@@ -196,7 +180,6 @@ export const en: Content = {
     },
     {
       id: 'hiddentest',
-      tags: ['parent-school-age', 'parent-teen', 'homework', 'honesty'],
       situation: 'You find a failed test crumpled at the bottom of the school bag.',
       options: [
         { text: '“Looks like this one was hard to show me. What happened?”', v: 'best' },
@@ -208,7 +191,6 @@ export const en: Content = {
     },
     {
       id: 'ride',
-      tags: ['parent-teen', 'independence', 'work-life'],
       situation: 'Ten minutes before an important meeting: “Can you drive me to a friend’s? Like, now?”',
       options: [
         { text: '“Not now. I can at six, or there’s the bus.”', v: 'best' },
@@ -220,7 +202,6 @@ export const en: Content = {
     },
     {
       id: 'tablet',
-      tags: ['parent-young-child', 'parent-school-age', 'screens'],
       situation: 'Screen time is over. You take the tablet — and the screaming starts.',
       options: [
         { text: '“You’re mad it’s over. I get it. It’s still over.”', v: 'best' },
@@ -232,7 +213,6 @@ export const en: Content = {
     },
     {
       id: 'gymclothes',
-      tags: ['parent-school-age', 'morning-rush', 'work-life'],
       situation: 'The school calls: gym clothes forgotten. Again. And you’re already at work.',
       options: [
         { text: '“I can’t come. Tonight we’ll make a checklist for the bag together.”', v: 'best' },
@@ -244,7 +224,6 @@ export const en: Content = {
     },
     {
       id: 'toothbrush',
-      tags: ['parent-young-child', 'parent-school-age', 'honesty', 'bedtime'],
       situation: '“I brushed my teeth!” The toothbrush is bone dry.',
       options: [
         { text: '“Hmm, this brush is dry. Let’s go do it — I’ll time you.”', v: 'best' },
@@ -256,7 +235,6 @@ export const en: Content = {
     },
     {
       id: 'checkout',
-      tags: ['parent-young-child', 'public'],
       situation: 'Checkout line, candy at eye level. Your child throws themselves on the floor, screaming.',
       options: [
         { text: 'Kneel, stay close and wait: “You really wanted it.”', v: 'best' },
@@ -268,7 +246,6 @@ export const en: Content = {
     },
     {
       id: 'playground',
-      tags: ['parent-young-child', 'public'],
       situation: 'At the playground your kid pushes another child. The other parent glares at you.',
       options: [
         { text: 'Check on the other child, then to yours: “Pushing hurts. Let’s take a break.”', v: 'best' },
@@ -280,7 +257,6 @@ export const en: Content = {
     },
     {
       id: 'nightwake',
-      tags: ['parent-young-child', 'bedtime'],
       situation: '3 a.m. The third time tonight: “I can’t sleep…”',
       options: [
         { text: 'Walk them back, a short hug: “Night is for sleeping. I’m right next door.”', v: 'best' },
@@ -292,7 +268,6 @@ export const en: Content = {
     },
     {
       id: 'dishes',
-      tags: ['partner', 'chores', 'no-kids'],
       situation: 'You asked this morning. The sink is still full, and your partner’s on the couch.',
       options: [
         { text: '“I’m wiped out. Can you do the dishes before the show?”', v: 'best' },
@@ -304,7 +279,6 @@ export const en: Content = {
     },
     {
       id: 'scrolling',
-      tags: ['partner', 'connection', 'screens', 'no-kids'],
       situation: 'You’re telling your partner about a hard day. They’re scrolling their phone.',
       options: [
         { text: '“Five minutes, just me? Can the phone wait?”', v: 'best' },
@@ -316,7 +290,6 @@ export const en: Content = {
     },
     {
       id: 'latehome',
-      tags: ['partner', 'mealtime', 'work-life', 'no-kids'],
       situation: 'Dinner’s been on the table for an hour. Your partner walks in — no call, no text.',
       options: [
         { text: '“I was worried, and the food went cold. Next time, just text?”', v: 'best' },
@@ -328,7 +301,6 @@ export const en: Content = {
     },
     {
       id: 'purchase',
-      tags: ['partner', 'money', 'no-kids'],
       situation: 'A big new charge on the card. Your partner didn’t mention it.',
       options: [
         { text: '“That gave me a shock. Can we agree on an amount we check first?”', v: 'best' },
@@ -340,7 +312,6 @@ export const en: Content = {
     },
     {
       id: 'overrule',
-      tags: ['partner', 'parent-young-child', 'parent-school-age', 'respect'],
       situation: 'You said no dessert. Your partner, in front of the kids: “Oh, let them have some.”',
       options: [
         { text: 'Later, privately: “In front of the kids, we’re a team. Okay?”', v: 'best' },
@@ -352,7 +323,6 @@ export const en: Content = {
     },
     {
       id: 'mentalload',
-      tags: ['women', 'partner', 'mental-load'],
       situation: '“Just tell me what needs doing and I’ll help!” — while you’re tracking everything in your head.',
       options: [
         { text: '“I don’t need a helper. Take the whole school thing — start to finish.”', v: 'best' },
@@ -364,7 +334,6 @@ export const en: Content = {
     },
     {
       id: 'formdeadline',
-      tags: ['women', 'partner', 'mental-load', 'parent-school-age'],
       situation: 'The school form deadline has passed. Your partner: “Why didn’t you remind me?”',
       options: [
         { text: '“I’m not the reminder. Let’s really split who owns what.”', v: 'best' },
@@ -376,7 +345,6 @@ export const en: Content = {
     },
     {
       id: 'babysitting',
-      tags: ['men', 'parent-young-child', 'respect'],
       situation: 'Out alone with the kids, a neighbor grins: “Babysitting today? Where’s Mom?”',
       options: [
         { text: 'Smile: “Nope, just parenting. We’re off to the park.”', v: 'best' },
@@ -388,7 +356,6 @@ export const en: Content = {
     },
     {
       id: 'badday',
-      tags: ['men', 'work-life', 'mess'],
       situation: 'Your boss humiliated you today. At home, one toy on the floor — and you’re about to blow.',
       options: [
         { text: 'Stop at the door: “Rough day. Give me ten minutes, then I’m all yours.”', v: 'best' },
@@ -400,7 +367,6 @@ export const en: Content = {
     },
     {
       id: 'samequestion',
-      tags: ['adult-child', 'caregiving', 'health', 'no-kids'],
       situation: 'Your mother asks what day it is — for the fourth time this hour.',
       options: [
         { text: 'Answer gently, and write it big on a board on the fridge.', v: 'best' },
@@ -412,7 +378,6 @@ export const en: Content = {
     },
     {
       id: 'carkeys',
-      tags: ['adult-child', 'caregiving', 'health', 'independence', 'no-kids'],
       situation: 'Your father scraped the car again, and still insists he’s “driving just fine”.',
       options: [
         { text: '“Dad, this scares me. Let’s go for a driving check together.”', v: 'best' },
@@ -424,7 +389,6 @@ export const en: Content = {
     },
     {
       id: 'homeaide',
-      tags: ['adult-child', 'caregiving', 'no-kids'],
       situation: 'You finally found a home aide. Your mother sends her away on day one.',
       options: [
         { text: '“You want to manage on your own. What would make her help feel okay?”', v: 'best' },
@@ -436,7 +400,6 @@ export const en: Content = {
     },
     {
       id: 'brotherturn',
-      tags: ['adult-child', 'siblings', 'caregiving', 'no-kids'],
       situation: 'Your brother cancels his turn with Dad again: “Work is crazy.” It’s all on you. Again.',
       options: [
         { text: '“I’m running on empty. Can you take Sundays, or chip in for help?”', v: 'best' },
@@ -448,7 +411,6 @@ export const en: Content = {
     },
     {
       id: 'momcomment',
-      tags: ['adult-child', 'respect', 'mess'],
       situation: 'Your mother, in front of the kids: “How can you live in such a mess?”',
       options: [
         { text: '“Mom, that stings in front of them. Let’s talk later.”', v: 'best' },
@@ -460,7 +422,6 @@ export const en: Content = {
     },
     {
       id: 'techcall',
-      tags: ['adult-child', 'caregiving', 'work-life', 'no-kids'],
       situation: 'Mid-deadline, Dad calls for the fifth time: “The phone’s broken again.”',
       options: [
         { text: '“Not now. Seven o’clock, video call, we’ll fix it together.”', v: 'best' },
@@ -472,7 +433,6 @@ export const en: Content = {
     },
     {
       id: 'grandmasweets',
-      tags: ['parent-young-child', 'in-laws', 'mealtime'],
       situation: 'You said no sweets before dinner. Grandma, with a wink: “Our little secret.”',
       options: [
         { text: 'Later, quietly: “I know you love spoiling them. Sweets after dinner, okay?”', v: 'best' },
@@ -484,7 +444,6 @@ export const en: Content = {
     },
     {
       id: 'inmyday',
-      tags: ['parent-young-child', 'in-laws', 'respect'],
       situation: 'Your mother-in-law, watching you soothe the baby: “In my day, we let them cry.”',
       options: [
         { text: '“A lot has changed. This is what works for us.”', v: 'best' },
@@ -496,7 +455,6 @@ export const en: Content = {
     },
     {
       id: 'grandadvice',
-      tags: ['grandparent', 'respect', 'in-laws'],
       situation: 'You gently suggest a jacket for your grandchild. Your son snaps: “I know what I’m doing!”',
       options: [
         { text: '“You’re right, they’re your kids. Done.”', v: 'best' },
@@ -508,7 +466,6 @@ export const en: Content = {
     },
     {
       id: 'grandbedtime',
-      tags: ['grandparent', 'bedtime'],
       situation: 'Babysitting the grandkids. Bedtime. “Mom lets us stay up till ten!”',
       options: [
         { text: '“Nice try. At Grandma and Grandpa’s, it’s bed at eight — with a story.”', v: 'best' },
@@ -520,7 +477,6 @@ export const en: Content = {
     },
     {
       id: 'handoff',
-      tags: ['single-parent', 'parent-young-child', 'parent-school-age', 'bedtime'],
       situation: 'The kids come back from their other parent two hours late, overtired and wired.',
       options: [
         { text: 'Settle the kids first; later, text: “Next time, can we stick to six?”', v: 'best' },
@@ -532,7 +488,6 @@ export const en: Content = {
     },
     {
       id: 'nobackup',
-      tags: ['single-parent', 'parent-young-child', 'health', 'work-life'],
       situation: 'Your little one is sick, work needs you, and there’s no one to hand over to.',
       options: [
         { text: '“I’m allowed to ask for help.” Text a friend and your manager.', v: 'best' },
@@ -541,6 +496,534 @@ export const en: Content = {
         { text: '“Great. Just great. As always, it’s all on me.”', v: 'bad' },
       ],
       why: 'Anger often hides exhaustion — reaching out for help is strength, not failure.',
+    },
+    {
+      id: 'credit',
+      situation: 'In the meeting, a coworker presents your idea as their own. Everyone nods.',
+      options: [
+        { text: 'After the meeting, privately: “That was my idea. Next time, let’s present it together.”', v: 'best' },
+        { text: 'Add in the meeting: “Glad you liked the idea I sent on Monday.”', v: 'ok' },
+        { text: 'Interrupt: “Excuse me, that’s MY idea!”', v: 'bad' },
+        { text: 'Say nothing and complain about them to everyone for a week.', v: 'bad' },
+      ],
+      why: 'A calm, private boundary protects your work without turning the meeting into a fight.',
+    },
+    {
+      id: 'lastminute',
+      situation: '5:55 p.m. Your boss drops a big task on your desk: “Need it first thing tomorrow.”',
+      options: [
+        { text: '“I can have the main part by 10 tomorrow. Is that enough, or what can wait?”', v: 'best' },
+        { text: 'Stay an hour, do what you can, and write what’s left.', v: 'ok' },
+        { text: 'Roll your eyes: “Seriously? Again?”', v: 'bad' },
+        { text: 'Say “sure”, stay till midnight, and fume all week.', v: 'bad' },
+      ],
+      why: 'Naming what’s realistic and asking what matters most is a boundary, not a refusal.',
+    },
+    {
+      id: 'replyall',
+      situation: 'A coworker corrects a small mistake of yours — in a reply-all to the whole team.',
+      options: [
+        { text: 'Reply only to them: “Thanks for the catch. Next time, could you tell me directly first?”', v: 'best' },
+        { text: 'Fix it, reply-all “Thanks, fixed,” and let it go.', v: 'ok' },
+        { text: 'Reply-all with a list of THEIR mistakes.', v: 'bad' },
+        { text: 'Stop talking to them, without saying why.', v: 'bad' },
+      ],
+      why: 'Thanking for the fix and asking for a direct channel keeps both your dignity and the relationship.',
+    },
+    {
+      id: 'meetinglate',
+      situation: 'The person who called the meeting is twenty minutes late. Again. Everyone’s waiting.',
+      options: [
+        { text: 'Use the time for your own work, and later suggest: “Let’s start on time, even without whoever’s missing.”', v: 'best' },
+        { text: 'Wait ten minutes, then leave a message and go.', v: 'ok' },
+        { text: 'When they walk in: “Oh, so nice of you to join us.”', v: 'bad' },
+        { text: 'Tap the table loudly and sigh until they arrive.', v: 'bad' },
+      ],
+      why: 'Waiting doesn’t have to be wasted, and a suggestion for the future helps more than sarcasm now.',
+    },
+    {
+      id: 'interrupt',
+      situation: 'For the third time in this meeting, the same coworker cuts you off mid-sentence.',
+      options: [
+        { text: 'Calmly, without stopping: “One second, I’d like to finish — then I’d love to hear you.”', v: 'best' },
+        { text: 'Let it go now, and mention it to them after the meeting.', v: 'ok' },
+        { text: 'Raise your voice over theirs until they stop.', v: 'bad' },
+        { text: 'Go quiet for the rest of the meeting, fuming.', v: 'bad' },
+      ],
+      why: 'A calm sentence in the moment keeps your space without making it a contest.',
+    },
+    {
+      id: 'bossyell',
+      situation: 'Your boss raises their voice at you in front of the whole team over a mistake that wasn’t yours.',
+      options: [
+        { text: '“I hear it’s urgent. Let’s talk in five minutes, just the two of us — I’ll bring the details.”', v: 'best' },
+        { text: 'Say nothing now, and write a short, factual email later.', v: 'ok' },
+        { text: 'Shout back: “Don’t you dare talk to me like that!”', v: 'bad' },
+        { text: 'Apologize for something you didn’t do, just to make it stop.', v: 'bad' },
+      ],
+      why: 'Moving it to a private, calm conversation protects your dignity and lets the facts come out.',
+    },
+    {
+      id: 'printer',
+      situation: 'Five minutes before an important meeting, the printer jams on your presentation.',
+      options: [
+        { text: 'Breathe, send the file to the screen in the room, and go in calm.', v: 'best' },
+        { text: 'Ask someone to help with the printer, and start a few minutes late.', v: 'ok' },
+        { text: 'Bang on the printer until something cracks.', v: 'bad' },
+        { text: 'Storm into the meeting already furious and blame IT.', v: 'bad' },
+      ],
+      why: 'A machine can’t be persuaded. A breath and a plan B save the meeting.',
+    },
+    {
+      id: 'lunchfridge',
+      situation: 'Lunchtime. Someone ate the lunch you left in the office fridge — with your name on it.',
+      options: [
+        { text: 'Get something to eat, and put a friendly note on the fridge: “Please don’t take food that isn’t yours.”', v: 'best' },
+        { text: 'Ask on the team chat, with a smile, whether anyone took it by mistake.', v: 'ok' },
+        { text: 'Send an angry message to everyone: “WHO STOLE MY FOOD?!”', v: 'bad' },
+        { text: 'Take someone else’s yogurt, “to even things out”.', v: 'bad' },
+      ],
+      why: 'Food first — hunger makes everything louder. Then one calm, general request.',
+    },
+    {
+      id: 'client',
+      situation: 'An angry customer is yelling at you over the phone about a mistake another department made.',
+      options: [
+        { text: '“I can hear how frustrating this is. I’ll check it now and call you back within the hour.”', v: 'best' },
+        { text: 'Put them on hold for a moment, take a breath, then come back.', v: 'ok' },
+        { text: 'Yell back: “It’s not my fault, call someone else!”', v: 'bad' },
+        { text: 'Hang up in the middle of the sentence.', v: 'bad' },
+      ],
+      why: 'Acknowledging the frustration lowers the volume; a concrete next step ends the call well.',
+    },
+    {
+      id: 'cutoff',
+      situation: 'A driver cuts you off, nearly hits you — and then honks at YOU.',
+      options: [
+        { text: 'Slow down, let them go, and breathe out: “Got home safe. That’s what matters.”', v: 'best' },
+        { text: 'Say what you think of them out loud, inside the car, and drop it.', v: 'ok' },
+        { text: 'Chase them and flash your lights.', v: 'bad' },
+        { text: 'Pull up next to them at the light and yell.', v: 'bad' },
+      ],
+      why: 'On the road, anger is a danger. Letting go is the strongest move there is.',
+    },
+    {
+      id: 'parking',
+      situation: 'You’ve been waiting with your signal on for a parking spot. Someone zips in from the other side.',
+      options: [
+        { text: 'Let it go and look for another spot. It’s not worth a fight.', v: 'best' },
+        { text: 'Roll down the window and say calmly: “I was waiting here.”', v: 'ok' },
+        { text: 'Block their car so they can’t get out.', v: 'bad' },
+        { text: 'Lean on the horn for a full minute.', v: 'bad' },
+      ],
+      why: 'A parking spot isn’t a threat to anything that matters. A short sentence — or letting go — is enough.',
+    },
+    {
+      id: 'queue',
+      situation: 'A long line at the supermarket. Someone walks straight to the front, as if you’re not there.',
+      options: [
+        { text: 'Calmly: “Excuse me, the line starts back there.”', v: 'best' },
+        { text: 'Let it go — it’s two more minutes.', v: 'ok' },
+        { text: 'Loudly, to the whole store: “Unbelievable, people with no manners!”', v: 'bad' },
+        { text: 'Push your cart into theirs.', v: 'bad' },
+      ],
+      why: 'A clear, polite sentence usually works. And when it doesn’t — it’s two minutes.',
+    },
+    {
+      id: 'hold',
+      situation: 'Forty minutes on hold with customer service. Someone finally answers — and the call drops.',
+      options: [
+        { text: 'Put the phone down, stretch, and try again later — or use the chat.', v: 'best' },
+        { text: 'Call again right away, with the speaker on, and do something else meanwhile.', v: 'ok' },
+        { text: 'When you get through, unload all forty minutes on the new rep.', v: 'bad' },
+        { text: 'Throw the phone onto the sofa — hard.', v: 'bad' },
+      ],
+      why: 'The person who answers next didn’t make you wait. Rested, you’ll get more out of them.',
+    },
+    {
+      id: 'package',
+      situation: 'The app says your package was “delivered”. It isn’t at your door.',
+      options: [
+        { text: 'Check with the neighbors and the lobby, then file a claim with a photo.', v: 'best' },
+        { text: 'Wait a day — sometimes it shows up.', v: 'ok' },
+        { text: 'Write a furious one-star review in all caps.', v: 'bad' },
+        { text: 'Call the courier and swear at them.', v: 'bad' },
+      ],
+      why: 'Checking first and then claiming calmly gets the package — or the money — back.',
+    },
+    {
+      id: 'traffic',
+      situation: 'Bumper-to-bumper traffic. You’re going to be late for something important.',
+      options: [
+        { text: 'Send a short message that you’ll be late, put on music, and breathe.', v: 'best' },
+        { text: 'Look for another route on the map.', v: 'ok' },
+        { text: 'Weave between lanes to gain thirty seconds.', v: 'bad' },
+        { text: 'Hit the steering wheel and curse the whole way.', v: 'bad' },
+      ],
+      why: 'The traffic won’t move faster. A message removes the pressure; the rest is out of your hands.',
+    },
+    {
+      id: 'laptopcrash',
+      situation: 'Your computer freezes and restarts. An hour of work, unsaved, gone.',
+      options: [
+        { text: 'Stand up, get some water, and come back to rebuild it — it’ll go faster the second time.', v: 'best' },
+        { text: 'Check if there’s an autosave before you panic.', v: 'ok' },
+        { text: 'Slam the laptop shut.', v: 'bad' },
+        { text: 'Tell everyone around you how cursed your day is, for an hour.', v: 'bad' },
+      ],
+      why: 'The second time is always faster. A short break before starting again saves the rest of the day.',
+    },
+    {
+      id: 'cinema',
+      situation: 'At the movies, the couple behind you has been talking loudly since the film started.',
+      options: [
+        { text: 'Turn around and whisper with a smile: “Could you keep it down a bit? Thanks.”', v: 'best' },
+        { text: 'Move to another seat.', v: 'ok' },
+        { text: 'Turn around and hiss: “SHUT. UP.”', v: 'bad' },
+        { text: 'Kick the seat behind you every few minutes.', v: 'bad' },
+      ],
+      why: 'A polite, specific request works more often than you’d think — and keeps your evening pleasant.',
+    },
+    {
+      id: 'waiter',
+      situation: 'After forty minutes at the restaurant, the wrong dish arrives.',
+      options: [
+        { text: '“This isn’t what I ordered. Can you check how long the right one will take?”', v: 'best' },
+        { text: 'Eat it anyway — you’re starving.', v: 'ok' },
+        { text: 'Push the plate away: “Is anyone actually working here?”', v: 'bad' },
+        { text: 'Say nothing, leave no tip, and write a nasty review.', v: 'bad' },
+      ],
+      why: 'The waiter probably isn’t the one who got it wrong. A clear request gets you fed sooner.',
+    },
+    {
+      id: 'drill',
+      situation: 'Saturday, 8 a.m. — your one day to sleep in. The neighbor starts drilling.',
+      options: [
+        { text: 'Later, at their door: “Saturday mornings are hard for me. Could you start after ten?”', v: 'best' },
+        { text: 'Put in earplugs and try to sleep a bit more.', v: 'ok' },
+        { text: 'Bang on the wall with your fist.', v: 'bad' },
+        { text: 'Blast music back at them.', v: 'bad' },
+      ],
+      why: 'A specific request about the future works better than a war of noises now.',
+    },
+    {
+      id: 'party',
+      situation: '1 a.m. on a work night. Loud party upstairs, and you have an early start.',
+      options: [
+        { text: 'Go up, knock, and say kindly: “I have to be up at six. Could you turn it down?”', v: 'best' },
+        { text: 'Send them a message, and if it doesn’t help — call building management in the morning.', v: 'ok' },
+        { text: 'Call the police right away without saying a word to them.', v: 'bad' },
+        { text: 'Bang on the ceiling with a broom until 2 a.m.', v: 'bad' },
+      ],
+      why: 'Most people don’t know they’re bothering you. A direct, kind request is the first step.',
+    },
+    {
+      id: 'blocked',
+      situation: 'You’re late, and a neighbor’s car is blocking yours. Again.',
+      options: [
+        { text: 'Call or knock: “I need to get out now — could you move it? And let’s find a fix for next time.”', v: 'best' },
+        { text: 'Leave a note on the windshield and take a taxi.', v: 'ok' },
+        { text: 'Lean on the horn until the whole street wakes up.', v: 'bad' },
+        { text: 'Leave a nasty note and a scratch “by accident”.', v: 'bad' },
+      ],
+      why: 'First solve the now, then suggest a fix for the future. Revenge only starts a long war.',
+    },
+    {
+      id: 'stairtrash',
+      situation: 'For the third day, a neighbor’s trash bag is sitting in the shared stairwell. It smells.',
+      options: [
+        { text: 'Knock and say simply: “Your bag’s been in the stairwell for a few days — could you take it down?”', v: 'best' },
+        { text: 'Take it down yourself this time, and mention it to them later.', v: 'ok' },
+        { text: 'Leave the bag on their doormat.', v: 'bad' },
+        { text: 'Post an angry message in the building group with a photo.', v: 'bad' },
+      ],
+      why: 'A direct sentence to the person beats public shaming — and keeps you on good terms.',
+    },
+    {
+      id: 'rudeneighbor',
+      situation: 'A neighbor stops you in the hallway and snaps: “Your music is driving me crazy!” It was on low.',
+      options: [
+        { text: '“I didn’t know it reaches you. Which hours are hard for you?”', v: 'best' },
+        { text: '“I’ll check the volume,” and walk on.', v: 'ok' },
+        { text: '“It’s my apartment, I’ll do what I want.”', v: 'bad' },
+        { text: 'Turn the music up that evening, on purpose.', v: 'bad' },
+      ],
+      why: 'Asking about their side calms them down and gives you a real fix — without admitting to something you didn’t do.',
+    },
+    {
+      id: 'cancel',
+      situation: 'A friend cancels on you an hour before you meet — for the third time this month.',
+      options: [
+        { text: '“I was really looking forward to it. It’s the third time — is something going on?”', v: 'best' },
+        { text: '“Okay,” and suggest a new date that suits them.', v: 'ok' },
+        { text: '“Typical. Forget it, I don’t need this.”', v: 'bad' },
+        { text: 'Don’t answer, and stop inviting them.', v: 'bad' },
+      ],
+      why: 'Saying it matters to you — and asking what’s going on — opens a conversation instead of a silent end.',
+    },
+    {
+      id: 'latefriend',
+      situation: 'You’ve been waiting at the café for half an hour. Your friend walks in smiling — no message, no sorry.',
+      options: [
+        { text: '“I’m glad you’re here. Next time, send me a message if you’re late, okay?”', v: 'best' },
+        { text: 'Say nothing now, enjoy the meeting, and mention it another time.', v: 'ok' },
+        { text: '“Oh, so you DO know how to tell time?”', v: 'bad' },
+        { text: 'Be cold the whole meeting so they’ll “get it”.', v: 'bad' },
+      ],
+      why: 'A short, clear request about next time — and then you can actually enjoy the meeting.',
+    },
+    {
+      id: 'friendloan',
+      situation: 'A friend still owes you money from three months ago. Today they posted photos from a vacation abroad.',
+      options: [
+        { text: 'Message them privately: “I need the money back. Can we set a date this month?”', v: 'best' },
+        { text: 'Wait until you see them, and ask in person.', v: 'ok' },
+        { text: 'Comment under the photo: “Nice vacation — on my money?”', v: 'bad' },
+        { text: 'Tell all your shared friends what a cheapskate they are.', v: 'bad' },
+      ],
+      why: 'A private, concrete request — with a date — protects both the money and the friendship.',
+    },
+    {
+      id: 'secret',
+      situation: 'You find out a close friend told others something very personal you shared only with them.',
+      options: [
+        { text: 'Wait until you’re calm, then: “I trusted you with that, and it hurt to hear it from others. I need to know I can trust you.”', v: 'best' },
+        { text: 'Take some distance for a while, until you’re ready to talk.', v: 'ok' },
+        { text: 'Call them right away and scream at them.', v: 'bad' },
+        { text: 'Tell everyone one of THEIR secrets.', v: 'bad' },
+      ],
+      why: 'Saying exactly what hurt — after calming down — gives the friendship a real chance to repair.',
+    },
+    {
+      id: 'groupchat',
+      situation: 'In the friends’ group chat, someone makes fun of something you posted. Others reply with laughing emojis.',
+      options: [
+        { text: 'Write to them privately: “That hurt a little. I’d rather you didn’t joke about it.”', v: 'best' },
+        { text: 'Put the phone down, and come back to it tomorrow.', v: 'ok' },
+        { text: 'Answer in the group with an even nastier joke about them.', v: 'bad' },
+        { text: 'Leave the group without a word.', v: 'bad' },
+      ],
+      why: 'Saying it privately avoids an audience — and gives them a real chance to hear you.',
+    },
+    {
+      id: 'birthday',
+      situation: 'It’s evening. Your best friend hasn’t remembered your birthday.',
+      options: [
+        { text: 'Call them: “Today’s my birthday, and I really wanted to hear from you.”', v: 'best' },
+        { text: 'Wait until tomorrow — maybe they’ll remember.', v: 'ok' },
+        { text: 'Post: “Nice to know who your real friends are.”', v: 'bad' },
+        { text: 'Forget THEIR birthday next month, on purpose.', v: 'bad' },
+      ],
+      why: 'Saying what you need is not begging. It lets the people who love you show up.',
+    },
+    {
+      id: 'whenmarried',
+      situation: 'At a family dinner, an aunt asks loudly, in front of everyone: “So, when are you finally settling down?”',
+      options: [
+        { text: 'Smile: “When it’s right for me. How’s your garden doing?”', v: 'best' },
+        { text: 'Answer briefly, then go help in the kitchen.', v: 'ok' },
+        { text: '“When you stop asking stupid questions.”', v: 'bad' },
+        { text: 'Spend the whole meal sulking in silence.', v: 'bad' },
+      ],
+      why: 'A light answer plus a change of subject is a boundary — without a scene at the table.',
+    },
+    {
+      id: 'compare',
+      situation: 'Your mother, at a family meal: “Why can’t you be more like your brother? Look how well he’s doing.”',
+      options: [
+        { text: 'Later, privately: “When you compare us, it hurts. I want you to see me for who I am.”', v: 'best' },
+        { text: 'Change the subject now, and talk to her another day.', v: 'ok' },
+        { text: '“Maybe because you always loved him more!”', v: 'bad' },
+        { text: 'Get up and leave the table.', v: 'bad' },
+      ],
+      why: 'Telling her what the comparison does to you — away from an audience — is the best chance she’ll hear it.',
+    },
+    {
+      id: 'hosting',
+      situation: 'Holiday again, and again everyone assumes it’s at your place. Nobody’s offered to help.',
+      options: [
+        { text: 'Message the family: “I’m happy to host. This time, everyone please brings one dish.”', v: 'best' },
+        { text: 'Host, but order part of the food instead of cooking it all.', v: 'ok' },
+        { text: 'Cancel the holiday dinner in a furious message to everyone.', v: 'bad' },
+        { text: 'Host, smile, and resent everyone all evening.', v: 'bad' },
+      ],
+      why: 'Asking for specific help is not ungrateful — it’s what lets you keep hosting with joy.',
+    },
+    {
+      id: 'politics',
+      situation: 'At the holiday table, an uncle starts on politics — and keeps poking at you specifically.',
+      options: [
+        { text: '“I see it differently, and I don’t want to argue today. Let’s enjoy the meal.”', v: 'best' },
+        { text: 'Get up to help clear the table until the subject changes.', v: 'ok' },
+        { text: 'Argue at the top of your voice until someone cries.', v: 'bad' },
+        { text: 'Answer with a personal insult.', v: 'bad' },
+      ],
+      why: 'You don’t have to accept every invitation to a fight. A short boundary keeps the evening.',
+    },
+    {
+      id: 'rmdishes',
+      situation: 'Your roommate’s dishes have been in the sink for four days. There’s no room to wash a cup.',
+      options: [
+        { text: '“The sink’s been full for a few days and it’s hard for me. Can we agree on a rule — dishes by the evening?”', v: 'best' },
+        { text: 'Wash just what you need, and bring it up at your next talk.', v: 'ok' },
+        { text: 'Put all their dishes on their bed.', v: 'bad' },
+        { text: 'Write “PIG” on a note and stick it on the fridge.', v: 'bad' },
+      ],
+      why: 'One clear rule you agree on together beats a silent war of notes.',
+    },
+    {
+      id: 'rmguest',
+      situation: 'Your roommate’s boyfriend has slept over every night for two weeks — and uses your towel.',
+      options: [
+        { text: '“I like them, but I need to talk about it: how often, and what’s shared. Can we sit tonight?”', v: 'best' },
+        { text: 'Ask just about the towel for now, and keep the rest for later.', v: 'ok' },
+        { text: 'Make sarcastic comments about the “new roommate”.', v: 'bad' },
+        { text: 'Hide all the towels and the toilet paper.', v: 'bad' },
+      ],
+      why: 'Talking about the arrangement, not the person, makes it a shared problem — not an attack.',
+    },
+    {
+      id: 'rmrent',
+      situation: 'Rent is due tomorrow. For the third month, your roommate hasn’t transferred their share.',
+      options: [
+        { text: '“I can’t cover your share again. What can you transfer by tomorrow, and how do we make sure it doesn’t happen again?”', v: 'best' },
+        { text: 'Cover it this time, in writing, with a date to pay you back.', v: 'ok' },
+        { text: 'Shout: “You’re a freeloader!”', v: 'bad' },
+        { text: 'Pay it, say nothing, and quietly plan to move out.', v: 'bad' },
+      ],
+      why: 'A clear limit plus a plan for next time protects your money without blowing up the home.',
+    },
+    {
+      id: 'rmfood',
+      situation: 'You open the fridge for the cheese you bought yesterday. Your roommate finished it.',
+      options: [
+        { text: '“You finished my cheese. Let’s mark a shelf for each of us — and could you replace it?”', v: 'best' },
+        { text: 'Eat something else, and mention it later.', v: 'ok' },
+        { text: 'Eat their whole shelf, “to even things out”.', v: 'bad' },
+        { text: 'Send a passive-aggressive message: “Hope it was tasty 🙂”.', v: 'bad' },
+      ],
+      why: 'A clear request plus a simple fix — a shelf each — prevents the next time.',
+    },
+    {
+      id: 'rmexam',
+      situation: 'You have an exam tomorrow. Your roommate has loud friends over in the living room.',
+      options: [
+        { text: '“I have an exam tomorrow. Could you keep it quieter after ten, or move to your room?”', v: 'best' },
+        { text: 'Go study at the library or a café.', v: 'ok' },
+        { text: 'Walk in and turn off their music without a word.', v: 'bad' },
+        { text: 'Slam your door every five minutes.', v: 'bad' },
+      ],
+      why: 'Telling them why you need quiet usually gets you more cooperation than you’d expect.',
+    },
+    {
+      id: 'weekendplans',
+      situation: 'Your partner tells you, casually, that they made plans with friends for the whole weekend. You had other plans for you two.',
+      options: [
+        { text: '“I was hoping for time together this weekend. Can we keep one day for us?”', v: 'best' },
+        { text: 'Make your own plans, and talk about it calmly next week.', v: 'ok' },
+        { text: '“Great. Go. You obviously prefer them.”', v: 'bad' },
+        { text: 'Say “fine”, then be cold the whole weekend.', v: 'bad' },
+      ],
+      why: 'Saying what you were hoping for — not what they did wrong — invites them to find a solution with you.',
+    },
+    {
+      id: 'inlawsvisit',
+      situation: 'Your partner invited their parents for the weekend — without asking you first.',
+      options: [
+        { text: '“I’d have liked to be asked first. Let’s agree that guests are decided together.”', v: 'best' },
+        { text: 'Host them this time, and talk about the rule afterwards.', v: 'ok' },
+        { text: '“Then YOU host them. I’m out.”', v: 'bad' },
+        { text: 'Be polite to the parents and silent to your partner all weekend.', v: 'bad' },
+      ],
+      why: 'Focusing on the rule for next time keeps it from turning into a fight about their parents.',
+    },
+    {
+      id: 'towel',
+      situation: 'A wet towel on the bed. Again. Your side of the bed.',
+      options: [
+        { text: '“When the towel’s on the bed, my side gets wet. Can you hang it up?”', v: 'best' },
+        { text: 'Hang it up yourself, and mention it at a calm moment.', v: 'ok' },
+        { text: '“How many times do I have to say it?!”', v: 'bad' },
+        { text: 'Throw the towel on the floor of the bathroom, angrily.', v: 'bad' },
+      ],
+      why: 'Describing the effect — not the character — makes it a small, solvable thing.',
+    },
+    {
+      id: 'reservation',
+      situation: 'You arrive at the restaurant for your anniversary. Your partner forgot to make the reservation. No tables.',
+      options: [
+        { text: 'Breathe: “I’m disappointed. But let’s find somewhere else — the evening is about us.”', v: 'best' },
+        { text: 'Go home, order in, and talk about the disappointment tomorrow.', v: 'ok' },
+        { text: '“You never care about anything that matters to me.”', v: 'bad' },
+        { text: 'Spend the evening listing everything else they ever forgot.', v: 'bad' },
+      ],
+      why: 'Saying you’re disappointed — and still choosing the evening — keeps the anniversary yours.',
+    },
+    {
+      id: 'doctor',
+      situation: 'Your mother has had chest pains for a week. She refuses to see a doctor: “It’s nothing, stop fussing.”',
+      options: [
+        { text: '“I believe you feel it’s nothing. I’m worried, and I’ll come with you. Can we go Tuesday?”', v: 'best' },
+        { text: 'Ask her doctor to call her directly.', v: 'ok' },
+        { text: '“You’re being stubborn and childish!”', v: 'bad' },
+        { text: 'Book the appointment behind her back and drag her there.', v: 'bad' },
+      ],
+      why: 'Naming your worry — and offering to go together — respects her choice and still moves things forward.',
+    },
+    {
+      id: 'nevervisit',
+      situation: 'At the clinic, your father tells the nurse: “Nobody ever visits me.” You were there yesterday — and the day before.',
+      options: [
+        { text: 'Later, gently: “Dad, I’m here a lot. When you say that, it hurts. Do you need more of me?”', v: 'best' },
+        { text: 'Smile at the nurse, and let it go.', v: 'ok' },
+        { text: '“Never?! I was here YESTERDAY!”', v: 'bad' },
+        { text: 'Skip the next visit, “so at least it’s true”.', v: 'bad' },
+      ],
+      why: 'Behind the unfair sentence there’s often loneliness. Asking about it softens both of you.',
+    },
+    {
+      id: 'grandscreens',
+      situation: 'The grandkids finally came to visit — and they’ve been on their phones the whole time.',
+      options: [
+        { text: '“I missed you! Phones in the basket for an hour — I have a game for us.”', v: 'best' },
+        { text: 'Sit next to one of them and ask them to show you what they’re playing.', v: 'ok' },
+        { text: '“In my day, we respected our grandparents!”', v: 'bad' },
+        { text: 'Complain to their parents in front of them.', v: 'bad' },
+      ],
+      why: 'An invitation to something fun works better than a lecture — and builds the connection you want.',
+    },
+    {
+      id: 'grandcancel',
+      situation: 'Your daughter cancels the grandkids’ visit at the last minute — again. You’d already baked.',
+      options: [
+        { text: '“I’m disappointed — I was really looking forward to it. Can we set a new date now?”', v: 'best' },
+        { text: 'Say “okay”, freeze the cake, and call her tomorrow.', v: 'ok' },
+        { text: '“You always do this. You don’t care about me.”', v: 'bad' },
+        { text: 'Don’t answer her calls for a few days.', v: 'bad' },
+      ],
+      why: 'Telling her you were looking forward to it — and asking for a date — keeps the door open.',
+    },
+    {
+      id: 'burnt',
+      situation: 'You stepped away to answer a call. The dinner on the stove is burnt black.',
+      options: [
+        { text: 'Open a window, breathe, and make something simple — eggs, a sandwich.', v: 'best' },
+        { text: 'Order in tonight, and try the recipe again tomorrow.', v: 'ok' },
+        { text: 'Throw the pot in the sink with a crash.', v: 'bad' },
+        { text: 'Blame whoever called you, out loud, for half an hour.', v: 'bad' },
+      ],
+      why: 'It’s a pot, not a disaster. A quick plan B turns a ruined dinner into a small story.',
+    },
+    {
+      id: 'keys',
+      situation: 'You’re about to leave, already late. The keys aren’t anywhere.',
+      options: [
+        { text: 'Stop, take one breath, and check the places in order: bag, coat, door.', v: 'best' },
+        { text: 'Use the spare key, and look for the others in the evening.', v: 'ok' },
+        { text: 'Empty every drawer onto the floor.', v: 'bad' },
+        { text: 'Yell at the whole house: “Who took my keys?!”', v: 'bad' },
+      ],
+      why: 'Panic makes you search the same place five times. One breath and an order find them faster.',
     },
   ],
   shouts: [

@@ -13,7 +13,9 @@ export type HouseholdTag =
   | 'partner'
   | 'adult-child' // grown son or daughter of an ageing parent
   | 'grandparent'
-  | 'no-kids';
+  | 'no-kids'
+  | 'lives-alone'
+  | 'roommates';
 export type GenderTag = 'men' | 'women';
 export type AudienceTag = HouseholdTag | GenderTag;
 
@@ -38,7 +40,10 @@ export type TopicTag =
   | 'independence'
   | 'honesty'
   | 'public'
-  | 'connection';
+  | 'connection'
+  | 'work' // bosses, coworkers, clients
+  | 'road' // traffic, parking, other drivers
+  | 'neighbors';
 export type Tag = AudienceTag | TopicTag;
 
 export const GENDER_TAGS: readonly GenderTag[] = ['men', 'women'];
@@ -51,4 +56,33 @@ export const HOUSEHOLD_TAGS: readonly HouseholdTag[] = [
   'adult-child',
   'grandparent',
   'no-kids',
+  'lives-alone',
+  'roommates',
+];
+
+export const TOPIC_TAGS: readonly TopicTag[] = [
+  'mess',
+  'chores',
+  'mealtime',
+  'bedtime',
+  'morning-rush',
+  'siblings',
+  'homework',
+  'noise',
+  'work-life',
+  'household',
+  'screens',
+  'money',
+  'in-laws',
+  'caregiving',
+  'health',
+  'mental-load',
+  'respect',
+  'independence',
+  'honesty',
+  'public',
+  'connection',
+  'work',
+  'road',
+  'neighbors',
 ];
