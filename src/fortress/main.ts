@@ -28,7 +28,7 @@ import {
   type Pillar,
   type Wave,
 } from './logic';
-import { BUBBLES, LEVEL_NAMES, PILLAR_INFO, THREATS } from './content';
+import { BUBBLES, LEVEL_ICONS, LEVEL_NAMES, PILLAR_INFO, THREATS } from './content';
 import { eligible, markSeen, query } from '../shared/library';
 
 /**
@@ -107,12 +107,16 @@ const T = {
     tr({ en: 'A calm hand on the cannon', he: 'יד רגועה על התותח', ar: 'يد هادئة على المدفع' }),
     tr({ en: 'A boundary where it mattered', he: 'גבול איפה שזה חשוב', ar: 'حدّ حيث يهمّ' }),
   ],
-  summary: (l: number, b: number, s: number) =>
-    tr({
-      en: `Let go: ${l} · Boundaries: ${b} · Cannon shots: ${s}`,
-      he: `שוחררו: ${l} · גבולות: ${b} · יריות: ${s}`,
-      ar: `مرّت: ${l} · حدود: ${b} · طلقات: ${s}`,
-    }),
+  letGoN: (n: number) => tr({ en: `🍃 ${n} let go`, he: `🍃 ${n} שוחררו`, ar: `🍃 ${n} مرّت` }),
+  shielded: (n: number) => tr({ en: `🛡️ ${n} calm boundaries`, he: `🛡️ ${n} גבולות בנחת`, ar: `🛡️ ${n} حدود بهدوء` }),
+  tips: [
+    tr({ en: 'Next time: let more bubbles pop on the wall', he: 'בפעם הבאה: תנו ליותר בועות להתפוצץ על החומה', ar: 'في المرة القادمة: دعوا فقاعات أكثر تنفجر على السور' }),
+    (n: number) =>
+      n
+        ? tr({ en: `Next time: at most one cannon shot`, he: `בפעם הבאה: לכל היותר ירייה אחת מהתותח`, ar: `في المرة القادمة: طلقة واحدة على الأكثر` })
+        : tr({ en: 'Next time: leave the cannon alone', he: 'בפעם הבאה: לא לגעת בתותח', ar: 'في المرة القادمة: اتركوا المدفع' }),
+    tr({ en: 'Next time: a shield for every real threat', he: 'בפעם הבאה: מגן מול כל איום אמיתי', ar: 'في المرة القادمة: درع أمام كل تهديد حقيقي' }),
+  ] as const,
   bestLet: (n: number) => tr({ en: `Most let go: ${n}`, he: `הכי הרבה ששוחררו: ${n}`, ar: `أكثر ما مرّ: ${n}` }),
 };
 
@@ -564,7 +568,8 @@ async function play(level: Level | null) {
   hush();
   closeCard();
 
-  const summary = h('p', { class: 'fo-summary' }, T.summary(s.letGo, s.shields, s.shots));
+  // The centrepiece: what you let go, and the boundaries that mattered (never the shots).
+  const hero = h('div', { class: 'fo-hero' }, h('b', {}, T.letGoN(s.letGo)), s.shields ? h('b', {}, T.shielded(s.blocked)) : null);
   if (endless) {
     const record = bump(shell.progress, 'endless', s.letGo);
     shell.persist();
@@ -572,7 +577,8 @@ async function play(level: Level | null) {
       title: T.endlessTitle,
       stars: [],
       zen: 0,
-      lines: [summary, h('p', {}, T.bestLet(shell.progress.best.endless ?? 0))],
+      hero,
+      lines: [h('p', { class: 'fo-summary' }, T.bestLet(shell.progress.best.endless ?? 0))],
       record,
       anchor: `${ANCHOR.threat}`,
       hasNext: false,
@@ -586,10 +592,10 @@ async function play(level: Level | null) {
   if (!finishedWaves || !standing(s)) {
     const c = await shell.card({
       title: T.fell,
-      lines: [s.wall <= 0 ? T.cracked : T.fellWhy, summary],
+      lines: [s.wall <= 0 ? T.cracked : T.fellWhy],
       buttons: [
-        { id: 'retry', label: T.retry, cls: 'warm' },
-        { id: 'menu', label: T.menu, cls: 'ghost' },
+        { id: 'retry', label: `↻ ${T.retry}`, cls: 'warm' },
+        { id: 'menu', label: `☰ ${T.menu}`, cls: 'ghost' },
       ],
     });
     quit();
@@ -603,9 +609,10 @@ async function play(level: Level | null) {
   shell.persist();
   const c = await shell.end({
     title: T.doneTitle,
-    stars: stars.map((on, i) => ({ on, label: T.stars[i] })),
+    stars: stars.map((on, i) => ({ on, label: T.stars[i], tip: i === 1 ? T.tips[1](lv.shots) : (T.tips[i] as string) })),
     zen,
-    lines: [summary],
+    hero,
+    next: lvlN < LEVELS.length ? { name: LEVEL_NAMES[lvlN], icon: LEVEL_ICONS[lvlN] } : undefined,
     record,
     anchor: `${ANCHOR.taken} ${ANCHOR.threat}`,
     hasNext: lvlN < LEVELS.length,

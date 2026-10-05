@@ -21,7 +21,7 @@ import {
   LEVELS,
   migrateLevels,
 } from './logic';
-import { LEVEL_NAMES, MY_LOSSES, SCENES, type Scene } from './content';
+import { LEVEL_ICONS, LEVEL_NAMES, MY_LOSSES, SCENES, type Scene } from './content';
 import { PUPPET_COLOR, monsterHoles, monsterPath, puppetPath, realThorns } from './puppets';
 import { Roar } from './sound';
 
@@ -87,6 +87,12 @@ const T = {
     he: 'גבול על זה? כנראה שתיקון קטן מספיק.',
     ar: 'حدّ من أجل هذا؟ غالبًا يكفي إصلاح صغير.',
   }),
+  tips: [
+    tr({ en: 'Next time: move the light back until the shadow fits', he: 'בפעם הבאה: הרחיקו את הפנס עד שהצל נכנס', ar: 'في المرة القادمة: أبعدوا الضوء حتى يدخل الظل' }),
+    tr({ en: 'Next time: look through both lenses before you choose', he: 'בפעם הבאה: הסתכלו דרך שתי העדשות לפני שבוחרים', ar: 'في المرة القادمة: انظروا عبر العدستين قبل أن تختاروا' }),
+  ],
+  tipLet: tr({ en: 'Next time: small things can be let go', he: 'בפעם הבאה: דבר קטן אפשר לשחרר', ar: 'في المرة القادمة: الأشياء الصغيرة يمكن تركها' }),
+  tipReal: tr({ en: 'Next time: when something real is there, a calm boundary', he: 'בפעם הבאה: כשיש משהו אמיתי, גבול בנחת', ar: 'في المرة القادمة: حين يوجد شيء حقيقي، حدّ بهدوء' }),
   doneTitle: tr({ en: 'Back to its real size', he: 'חזרה לגודל האמיתי', ar: 'عاد إلى حجمه الحقيقي' }),
   stars: [
     tr({ en: 'Found its real size', he: 'מצאתם את הגודל האמיתי', ar: 'وجدتم حجمه الحقيقي' }),
@@ -198,6 +204,28 @@ async function startMine() {
       anchor: T.mineEnd,
     },
     true,
+  );
+}
+
+/** The end card's centrepiece: the thing itself, hung in a gallery frame, with what it really took. */
+function framedHero(scene: Scene, count: string) {
+  const c = h('canvas', { class: 'sw-hero-art', width: 160, height: 160, 'aria-hidden': 'true' }) as HTMLCanvasElement;
+  const x = c.getContext('2d')!;
+  x.translate(80, 84);
+  x.scale(110, 110);
+  puppetPath(x, scene.puppet);
+  x.fillStyle = PUPPET_COLOR[scene.puppet];
+  x.fill();
+  x.lineWidth = 3 / 110;
+  x.strokeStyle = '#1d2b4f';
+  x.stroke();
+  return h(
+    'div',
+    { class: 'sw-hero' },
+    h('div', { class: 'sw-hero-frame' }, c),
+    h('b', { class: 'sw-hero-name' }, scene.name),
+    scene.losses.length ? h('div', { class: 'sw-hero-tags' }, ...scene.losses.map((l) => h('span', { class: 'sw-tag' }, l))) : null,
+    count ? h('small', { class: 'sw-hero-count' }, count) : null,
   );
 }
 
@@ -650,7 +678,7 @@ async function play(scene: Scene, mine = false, level = 0) {
         title: T.doneTitle,
         stars: [],
         zen: 0,
-        lines: [h('p', { class: 'sw-mine-event' }, `“${scene.event}”`)],
+        hero: framedHero(scene, ''),
         anchor: `${ANCHOR.taken} ${ANCHOR.threat}`,
         hasNext: false,
       });
@@ -661,11 +689,14 @@ async function play(scene: Scene, mine = false, level = 0) {
     }
     const stars = starsFor({ framed: true, looked: firstLooked, firstChoice, right: scene.right });
     const zen = shell.finishLevel(LEVELS[level].id, stars);
+    const mineScenes = SCENES.filter((x) => eligible(x));
+    const hung = mineScenes.filter((x) => shell.progress.album.includes(x.id)).length;
     const c = await shell.end({
       title: T.doneTitle,
-      stars: stars.map((on, i) => ({ on, label: T.stars[i] })),
+      stars: stars.map((on, i) => ({ on, label: T.stars[i], tip: i === 2 ? (scene.real ? T.tipReal : T.tipLet) : T.tips[i] })),
       zen,
-      lines: [h('p', { class: 'sw-losses' }, `${scene.emoji} ${scene.losses.join(' · ')}`)],
+      hero: framedHero(scene, `🖼️ ${hung}/${mineScenes.length}`),
+      next: level < LEVELS.length - 1 ? { name: LEVEL_NAMES[level + 1], icon: LEVEL_ICONS[level + 1] } : undefined,
       anchor: scene.real ? ANCHOR.boundary : `${ANCHOR.taken} ${ANCHOR.threat}`,
       hasNext: level < LEVELS.length - 1,
     });

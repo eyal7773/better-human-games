@@ -2,7 +2,7 @@
 import { Shell } from '../shared/shell';
 import './styles.css';
 import { h, clamp, lerp, pick, rand, reducedMotion, Scope } from '../shared/dom';
-import { markSeen, query } from '../shared/library';
+import { eligible, markSeen, query } from '../shared/library';
 import { tr, isRTL } from '../shared/i18n';
 import { vibrate } from '../shared/haptics';
 import { faceSVG, setFaceMood } from '../shared/face';
@@ -28,7 +28,7 @@ import {
   type Level,
   type SentenceTally,
 } from './logic';
-import { LEVEL_NAMES, REPLY, replyGroup, SENTENCES, type Sentence } from './content';
+import { LEVEL_ICONS, LEVEL_NAMES, REPLY, replyGroup, SENTENCES, type Sentence } from './content';
 
 /**
  * Words in Flight: when you're hot, words leave your mouth before you've
@@ -81,7 +81,6 @@ const T = {
   streak: (n: number) => tr({ en: `Honesty streak ×${n}`, he: `רצף כנות ×${n}`, ar: `سلسلة صدق ×${n}` }),
   streakBig: tr({ en: 'Honesty streak!', he: 'רצף כנות!', ar: 'سلسلة صدق!' }),
   leftTitle: tr({ en: 'They left the room', he: 'יצאו מהחדר', ar: 'خرجوا من الغرفة' }),
-  leftLine: tr({ en: '“Okay. Let’s talk later.”', he: '"טוב. נדבר אחר כך."', ar: '«طيب. نتكلم لاحقًا.»' }),
   leftTip: tr({
     en: 'It happens to everyone. Try again — and remember the 🌬️.',
     he: 'זה קורה לכולם. נסו שוב — וזכרו את ה-🌬️.',
@@ -96,12 +95,25 @@ const T = {
     tr({ en: 'Honesty streak', he: 'רצף כנות', ar: 'سلسلة صدق' }),
     tr({ en: 'No word hurt them', he: 'אף מילה לא פגעה', ar: 'لم تجرح أي كلمة' }),
   ],
-  summary: (caught: number, hits: number, streak: number) =>
+  caughtOf: (caught: number, toxic: number) =>
     tr({
-      en: `Caught: ${caught} · Landed as hurt: ${hits} · Longest streak: ${streak}`,
-      he: `נתפסו: ${caught} · פגעו: ${hits} · הרצף הארוך: ${streak}`,
-      ar: `التُقطت: ${caught} · جرحت: ${hits} · أطول سلسلة: ${streak}`,
+      en: `You caught ${caught} of ${toxic} hurtful words`,
+      he: `תפסתם ${caught} מתוך ${toxic} מילים פוגעות`,
+      ar: `التقطتم ${caught} من ${toxic} كلمات جارحة`,
     }),
+  noneHonest: tr({
+    en: 'They’re still here. Next time, catch the red words — and remember 🌬️.',
+    he: 'הם עדיין פה. בפעם הבאה תפסו את המילים האדומות, וזכרו את 🌬️.',
+    ar: 'ما زالوا هنا. في المرة القادمة التقطوا الكلمات الحمراء — وتذكّروا 🌬️.',
+  }),
+  tips: [
+    tr({ en: 'Next time: breathe 🌬️ when it gets too fast', he: 'בפעם הבאה: נשמו 🌬️ כשזה מהר מדי', ar: 'في المرة القادمة: تنفّسوا 🌬️ حين يسرع الأمر' }),
+    (n: number) => tr({ en: `Next time: ${n} honest sentences in a row`, he: `בפעם הבאה: ${n} משפטים כנים ברצף`, ar: `في المرة القادمة: ${n} جمل صادقة متتالية` }),
+    tr({ en: 'Next time: catch every red word before it lands', he: 'בפעם הבאה: לתפוס כל מילה אדומה לפני שהיא נוחתת', ar: 'في المرة القادمة: التقطوا كل كلمة حمراء قبل أن تصل' }),
+  ] as const,
+  album: tr({ en: '📒 Sentences I fixed', he: '📒 משפטים שתיקנתי', ar: '📒 جمل أصلحتها' }),
+  albumEmpty: tr({ en: 'Catch the hurtful words in a sentence, and its honest version lands here.', he: 'תפסו את המילים הפוגעות במשפט, והגרסה הכנה שלו תנחת כאן.', ar: 'التقطوا الكلمات الجارحة في جملة، فتصل نسختها الصادقة إلى هنا.' }),
+  endlessRun: (n: number) => tr({ en: `Longest honesty streak: ${n}`, he: `רצף הכנות הארוך: ${n}`, ar: `أطول سلسلة صدق: ${n}` }),
 };
 
 const KEY = 'bhg.words-in-flight.v1';
@@ -125,6 +137,7 @@ function showMenu() {
     art: art(),
     levels: LIST,
     extras: [
+      { label: T.album, onClick: () => void showAlbum() },
       {
         label: best ? `${T.endless} · ${best}` : T.endless,
         locked: !allDone,
@@ -134,6 +147,21 @@ function showMenu() {
     ],
     onPlay: (id) => void play(LEVELS.find((l) => l.id === id)!),
   });
+}
+
+/** The honest version of a sentence: every hurtful word swapped for what it really meant. */
+const honestText = (s: Sentence) => s.tokens.map((t) => (t.kind === 't' ? t.fix : t.text)).join(' ');
+
+/** Sentences whose honest version landed, out of the ones this home can meet — so it can be filled. */
+async function showAlbum() {
+  const mine = SENTENCES.filter((s) => eligible(s));
+  const fixed = mine.filter((s) => shell.progress.album.includes(`fixed:${s.id}`));
+  await shell.sheet(
+    `${T.album} · ${fixed.length}/${mine.length}`,
+    fixed.length
+      ? [h('ul', { class: 'wf-album' }, ...fixed.map((s) => h('li', {}, h('span', { class: 'wf-album-face', html: faceSVG(s.face) }), h('p', {}, honestText(s)))))]
+      : [h('p', {}, T.albumEmpty)],
+  );
 }
 
 /** A level's sentences: ones that fit the player's home, fresh ones first (see the content library). */
@@ -243,8 +271,13 @@ async function play(level: Level | null) {
   let flyers: Flyer[] = [];
   let faceSvg: Element | null = null;
   let sentenceIndex = 0;
+  let toxicTotal = 0;
+  /** The best honest sentence of the run: the end card's centrepiece. */
+  let best: { s: Sentence; outcomes: Outcome[]; caught: number } | null = null;
 
+  let lastFace: Sentence['face'] = 'partner';
   const setFace = (s: Sentence) => {
+    lastFace = s.face;
     faceBox.innerHTML = faceSVG(s.face);
     faceSvg = faceBox.querySelector('svg');
     if (!reducedMotion()) faceBox.animate([{ transform: 'translateY(-20px)', opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 300, easing: 'ease-out' });
@@ -427,6 +460,7 @@ async function play(level: Level | null) {
   async function runSentence(s: Sentence): Promise<void> {
     setFace(s);
     tally = emptyTally(s.tokens);
+    toxicTotal += tally.toxic;
     outcomes = [];
     slots = s.tokens.map((tok) => h('span', { class: 'wf-o slot' }, tok.text));
     line.replaceChildren(...slots);
@@ -592,6 +626,8 @@ async function play(level: Level | null) {
     streak = nextStreak(streak, tally);
     bestStreak = Math.max(bestStreak, streak);
     if (wasHonest) {
+      if (tally.toxic && discover(shell.progress, `fixed:${s.id}`)) shell.persist();
+      if (!best || tally.caught > best.caught) best = { s, outcomes: outcomes.filter(Boolean), caught: tally.caught };
       say(pick(REPLY[replyGroup(s.with)].honest), 'good');
       if (streak >= 2) {
         streakEl.textContent = streak >= 3 && streak === (level?.streak ?? 3) ? T.streakBig : T.streak(streak);
@@ -619,11 +655,13 @@ async function play(level: Level | null) {
     shell.audio.tone({ f: 90, to: 50, d: 0.3, g: 0.3 });
     shell.fx.shake(root, 6, 300);
     const c = await shell.card({
+      cls: 'wf-left',
+      art: h('div', { class: 'wf-left-door', 'aria-hidden': 'true' }, h('span', { html: faceSVG(lastFace) }), '🚪'),
       title: T.leftTitle,
-      lines: [T.leftLine, T.leftTip],
+      lines: [T.leftTip],
       buttons: [
-        { id: 'retry', label: T.retry, cls: 'warm' },
-        { id: 'menu', label: T.menu, cls: 'ghost' },
+        { id: 'retry', label: `↻ ${T.retry}`, cls: 'warm' },
+        { id: 'menu', label: `☰ ${T.menu}`, cls: 'ghost' },
       ],
     });
     scope.dispose();
@@ -631,7 +669,16 @@ async function play(level: Level | null) {
     else showMenu();
     return;
   }
-  const summary = h('p', { class: 'wf-summary' }, T.summary(caughtTotal, hitsTotal, bestStreak));
+  // The centrepiece: the best honest sentence, said to them, and how much was caught overall.
+  const hero = best
+    ? h(
+        'div',
+        { class: 'wf-hero' },
+        h('span', { class: 'wf-hero-face', html: faceSVG(best.s.face) }),
+        h('p', { class: 'wf-hero-said' }, ...best.outcomes.map((o) => h('span', { class: `wf-o ${o.cls}` }, o.text))),
+        h('p', { class: 'wf-summary' }, T.caughtOf(caughtTotal, toxicTotal)),
+      )
+    : h('div', { class: 'wf-hero' }, h('span', { class: 'wf-hero-face', html: faceSVG(lastFace) }), h('p', { class: 'wf-summary' }, T.noneHonest));
   if (endless) {
     const record = bump(shell.progress, 'endless', bestStreak);
     shell.persist();
@@ -639,7 +686,8 @@ async function play(level: Level | null) {
       title: T.endlessTitle,
       stars: [],
       zen: 0,
-      lines: [summary, h('p', {}, T.endlessBest(shell.progress.best.endless ?? 0))],
+      hero,
+      lines: [h('p', { class: 'wf-summary' }, T.endlessRun(bestStreak)), h('p', { class: 'wf-summary' }, T.endlessBest(shell.progress.best.endless ?? 0))],
       record,
       anchor: ANCHOR.sentence,
       hasNext: false,
@@ -654,9 +702,10 @@ async function play(level: Level | null) {
   const zen = shell.finishLevel(lv.id, stars);
   const c = await shell.end({
     title: T.doneTitle,
-    stars: stars.map((on, i) => ({ on, label: T.stars[i] })),
+    stars: stars.map((on, i) => ({ on, label: T.stars[i], tip: i === 1 ? T.tips[1](lv.streak) : (T.tips[i] as string) })),
     zen,
-    lines: [summary],
+    hero,
+    next: lvlN < LEVELS.length ? { name: LEVEL_NAMES[lvlN], icon: LEVEL_ICONS[lvlN] } : undefined,
     // The feelings level ends on the question underneath; the rest on the sentence itself.
     anchor: lvlN === 2 ? ANCHOR.underneath : ANCHOR.sentence,
     hasNext: lvlN < LEVELS.length,

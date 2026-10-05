@@ -204,3 +204,6 @@ export const LEVEL_NAMES = [
   tr({ en: 'Looks scary', he: 'נראה מפחיד', ar: 'يبدو مخيفًا' }),
   tr({ en: 'A whole week', he: 'שבוע שלם', ar: 'أسبوع كامل' }),
 ];
+
+/** One icon per level, for the "next level" button. */
+export const LEVEL_ICONS = ['🌅', '💼', '🌆', '🏡', '🎉', '✌️', '🎭', '📅'];

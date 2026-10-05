@@ -1,6 +1,6 @@
 import './base.css';
 import './shell.css';
-import { h } from './dom';
+import { h, reducedMotion } from './dom';
 import { tr } from './i18n';
 import { AudioEngine } from './audio';
 import { FX } from './fx';
@@ -54,6 +54,7 @@ export const S = {
   close: tr({ en: 'Close', he: 'סגירה', ar: 'إغلاق' }),
   record: tr({ en: 'New personal best!', he: 'שיא אישי חדש!', ar: 'رقم شخصي جديد!' }),
   stars: (n: number) => tr({ en: `${n} of 3 stars`, he: `${n} מתוך 3 כוכבים`, ar: `${n} من 3 نجوم` }),
+  allStars: tr({ en: '★ Three stars!', he: '★ שלושה כוכבים!', ar: '★ ثلاث نجوم!' }),
 };
 
 export interface LevelInfo {
@@ -71,6 +72,8 @@ export interface Extra {
 export interface StarLine {
   label: string;
   on: boolean;
+  /** What to try next time, shown when this is the first star missed. */
+  tip?: string;
 }
 
 export interface CardButton {
@@ -280,49 +283,96 @@ export class Shell {
     });
   }
 
-  /** The end-of-level card. Resolves with 'next' | 'again' | 'menu'. */
+  /**
+   * The end-of-level card: a reward, not a report. Stars land one by one (no
+   * text: tap one to see what it was for), one central moment (`hero`), one
+   * tip for the first star missed, the anchor sentence as a sticker, and one
+   * big button forward that shows what's next. Again and levels are icons.
+   * Resolves with 'next' | 'again' | 'menu'.
+   */
   end(o: {
     title: string;
     stars: StarLine[];
     zen: number;
+    /** The one thing to look at: the shadow in its frame, the sentence you made. */
+    hero?: Node;
     lines?: (string | Node)[];
     anchor: string;
     record?: boolean;
     hasNext: boolean;
+    /** The next level, shown on the forward button. */
+    next?: { name: string; icon?: string };
   }): Promise<string> {
-    const earned = o.stars.filter((s) => s.on).length;
-    const starsEl = h(
-      'div',
-      { class: 'sh-end-stars', 'aria-label': S.stars(earned) },
-      ...o.stars.map((s, i) =>
-        h('div', { class: `sh-end-star${s.on ? ' on' : ''}`, style: { animationDelay: `${0.15 + i * 0.22}s` } }, h('i', { 'aria-hidden': 'true' }, '★'), h('span', {}, s.label)),
-      ),
-    );
-    if (earned) this.audio.success();
-    const buttons: CardButton[] = [];
-    if (o.hasNext) buttons.push({ id: 'next', label: S.next, cls: 'warm' });
-    buttons.push({ id: 'again', label: S.again, cls: o.hasNext ? 'ghost' : 'warm' }, { id: 'menu', label: S.menu, cls: 'ghost' });
-    const opened = this.newIsles.map((i) => isleMeta(i)!);
-    this.newIsles = [];
-    if (opened.length) buttons.unshift({ id: 'island', label: S.seeIsle(opened[0].name), cls: 'warm' });
-    else if (o.zen) buttons.push({ id: 'island', label: S.island, cls: 'ghost' });
-    const daily = this.daily;
-    this.daily = 0;
-    const chosen = this.card({
-      cls: 'sh-end',
-      title: o.title,
-      lines: [
+    return new Promise((resolve) => {
+      const done = (id: string) => {
+        wrap.remove();
+        if (id === 'island') location.assign(islandHref());
+        else resolve(id);
+      };
+      const earned = o.stars.filter((s) => s.on).length;
+      const quiet = reducedMotion();
+      // Stars: big, wordless; a tap shows what each was for.
+      const bubble = h('p', { class: 'sh-end-bubble', 'aria-live': 'polite' });
+      const starsEl = h(
+        'div',
+        { class: 'sh-end-stars', role: 'group', 'aria-label': S.stars(earned) },
+        ...o.stars.map((st, i) => {
+          const b = h(
+            'button',
+            { class: `sh-end-star${st.on ? ' on' : ''}`, type: 'button', 'aria-label': st.label, style: { animationDelay: `${0.2 + i * 0.35}s` } },
+            '★',
+          );
+          b.addEventListener('click', () => {
+            bubble.textContent = bubble.textContent === st.label ? '' : st.label;
+          });
+          if (st.on && !quiet) setTimeout(() => this.audio.bell(3 + i * 3, 0.7), 200 + i * 350);
+          return b;
+        }),
+      );
+      // One tip: for the first star missed, phrased for next time. Or a cheer.
+      const missed = o.stars.find((st) => !st.on);
+      const tip = missed?.tip ? `☆ ${missed.tip}` : o.stars.length && !missed ? S.allStars : '';
+      const opened = this.newIsles.map((i) => isleMeta(i)!);
+      this.newIsles = [];
+      this.daily = 0;
+
+      const primary = h(
+        'button',
+        { class: 'btn warm sh-end-go', type: 'button' },
+        o.hasNext ? `▶ ${o.next ? `${o.next.name}${o.next.icon ? ` ${o.next.icon}` : ''}` : S.next}` : `↻ ${S.again}`,
+      );
+      primary.addEventListener('click', () => done(o.hasNext ? 'next' : 'again'));
+      const icon = (id: string, glyph: string, label: string) => {
+        const b = h('button', { class: 'sh-end-icon', type: 'button', 'aria-label': label, title: label }, glyph);
+        b.addEventListener('click', () => done(id));
+        return b;
+      };
+      const icons = h('div', { class: 'sh-end-icons' }, o.hasNext ? icon('again', '↻', S.again) : null, icon('menu', '☰', S.menu));
+      if (o.zen) icons.append(icon('island', `🌿 +${o.zen}`, S.zen(o.zen)));
+      const isleBtn = opened.length ? h('button', { class: 'btn warm sh-end-isle', type: 'button' }, `${opened[0].emoji} ${S.seeIsle(opened[0].name)}`) : null;
+      isleBtn?.addEventListener('click', () => done('island'));
+
+      const card = h(
+        'div',
+        { class: 'sh-card sh-end', role: 'dialog', 'aria-modal': 'true', 'aria-label': o.title },
         starsEl,
-        ...(o.lines ?? []),
-        ...(o.record ? [h('p', { class: 'sh-record' }, `🏆 ${S.record}`)] : []),
-        ...opened.map((m) => h('p', { class: 'sh-newisle' }, `${m.emoji} ${S.newIsle(m.name)}`)),
-        ...(o.zen ? [h('p', { class: 'sh-zen' }, `🌿 ${S.zen(o.zen)}`, daily ? h('small', {}, S.daily(daily)) : null)] : []),
-        h('div', { class: 'sh-anchor' }, h('b', {}, S.takeHome), h('p', {}, o.anchor)),
-      ],
-      buttons,
+        bubble,
+        h('h2', {}, o.title),
+        o.hero ?? null,
+        ...(o.lines ?? []).map((l) => (typeof l === 'string' ? h('p', {}, l) : l)),
+        o.record ? h('p', { class: 'sh-record' }, `🏆 ${S.record}`) : null,
+        tip ? h('p', { class: 'sh-end-tip' }, tip) : null,
+        h('p', { class: 'sh-sticker' }, o.anchor),
+        isleBtn,
+        primary,
+        icons,
+      );
+      const wrap = h('div', { class: 'sh-scrim' }, card);
+      this.layer.append(wrap);
+      if (earned) this.audio.success();
+      this.announce(`${o.title}. ${S.stars(earned)}. ${o.anchor}`);
+      primary.focus({ preventScroll: true });
     });
-    // "To the islands" leaves the page; the game never sees that choice.
-    return chosen.then((id) => (id === 'island' ? (location.assign(islandHref()), new Promise<string>(() => {})) : id));
   }
 
   /** Information sheet (album, how to play) with a close button. */

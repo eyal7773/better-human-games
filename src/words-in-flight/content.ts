@@ -47,6 +47,9 @@ export const LEVEL_NAMES = [
 ];
 
 /** Replies from the listener after each sentence, by how it landed. */
+/** One icon per level, for the "next level" button. */
+export const LEVEL_ICONS = ['🌙', '🌱', '🏷️', '👻', '🙏', '✌️', '🍬', '🌅', '⏩', '⛈️'];
+
 /** How the listener answers depends on who they are: a kid, someone close, or someone outside the home. */
 export type ReplyGroup = 'kid' | 'close' | 'formal';
 export const replyGroup = (with_: readonly Other[]): ReplyGroup => {

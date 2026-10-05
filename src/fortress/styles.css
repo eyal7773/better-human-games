@@ -161,3 +161,18 @@
     color: #d9622b;
   }
 }
+
+/* ---- End card: what you let go, and the boundaries that mattered. */
+.fo-hero {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+.fo-hero b {
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: #e3f7f3;
+  color: var(--lagoon-deep);
+  font-size: 1.05rem;
+}

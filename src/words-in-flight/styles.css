@@ -388,3 +388,98 @@
     transform: translateY(-30px);
   }
 }
+
+/* ---- End card: the best honest sentence, said to them. */
+.wf-hero {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+}
+.wf-hero-face,
+.wf-left-door span {
+  display: block;
+  width: 64px;
+  height: 64px;
+}
+.wf-hero-said {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px;
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 18px;
+  background: #f1f7ff;
+  font-weight: 600;
+  font-size: 0.92rem;
+  animation: wf-said 600ms 700ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.wf-hero-said::before {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  inset-inline-start: calc(50% - 8px);
+  border: 8px solid transparent;
+  border-bottom-color: #f1f7ff;
+}
+@keyframes wf-said {
+  from {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+}
+.wf-summary {
+  margin: 4px 0 0;
+}
+/* ---- They left: the face at the door. */
+.wf-left-door {
+  display: flex;
+  justify-content: center;
+  align-items: end;
+  gap: 4px;
+  font-size: 3rem;
+}
+.wf-left-door span {
+  animation: wf-leave 900ms ease-in both;
+}
+@keyframes wf-leave {
+  to {
+    transform: translateX(var(--wf-out, 30px));
+    opacity: 0.35;
+  }
+}
+[dir='rtl'] .wf-left-door {
+  --wf-out: -30px;
+}
+/* ---- Album: honest versions that landed. */
+.wf-album {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.wf-album li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 14px;
+  background: #f1f7ff;
+}
+.wf-album-face {
+  flex: none;
+  width: 40px;
+  height: 40px;
+}
+.wf-album p {
+  margin: 0;
+  font-weight: 600;
+}
+@media (prefers-reduced-motion: reduce) {
+  .wf-hero-said,
+  .wf-left-door span {
+    animation: none;
+  }
+}

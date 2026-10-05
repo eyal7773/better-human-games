@@ -579,3 +579,6 @@ export const LEVEL_NAMES = [
   tr({ en: 'A calm boundary', he: 'גבול בנחת', ar: 'حدّ بهدوء' }),
   tr({ en: 'The last lantern', he: 'הפנס האחרון', ar: 'الفانوس الأخير' }),
 ];
+
+/** One icon per level, for the "next level" button. */
+export const LEVEL_ICONS = ['🔦', '👻', '🔍', '🌵', '🦔', '🟠', '🌫️', '🌵', '🌙', '📏', '🗣️', '🏮'];
