@@ -67,13 +67,17 @@ export function heSelf(m: string, f: string, p: Profile = profile) {
  * "{m|f|x}". Without a choice it's the slash form ("מרגיש/ה"), unless an
  * explicit neutral form is given.
  */
+const FINAL_OPEN: Record<string, string> = { ך: 'כ', ם: 'מ', ן: 'נ', ף: 'פ', ץ: 'צ' };
+
 export function agree(text: string, p: Profile = profile) {
   return text.replace(/\{([^{}|]*)\|([^{}|]*)(?:\|([^{}|]*))?\}/g, (_, m: string, f: string, x?: string) => {
     if (m === f) return m;
     if (p.address === 'm') return m;
     if (p.address === 'f') return f;
     if (x !== undefined) return x;
-    return f === `${m}ה` ? `${m}/ה` : `${m}/${f}`;
+    // Feminine = masculine + suffix (final letters open up: נבוך → נבוכה): "נבוך/ה".
+    const open = m.replace(/[ךםןףץ]$/, (c) => FINAL_OPEN[c]);
+    return m && f.startsWith(open) && f.length - open.length <= 2 ? `${m}/${f.slice(open.length)}` : `${m}/${f}`;
   });
 }
 

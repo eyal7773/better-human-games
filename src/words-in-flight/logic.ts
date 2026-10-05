@@ -15,19 +15,24 @@ export interface Token {
   text: string;
   /** For toxic tokens: what it becomes when caught. */
   fix?: string;
+  /** A toxic token dressed as a friendly one (sarcasm): it flies looking neutral. */
+  sweet?: boolean;
 }
 
 /**
  * Parses the compact sentence notation used in the content:
  * tokens split by " | ", "!" marks toxic with "→" before its honest version,
- * "+" marks a feeling. Everything else is neutral.
+ * "~" marks a toxic one that sounds sweet (sarcasm), "+" marks a feeling.
+ * Everything else is neutral.
  */
 export function parse(s: string): Token[] {
   return s.split(' | ').map((raw) => {
     const p = raw.trim();
-    if (p.startsWith('!')) {
+    if (p.startsWith('!') || p.startsWith('~')) {
       const [text, fix] = p.slice(1).split('→');
-      return { kind: 't', text: text.trim(), fix: (fix ?? '').trim() };
+      const t: Token = { kind: 't', text: text.trim(), fix: (fix ?? '').trim() };
+      if (p.startsWith('~')) t.sweet = true;
+      return t;
     }
     if (p.startsWith('+')) return { kind: 'f', text: p.slice(1).trim() };
     return { kind: 'n', text: p };
@@ -75,14 +80,28 @@ export interface Level {
   speed: number;
   /** Honest sentences in a row needed for the streak star. */
   streak: number;
+  /** Which sentences can come up (their difficulty, 1–5; see content). */
+  diff: [number, number];
+  /** What's new here, besides speed: sweet-sounding stings, or sentences back to back. */
+  twist?: 'sweet' | 'chain';
 }
 
+/**
+ * Ten levels. Each adds speed and something new to read; the sentences come
+ * from the content library, picked for the player's home. The first five ids
+ * are the original levels', so earned stars carry over.
+ */
 export const LEVELS: Level[] = [
-  { id: 'calm', sentences: 5, speed: 1, streak: 1 },
-  { id: 'dishes', sentences: 6, speed: 1.15, streak: 2 },
-  { id: 'screens', sentences: 6, speed: 1.3, streak: 3 },
-  { id: 'school', sentences: 7, speed: 1.5, streak: 3 },
-  { id: 'argument', sentences: 8, speed: 1.75, streak: 3 },
+  { id: 'calm', sentences: 4, speed: 1, streak: 1, diff: [1, 1] },
+  { id: 'dishes', sentences: 5, speed: 1.06, streak: 2, diff: [1, 2] },
+  { id: 'screens', sentences: 5, speed: 1.12, streak: 2, diff: [1, 3] },
+  { id: 'school', sentences: 5, speed: 1.18, streak: 3, diff: [2, 3] },
+  { id: 'argument', sentences: 5, speed: 1.24, streak: 3, diff: [2, 4] },
+  { id: 'double', sentences: 5, speed: 1.3, streak: 3, diff: [3, 4] },
+  { id: 'sweet', sentences: 5, speed: 1.3, streak: 3, diff: [3, 5], twist: 'sweet' },
+  { id: 'long', sentences: 6, speed: 1.36, streak: 3, diff: [4, 5] },
+  { id: 'chain', sentences: 6, speed: 1.42, streak: 3, diff: [4, 5], twist: 'chain' },
+  { id: 'big', sentences: 6, speed: 1.5, streak: 3, diff: [5, 5] },
 ];
 
 /** Seconds a token takes from your mouth to their face. */

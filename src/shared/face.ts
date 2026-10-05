@@ -6,9 +6,9 @@ import { clamp, lerp } from './dom';
  * the funny version of getting defensive.
  */
 
-export type Who = 'teen' | 'partner' | 'child' | 'grandma' | 'teenGirl';
+export type Who = 'teen' | 'partner' | 'child' | 'grandma' | 'teenGirl' | 'man' | 'woman' | 'grandpa';
 
-const HAIR: Record<Who, { color: string; path: string; skin: string }> = {
+const HAIR: Record<Who, { color: string; path: string; skin: string; extra?: string }> = {
   teen: { color: '#3b2a20', skin: '#f2c6a0', path: 'M22 46c-2-22 14-34 30-34s32 10 29 34c-6-10-14-14-20-12-8-8-26-8-39 12z' },
   teenGirl: {
     color: '#6b3a1f',
@@ -21,6 +21,24 @@ const HAIR: Record<Who, { color: string; path: string; skin: string }> = {
     color: '#d9dbe3',
     skin: '#f0c7a4',
     path: 'M16 50c0-26 16-38 34-38s34 12 34 38c-6-12-12-16-20-18 2-6-4-10-14-10s-16 4-14 10c-8 2-14 6-20 18z',
+  },
+  // Adults outside the home: a short-haired man with a trimmed beard, a woman with a bun, a grandpa with a moustache.
+  man: {
+    color: '#4a3527',
+    skin: '#e3b089',
+    path: 'M18 46c-2-22 14-32 32-32s34 10 32 32c-4-8-12-12-22-12-6 4-18 4-24 0-8 0-14 4-18 12z',
+    extra: '<path d="M24 66c2 18 14 26 26 26s24-8 26-26c-4 8-10 10-14 10-4-4-20-4-24 0-4 0-10-2-14-10z" fill="#4a3527" stroke="#1d2b4f" stroke-width="2.5" stroke-linejoin="round" opacity=".9"/>',
+  },
+  woman: {
+    color: '#b5522f',
+    skin: '#f4c9a6',
+    path: 'M16 58c-4-28 12-44 34-44s38 16 34 44c-2-16-8-24-16-28-8 6-28 6-36 0-8 4-14 12-16 28zM38 18c0-10 24-10 24 0s-24 10-24 0z',
+  },
+  grandpa: {
+    color: '#c9ccd6',
+    skin: '#eab995',
+    path: 'M14 60c-2-14 2-24 10-30 0 10 2 16 4 20-6 2-10 6-14 10zM86 60c2-14-2-24-10-30 0 10-2 16-4 20 6 2 10 6 14 10z',
+    extra: '<path d="M34 72c6-4 12-4 16 0 4-4 10-4 16 0-4 4-10 4-16 2-6 2-12 2-16-2z" fill="#c9ccd6" stroke="#1d2b4f" stroke-width="2.5" stroke-linejoin="round"/>',
   },
 };
 
@@ -42,6 +60,7 @@ export function faceSVG(who: Who) {
   <circle class="fc-head" cx="50" cy="56" r="36" fill="${hair.skin}" stroke="#1d2b4f" stroke-width="3"/>
   <circle class="fc-flush" cx="50" cy="56" r="34" fill="#ff4a3a" opacity="0"/>
   <path d="${hair.path}" fill="${hair.color}" stroke="#1d2b4f" stroke-width="3" stroke-linejoin="round"/>
+  ${hair.extra ?? ''}
   <g class="fc-cheeks" fill="#ff7aa2"><circle cx="30" cy="68" r="5"/><circle cx="70" cy="68" r="5"/></g>
   <g fill="#1d2b4f"><ellipse class="fc-eye" cx="38" cy="58" rx="4" ry="4.6"/><ellipse class="fc-eye" cx="62" cy="58" rx="4" ry="4.6"/></g>
   <g fill="none" stroke="#1d2b4f" stroke-width="3.4" stroke-linecap="round">

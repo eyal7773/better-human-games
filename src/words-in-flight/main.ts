@@ -1,7 +1,8 @@
 // The shell first, so each game's styles come after (and win over) the shared ones.
 import { Shell } from '../shared/shell';
 import './styles.css';
-import { h, clamp, lerp, pick, rand, reducedMotion, shuffle, Scope } from '../shared/dom';
+import { h, clamp, lerp, pick, rand, reducedMotion, Scope } from '../shared/dom';
+import { markSeen, query } from '../shared/library';
 import { tr, isRTL } from '../shared/i18n';
 import { vibrate } from '../shared/haptics';
 import { faceSVG, setFaceMood } from '../shared/face';
@@ -27,7 +28,7 @@ import {
   type Level,
   type SentenceTally,
 } from './logic';
-import { LEVEL_NAMES, REPLY, SENTENCES, type Sentence } from './content';
+import { LEVEL_NAMES, REPLY, replyGroup, SENTENCES, type Sentence } from './content';
 
 /**
  * Words in Flight: when you're hot, words leave your mouth before you've
@@ -64,6 +65,16 @@ const T = {
     en: '“Thank you” is not “you always”. Read before you swipe.',
     he: '"תודה" זה לא "אתה תמיד". קראו לפני שמחליקים.',
     ar: '«شكرًا» ليست «أنت دائمًا». اقرؤوا قبل أن تسحبوا.',
+  }),
+  hintSweet: tr({
+    en: 'Some white words sound nice but sting (“Oh, great job…”). Read them — and catch those too.',
+    he: 'יש מילים לבנות שנשמעות נחמד אבל עוקצות ("יופי, כל הכבוד..."). קראו, ותפסו גם אותן.',
+    ar: 'بعض الكلمات البيضاء تبدو لطيفة لكنها تلسع («رائع، أحسنت…»). اقرؤوها — والتقطوها أيضًا.',
+  }),
+  hintChain: tr({
+    en: 'No pause between sentences, like a real argument. Breathe when you need to.',
+    he: 'בלי הפסקה בין משפטים, כמו בוויכוח אמיתי. נשמו כשצריך.',
+    ar: 'بلا توقف بين الجمل، كجدال حقيقي. تنفّسوا عند الحاجة.',
   }),
   cutFeeling: tr({ en: '✗ You cut off what you felt', he: '✗ חתכתם את מה שהרגשתם', ar: '✗ قطعتم ما شعرتم به' }),
   caught: tr({ en: '✓ Caught', he: '✓ נתפס', ar: '✓ التقطتموها' }),
@@ -125,20 +136,26 @@ function showMenu() {
   });
 }
 
-/** Picks a level's sentences: new ones for this level first, then earlier ones. */
-function sentencesFor(level: Level, n: number): Sentence[] {
-  const lvl = LEVELS.indexOf(level) + 1;
-  const fresh = shuffle(SENTENCES.filter((s) => s.lvl === lvl));
-  const older = shuffle(SENTENCES.filter((s) => s.lvl < lvl));
-  const list = [...fresh.slice(0, Math.ceil(n * 0.6)), ...older, ...fresh.slice(Math.ceil(n * 0.6))].slice(0, n);
-  // Level 1 opens with its easiest sentence; otherwise mix the order.
-  return lvl === 1 ? list : shuffle(list);
+/** A level's sentences: ones that fit the player's home, fresh ones first (see the content library). */
+function sentencesFor(level: Level): Sentence[] {
+  const gentle = LEVELS.indexOf(level) < 2;
+  const list = query(SENTENCES, { count: level.sentences, diff: level.diff, gentle });
+  markSeen(list.map((s) => s.id));
+  return list;
+}
+
+/** Endless: any difficulty, never the same sentence twice within a while. */
+function nextEndless(recent: readonly string[]): Sentence {
+  const [s] = query(SENTENCES, { count: 1, exclude: recent });
+  return s ?? pick(SENTENCES);
 }
 
 interface Flyer {
   kind: Kind;
   text: string;
   fix?: string;
+  /** Toxic, but flies looking friendly (sarcasm). */
+  sweet?: boolean;
   /** Index of the token in its sentence. */
   idx: number;
   t: number;
@@ -228,7 +245,7 @@ async function play(level: Level | null) {
   let sentenceIndex = 0;
 
   const setFace = (s: Sentence) => {
-    faceBox.innerHTML = faceSVG(s.who);
+    faceBox.innerHTML = faceSVG(s.face);
     faceSvg = faceBox.querySelector('svg');
     if (!reducedMotion()) faceBox.animate([{ transform: 'translateY(-20px)', opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 300, easing: 'ease-out' });
   };
@@ -426,6 +443,7 @@ async function play(level: Level | null) {
         kind: tok.kind,
         text: tok.text,
         fix: tok.fix,
+        sweet: tok.sweet,
         idx: i,
         t: 0,
         dur: flightTime(speed) * rand(0.92, 1.08),
@@ -512,13 +530,15 @@ async function play(level: Level | null) {
       ctx.scale(grow, grow);
       const w = f.w;
       const hh = f.h;
-      if (f.kind === 't') spikes(w, hh);
+      // A sweet sting flies dressed as a neutral word: you have to read it.
+      const look = f.kind === 't' && f.sweet ? 'n' : f.kind;
+      if (look === 't') spikes(w, hh);
       ctx.beginPath();
       ctx.roundRect(-w / 2, -hh / 2, w, hh, 17);
-      ctx.fillStyle = f.kind === 't' ? '#ff5a4e' : f.kind === 'f' ? '#c6f3da' : f.kind === 'x' ? '#dff0ff' : '#ffffff';
+      ctx.fillStyle = look === 't' ? '#ff5a4e' : look === 'f' ? '#c6f3da' : look === 'x' ? '#dff0ff' : '#ffffff';
       ctx.fill();
       ctx.lineWidth = 3;
-      ctx.strokeStyle = f.kind === 't' ? '#b3261e' : f.kind === 'f' ? '#1f9e6d' : f.kind === 'x' ? '#2f7fd8' : 'rgba(29,43,79,.25)';
+      ctx.strokeStyle = look === 't' ? '#b3261e' : look === 'f' ? '#1f9e6d' : look === 'x' ? '#2f7fd8' : 'rgba(29,43,79,.25)';
       ctx.stroke();
       if (f.flash > 0) {
         ctx.globalAlpha = f.flash;
@@ -526,7 +546,7 @@ async function play(level: Level | null) {
         ctx.fill();
         ctx.globalAlpha = 1;
       }
-      ctx.fillStyle = f.kind === 't' ? '#fff' : f.kind === 'f' ? '#0a5e43' : f.kind === 'x' ? '#134a8c' : '#1d2b4f';
+      ctx.fillStyle = look === 't' ? '#fff' : look === 'f' ? '#0a5e43' : look === 'x' ? '#134a8c' : '#1d2b4f';
       ctx.fillText(f.kind === 'f' ? `🌱 ${f.text}` : f.text, 0, 1);
       ctx.restore();
     }
@@ -549,13 +569,18 @@ async function play(level: Level | null) {
 
   // --- the evening
   const total = level ? level.sentences : Infinity;
-  const queue = level ? sentencesFor(level, level.sentences) : [];
-  hint.textContent = lvlN === 1 ? T.hint1 : lvlN === 2 ? T.hint2 : lvlN === 4 ? T.hint4 : '';
+  const queue = level ? sentencesFor(level) : [];
+  const recent: string[] = [];
+  hint.textContent = { 1: T.hint1, 2: T.hint2, 5: T.hint4, 7: T.hintSweet, 9: T.hintChain }[lvlN] ?? '';
   await scope.sleep(900);
-  let lastSentence: Sentence | null = null;
   while (scope.alive && sentenceIndex < total) {
-    const s = level ? queue[sentenceIndex] : pick(SENTENCES.filter((x) => x !== lastSentence));
-    lastSentence = s;
+    const s = level ? queue[sentenceIndex] : nextEndless(recent);
+    if (!s) break;
+    if (endless) {
+      recent.push(s.id);
+      if (recent.length > 12) recent.shift();
+      markSeen([s.id]);
+    }
     await runSentence(s);
     if (!scope.alive) return;
     if (conn <= 0) {
@@ -567,7 +592,7 @@ async function play(level: Level | null) {
     streak = nextStreak(streak, tally);
     bestStreak = Math.max(bestStreak, streak);
     if (wasHonest) {
-      say(pick(REPLY.honest), 'good');
+      say(pick(REPLY[replyGroup(s.with)].honest), 'good');
       if (streak >= 2) {
         streakEl.textContent = streak >= 3 && streak === (level?.streak ?? 3) ? T.streakBig : T.streak(streak);
         streakEl.classList.remove('show');
@@ -579,11 +604,12 @@ async function play(level: Level | null) {
         shell.fx.confetti(r.left + r.width / 2, r.top + r.height / 2, 30);
         shell.audio.success();
       }
-    } else if (tally.hits) say(pick(REPLY.hurt), 'bad');
-    else say(pick(REPLY.muddled), '');
+    } else if (tally.hits) say(pick(REPLY[replyGroup(s.with)].hurt), 'bad');
+    else say(pick(REPLY[replyGroup(s.with)].muddled), '');
     if (sentenceIndex >= 1) hint.textContent = '';
     sentenceIndex++;
-    await scope.sleep(1500);
+    // "No pause": the next sentence comes right away, like in a real argument.
+    await scope.sleep(level?.twist === 'chain' ? 450 : 1500);
   }
   if (!scope.alive) return;
 
@@ -631,7 +657,8 @@ async function play(level: Level | null) {
     stars: stars.map((on, i) => ({ on, label: T.stars[i] })),
     zen,
     lines: [summary],
-    anchor: ANCHOR.sentence,
+    // The feelings level ends on the question underneath; the rest on the sentence itself.
+    anchor: lvlN === 2 ? ANCHOR.underneath : ANCHOR.sentence,
     hasNext: lvlN < LEVELS.length,
   });
   scope.dispose();

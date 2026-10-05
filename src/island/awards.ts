@@ -1,6 +1,7 @@
 import { tr } from '../shared/i18n';
 import { load } from '../shared/storage';
 import { wallet } from '../shared/zen';
+import { LEVELS as WORDS_LEVELS } from '../words-in-flight/logic';
 
 /**
  * Achievement items: never bought, earned in the games. Each one reads a
@@ -30,7 +31,7 @@ export const AWARDS: Record<string, Award> = {
   },
   feather: {
     how: tr({ en: 'Three stars on every level of Words in Flight', he: 'שלושה כוכבים בכל השלבים של מילים באוויר', ar: 'ثلاث نجوم في كل مراحل «كلمات في الهواء»' }),
-    done: () => threeStarLevels(read('words-in-flight').stars) >= 5,
+    done: () => threeStarLevels(read('words-in-flight').stars) >= WORDS_LEVELS.length,
   },
   shadowlamp: {
     how: tr({ en: 'Fill the whole shadow gallery in Shadow on the Wall', he: 'למלא את כל גלריית הצללים בצל על הקיר', ar: 'املؤوا معرض الظلال كله في «ظلّ على الحائط»' }),

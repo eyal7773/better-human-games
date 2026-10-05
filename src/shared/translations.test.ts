@@ -18,7 +18,7 @@ async function contentIn(lang: 'he' | 'ar') {
   const strings: string[] = [
     ...words.SENTENCES.flatMap((s) => s.tokens.flatMap((t) => (t.fix ? [t.text, t.fix] : [t.text]))),
     ...words.LEVEL_NAMES,
-    ...Object.values(words.REPLY).flat(),
+    ...Object.values(words.REPLY).flatMap((r) => Object.values(r).flat()),
     ...shadow.SCENES.flatMap((s) => [s.name, s.event, s.anchor, ...s.losses]),
     ...shadow.MY_LOSSES,
     ...fortress.BUBBLES.flatMap((b) => [b.label, b.takes]),
