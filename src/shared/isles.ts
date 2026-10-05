@@ -24,7 +24,7 @@ export interface IsleMeta {
 
 export const ISLES: IsleMeta[] = [
   { id: 'garden', emoji: '🌸', game: 'boiling-point', threshold: 0, name: tr({ en: 'Garden of Calm', he: 'גן השקט', ar: 'حديقة السكينة' }), gameName: tr({ en: 'Boiling Point', he: 'נקודת רתיחה', ar: 'نقطة الغليان' }) },
-  { id: 'shore', emoji: '🐚', game: 'inner-radio', threshold: 300, name: tr({ en: 'Shore of Sounds', he: 'חוף הצלילים', ar: 'شاطئ الأصوات' }), gameName: tr({ en: 'Inner Radio', he: 'רדיו פנימי', ar: 'الراديو الداخلي' }) },
+  { id: 'shore', emoji: '🐚', game: 'shadow-wall', threshold: 300, name: tr({ en: 'Shore of Sounds', he: 'חוף הצלילים', ar: 'شاطئ الأصوات' }), gameName: tr({ en: 'Shadow on the Wall', he: 'צל על הקיר', ar: 'ظلّ على الحائط' }) },
   { id: 'hill', emoji: '🪁', game: 'words-in-flight', threshold: 900, name: tr({ en: 'Hill of Wind', he: 'גבעת הרוח', ar: 'تلة الريح' }), gameName: tr({ en: 'Words in Flight', he: 'מילים באוויר', ar: 'كلمات في الهواء' }) },
   { id: 'forest', emoji: '🏮', game: 'shadow-wall', threshold: 1800, name: tr({ en: 'Lantern Forest', he: 'יער הפנסים', ar: 'غابة الفوانيس' }), gameName: tr({ en: 'Shadow on the Wall', he: 'צל על הקיר', ar: 'ظلّ على الحائط' }) },
   { id: 'lighthouse', emoji: '🗼', game: 'fortress', threshold: 3000, name: tr({ en: 'Lighthouse Isle', he: 'אי המגדלור', ar: 'جزيرة المنارة' }), gameName: tr({ en: 'The Fortress', he: 'המבצר', ar: 'الحصن' }) },

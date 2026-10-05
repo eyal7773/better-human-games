@@ -337,18 +337,6 @@ body {
   margin-bottom: 18px;
   overflow: visible;
 }
-.gc-art-radio {
-  background:
-    radial-gradient(90% 30% at 0% 100%, #ff8a5c 0 60%, transparent 61%),
-    linear-gradient(180deg, #ffd08a 0%, #ffab70 100%);
-}
-.gc-needle {
-  transition: transform 700ms cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-.game-card:hover .gc-needle,
-.game-card:focus .gc-needle {
-  transform: translateX(44px);
-}
 .gc-art-words {
   display: flex;
   flex-direction: column;

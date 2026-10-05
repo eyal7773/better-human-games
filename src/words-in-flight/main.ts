@@ -373,6 +373,8 @@ async function play(level: Level | null) {
       vibrate(40);
     } else {
       if (f.kind !== 'n') joy = 1;
+      // Every feeling that got through is kept (the island's feelings antenna counts them).
+      if (f.kind === 'f' && discover(shell.progress, `feel:${f.text}`)) shell.persist();
       settle(f.idx, { text: f.text, cls: f.kind === 'n' ? 'plain' : f.kind === 'f' ? 'feel' : 'fix' });
       const r = faceBox.getBoundingClientRect();
       if (f.kind !== 'n') shell.fx.floatText(r.left + r.width / 2 + rand(-30, 30), r.bottom, '❤', 'wf-heart');

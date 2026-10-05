@@ -34,7 +34,6 @@ export default defineConfig(({ command }) => ({
         boilingPoint: page('./boiling-point/index.html'),
         catchMe: page('./catch-me/index.html'),
         catchMe3d: page('./catch-me-3d/index.html'),
-        innerRadio: page('./inner-radio/index.html'),
         wordsInFlight: page('./words-in-flight/index.html'),
         shadowWall: page('./shadow-wall/index.html'),
         fortress: page('./fortress/index.html'),

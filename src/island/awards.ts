@@ -10,6 +10,8 @@ import { wallet } from '../shared/zen';
 type Saved = { album?: unknown; done?: unknown; stars?: unknown; calmRounds?: unknown; finished?: unknown };
 const read = (game: string) => load<Saved>(`bhg.${game}.v1`, {});
 const len = (v: unknown) => (Array.isArray(v) ? v.length : 0);
+/** Words in Flight files each feeling that landed in its album as "feel:…". */
+const feelings = (v: unknown) => (Array.isArray(v) ? v.filter((x) => typeof x === 'string' && x.startsWith('feel:')).length : 0);
 const threeStarLevels = (v: unknown) => (v && typeof v === 'object' ? Object.values(v as Record<string, unknown>).filter((s) => Array.isArray(s) && s.length === 3 && s.every(Boolean)).length : 0);
 
 export interface Award {
@@ -23,8 +25,8 @@ export const AWARDS: Record<string, Award> = {
     done: () => Number(read('boiling-point').calmRounds) >= 30,
   },
   antenna: {
-    how: tr({ en: 'Find all six stations in Inner Radio', he: 'למצוא את כל שש התחנות ברדיו הפנימי', ar: 'اعثروا على المحطات الست في «الراديو الداخلي»' }),
-    done: () => len(read('inner-radio').album) >= 6,
+    how: tr({ en: 'Let 6 different feelings land in Words in Flight', he: 'לתת ל־6 רגשות שונים לנחות במילים באוויר', ar: 'دعوا 6 مشاعر مختلفة تصل في «كلمات في الهواء»' }),
+    done: () => feelings(read('words-in-flight').album) >= 6,
   },
   feather: {
     how: tr({ en: 'Three stars on every level of Words in Flight', he: 'שלושה כוכבים בכל השלבים של מילים באוויר', ar: 'ثلاث نجوم في كل مراحل «كلمات في الهواء»' }),

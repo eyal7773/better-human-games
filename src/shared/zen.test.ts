@@ -28,7 +28,7 @@ describe('wallet', () => {
     const w = sanitizeWallet({ zen: 5 });
     expect(claimDaily(w, 'fortress', 'd1')).toBe(DAILY_BONUS);
     expect(claimDaily(w, 'fortress', 'd1')).toBe(0);
-    expect(claimDaily(w, 'inner-radio', 'd1')).toBe(DAILY_BONUS);
+    expect(claimDaily(w, 'shadow-wall', 'd1')).toBe(DAILY_BONUS);
     expect(claimDaily(w, 'fortress', 'd2')).toBe(DAILY_BONUS);
     expect(w.zen).toBe(5 + 3 * DAILY_BONUS);
     expect(w.earned).toBe(5 + 3 * DAILY_BONUS);
