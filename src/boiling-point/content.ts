@@ -1,7 +1,8 @@
 import { tr } from '../shared/i18n';
 import { agree } from '../shared/profile';
-import type { Meta } from '../shared/library';
-import { DILEMMA_META } from './content/meta';
+import type { Meta, Other } from '../shared/library';
+import { DILEMMA_META, NOTIF_WITH, SHOUT_WITH } from './content/meta';
+import { eligible } from '../shared/library';
 import { en } from './content/en';
 import { he } from './content/he';
 import { ar } from './content/ar';
@@ -44,6 +45,8 @@ export const DILEMMAS: Dilemma[] = content.dilemmas.map((d) => ({
   options: d.options.map((o) => ({ ...o, text: agree(o.text) })),
   why: agree(d.why),
 }));
-export const SHOUTS = content.shouts;
-export const NOTIFS = content.notifs;
+/** Only the noise of the player's own life: kids shouting for parents, a drill next door for everyone. */
+const fitsHome = (o: Other[]) => eligible({ id: '', with: o, topics: ['noise'], setting: 'home', diff: 1 });
+export const SHOUTS = content.shouts.filter((_, i) => fitsHome(SHOUT_WITH[i]));
+export const NOTIFS = content.notifs.filter((_, i) => fitsHome(NOTIF_WITH[i])).map((n) => ({ ...n, body: agree(n.body) }));
 export const LURES = content.lures;

@@ -1,4 +1,4 @@
-import type { Meta } from '../../shared/library';
+import type { Meta, Other } from '../../shared/library';
 import type { HouseholdTag } from '../../shared/tags';
 
 /**
@@ -102,4 +102,36 @@ export const DILEMMA_META: Meta[] = [
   { id: 'grandcancel', with: ['family'], requires: ['grandparent'], topics: ['connection'], setting: 'home', diff: 2 },
   { id: 'burnt', with: ['none'], topics: ['household'], setting: 'home', diff: 1 },
   { id: 'keys', with: ['none'], topics: ['household'], setting: 'home', diff: 1 },
+];
+
+/** Who's shouting, in the order of the language files' shouts (kids first, then the rest of life). */
+export const SHOUT_WITH: Other[][] = [
+  ...Array.from({ length: 10 }, (): Other[] => ['kids']),
+  ['coworker'],
+  ['neighbor'],
+  ['none'],
+  ['roommate'],
+  ['partner'],
+  ['ageing-parent'],
+  ['stranger'],
+  ['boss'],
+  ['grandchild'],
+  ['family'],
+];
+
+/** Who each notification is from, in the order of the language files' notifs. */
+export const NOTIF_WITH: Other[][] = [
+  ['child', 'teen'],
+  ['boss'],
+  ['none'],
+  ['none'],
+  ['kids'],
+  ['stranger'],
+  ['family'],
+  ['neighbor'],
+  ['coworker'],
+  ['partner'],
+  ['roommate'],
+  ['friend'],
+  ['none'],
 ];

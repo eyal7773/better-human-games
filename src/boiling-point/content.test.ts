@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { en } from './content/en';
 import { he } from './content/he';
 import { ar } from './content/ar';
-import { DILEMMA_META } from './content/meta';
+import { DILEMMA_META, NOTIF_WITH, SHOUT_WITH } from './content/meta';
 import { checkPool, PERSONAS } from '../shared/library/classify';
 import { eligible } from '../shared/library';
 
@@ -39,6 +39,32 @@ describe('dilemmas', () => {
       if (n < MIN_PER_HOME) short.push(`${name}: ${n}`);
     }
     expect(short).toEqual([]);
+  });
+});
+
+describe('shouts and notifications', () => {
+  it('say who they come from, in every language', () => {
+    for (const c of Object.values(langs)) {
+      expect(c.shouts).toHaveLength(SHOUT_WITH.length);
+      expect(c.notifs).toHaveLength(NOTIF_WITH.length);
+    }
+  });
+
+  it('are classified so they only reach the homes they belong to', () => {
+    const item = (id: string, w: (typeof SHOUT_WITH)[number], texts: string[]) => ({ meta: { id, with: w, topics: ['noise' as const], setting: 'home' as const, diff: 1 as const }, texts });
+    const all = [
+      ...SHOUT_WITH.map((w, i) => item(`shout${i}`, w, Object.values(langs).map((c) => c.shouts[i]))),
+      ...NOTIF_WITH.map((w, i) => item(`notif${i}`, w, Object.values(langs).flatMap((c) => [c.notifs[i].title, c.notifs[i].body]))),
+    ];
+    expect(checkPool(all)).toEqual([]);
+  });
+
+  it('leave every home some noise of its own', () => {
+    const fits = (w: (typeof SHOUT_WITH)[number], p: (typeof PERSONAS)[string]) => eligible({ id: '', with: w, topics: ['noise'], setting: 'home', diff: 1 }, p);
+    for (const [name, p] of Object.entries(PERSONAS)) {
+      expect(SHOUT_WITH.filter((w) => fits(w, p)).length, name).toBeGreaterThanOrEqual(5);
+      expect(NOTIF_WITH.filter((w) => fits(w, p)).length, name).toBeGreaterThanOrEqual(5);
+    }
   });
 });
 
