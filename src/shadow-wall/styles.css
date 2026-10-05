@@ -358,3 +358,29 @@
     animation: none;
   }
 }
+
+/* "Pick up the flashlight" nudges itself now and then: the monster is waiting. */
+.sw-wiggle {
+  animation: sw-wiggle 2.4s ease-in-out 1s infinite;
+}
+@keyframes sw-wiggle {
+  0%,
+  80%,
+  100% {
+    rotate: 0deg;
+  }
+  84% {
+    rotate: -2deg;
+  }
+  88% {
+    rotate: 2deg;
+  }
+  92% {
+    rotate: -1deg;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sw-wiggle {
+    animation: none;
+  }
+}

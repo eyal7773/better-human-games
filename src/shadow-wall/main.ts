@@ -789,7 +789,7 @@ async function play(scene: Scene, mine = false, level = 0) {
       title: scene.name,
       art: h('div', { class: 'sw-card-emoji' }, scene.emoji),
       lines: [scene.event],
-      buttons: [{ id: 'go', label: T.start, cls: 'warm' }],
+      buttons: [{ id: 'go', label: `🔦 ${T.start}`, cls: 'warm sw-wiggle' }],
     });
     if (!scope.alive || go !== 'go') return;
   }
