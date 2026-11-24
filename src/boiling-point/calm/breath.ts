@@ -23,9 +23,12 @@ export class BreathCalm implements Calm {
     ring.innerHTML = `<circle cx="50" cy="50" r="46" class="track"/><circle cx="50" cy="50" r="46" class="prog" stroke-dasharray="${RING}" stroke-dashoffset="${RING}"/>`;
     const prog = ring.querySelector('.prog') as SVGCircleElement;
     const label = h('div', { class: 'breath-label' }, tr({ en: 'Hold', he: 'החזיקו', ar: 'اضغطوا' }));
+    // While held, the finger covers the orb: the in/out cue and its count sit above it.
+    const cueWord = h('div', { class: 'breath-cue-word' }, '');
     const count = h('div', { class: 'breath-count' }, '');
-    const orb = h('button', { class: 'breath-orb', type: 'button', 'aria-label': tr({ en: 'Press and hold to breathe', he: 'לחצו והחזיקו כדי לנשום', ar: 'اضغطوا مطوّلًا لتتنفّسوا' }) }, label, count);
-    const wrap = h('div', { class: 'breath' }, h('div', { class: 'breath-halo' }), ring, orb);
+    const cue = h('div', { class: 'breath-cue', 'aria-hidden': 'true' }, cueWord, count);
+    const orb = h('button', { class: 'breath-orb', type: 'button', 'aria-label': tr({ en: 'Press and hold to breathe', he: 'לחצו והחזיקו כדי לנשום', ar: 'اضغطوا مطوّلًا لتتنفّسوا' }) }, label);
+    const wrap = h('div', { class: 'breath' }, h('div', { class: 'breath-halo' }), ring, orb, cue);
     board.append(wrap);
 
     let held = 0;
@@ -69,20 +72,24 @@ export class BreathCalm implements Calm {
       if (holding && now !== phase) {
         phase = now;
         audio.breath(now === 'in', now === 'in' ? IN - held : TOTAL - held);
-        this.c.say(now === 'in' ? tr({ en: 'A slow breath in through the nose…', he: 'שאיפה איטית דרך האף…', ar: 'شهيق بطيء من الأنف…' }) : tr({ en: 'And now a slow breath out through the mouth…', he: 'ועכשיו נשיפה איטית דרך הפה…', ar: 'والآن زفير بطيء من الفم…' }));
+        this.c.say(now === 'in' ? tr({ en: 'Breathe in slowly through your nose…', he: 'נשמו לאט פנימה, דרך האף…', ar: 'استنشقوا ببطء من الأنف…' }) : tr({ en: 'And now breathe out slowly through your mouth…', he: 'ועכשיו נשפו לאט החוצה, דרך הפה…', ar: 'والآن ازفروا ببطء من الفم…' }));
       }
       const scale = held < IN ? 0.7 + 0.45 * (held / IN) : 1.15 - 0.45 * ((held - IN) / OUT);
       orb.style.transform = `scale(${scale.toFixed(3)})`;
       wrap.style.setProperty('--glow', String(Math.min(1, held / TOTAL)));
       prog.setAttribute('stroke-dashoffset', String(RING * (1 - Math.min(1, held / TOTAL))));
-      label.textContent = holding ? (now === 'in' ? tr({ en: 'In', he: 'שאיפה', ar: 'شهيق' }) : tr({ en: 'Out', he: 'נשיפה', ar: 'زفير' })) : held > 0 ? tr({ en: 'Keep going', he: 'המשיכו', ar: 'تابعوا' }) : tr({ en: 'Hold', he: 'החזיקו', ar: 'اضغطوا' });
+      label.textContent = holding ? '' : held > 0 ? tr({ en: 'Keep going', he: 'המשיכו', ar: 'تابعوا' }) : tr({ en: 'Hold', he: 'החזיקו', ar: 'اضغطوا' });
+      cueWord.textContent = holding ? (now === 'in' ? tr({ en: 'Breathe in', he: 'נשמו פנימה', ar: 'استنشقوا' }) : tr({ en: 'Breathe out', he: 'נשפו החוצה', ar: 'ازفروا' })) : '';
       count.textContent = holding ? String(Math.max(1, Math.ceil((now === 'in' ? IN : TOTAL) - held))) : '';
+      wrap.classList.toggle('cueing', holding);
 
       if (held >= TOTAL) {
         finished = true;
         wrap.classList.add('complete');
         label.textContent = tr({ en: 'Lovely', he: 'יופי', ar: 'رائع' });
+        cueWord.textContent = '';
         count.textContent = '';
+        wrap.classList.remove('cueing');
         vibrate([20, 60, 20]);
         this.c.done();
       }

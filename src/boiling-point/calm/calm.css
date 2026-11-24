@@ -64,10 +64,36 @@
   line-height: 1.1;
   text-shadow: 0 2px 0 rgba(12, 95, 88, 0.6);
 }
+/* The in/out cue sits above the ring, where the holding finger can't cover it. */
+.breath {
+  translate: 0 1.6rem;
+}
+.breath-cue {
+  position: absolute;
+  inset-inline: -20%;
+  bottom: calc(100% + 0.4rem);
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  gap: 0.5rem;
+  color: var(--lagoon-deep);
+  opacity: 0;
+  transition: opacity 200ms;
+  pointer-events: none;
+}
+.breath.cueing .breath-cue {
+  opacity: 1;
+}
+.breath-cue-word {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 30px;
+  line-height: 1.1;
+  white-space: nowrap;
+}
 .breath-count {
-  font-size: 1.2rem;
-  font-weight: 600;
-  min-height: 1.4em;
+  font-size: 1.3rem;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
 .breath.complete .breath-orb {
